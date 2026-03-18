@@ -1,0 +1,52 @@
+services:
+    frontend:
+        build: ./frontend
+        container_name: next_frontend
+        ports:
+            - "3000:3000" # Serve frontend on localhost:3000
+        env_file:
+            - ./frontend/.env # Load environment variables from frontend .env file
+        develop:
+            watch:
+                - action: sync
+                  path: ./frontend/src
+                  target: /app
+                - action: rebuild
+                  path: ./frontend/package.json
+        depends_on:
+            - backend
+
+    backend:
+        build: ./backend
+        container_name: node_backend
+        ports:
+            - "5000:5000" # Backend runs on port 5000
+        env_file:
+            - ./backend/.env # Load environment variables from backend .env file
+        develop:
+            watch:
+                - action: rebuild
+                  path: ./backend
+                  target: /app
+                - action: rebuild
+                  path: ./backend/package.json
+        depends_on:
+            - mongodb
+        volumes:
+            - ./backend/logs:/app/logs
+    mongodb:
+        image: mongo:7.0
+        container_name: mongo_database
+        restart: unless-stopped
+        ports:
+            - "27017:27017"
+        command: ["mongod", "--config", "/etc/mongod.conf"]
+        env_file:
+            - ./database/.env # Load environment variables from database .env file
+        volumes:
+            # Mount the config file from database/config directory
+            - ./database/config/mongod.conf:/etc/mongod.conf
+            # Mount data directory for persistence
+            - ./database/data:/data/db
+            # Mount logs directory
+            - ./database/logs:/var/log/mongodb

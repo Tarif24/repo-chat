@@ -1,0 +1,16 @@
+#BACKEND ----------------------
+
+# Server configuration
+PORT=
+
+# MongoDB connection string
+MONGO_URL=
+
+#FRONTEND ----------------------
+
+REPO-CHAT_API_URL =
+
+#DATABASE  ----------------------
+
+MONGO_INITDB_ROOT_USERNAME=
+MONGO_INITDB_ROOT_PASSWORD=

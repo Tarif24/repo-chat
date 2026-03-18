@@ -1,0 +1,38 @@
+{
+    "name": "backend",
+    "version": "1.0.0",
+    "description": "",
+    "main": "index.ts",
+    "scripts": {
+        "dev": "nodemon",
+        "build": "tsc",
+        "start": "node dist/index.js",
+        "lint": "eslint",
+        "lint:fix": "eslint --fix .",
+        "format": "prettier --write .",
+        "format:check": "prettier --check .",
+        "lint:format": "npm run lint:fix && npm run format"
+    },
+    "keywords": [],
+    "author": "Tarif Mohammad",
+    "license": "ISC",
+    "type": "module",
+    "dependencies": {
+        "@babel/parser": "^7.29.2",
+        "cors": "^2.8.6",
+        "dotenv": "^17.3.1",
+        "express": "^5.2.1",
+        "mongoose": "^9.3.1",
+        "openai": "^6.32.0",
+        "simple-git": "^3.33.0"
+    },
+    "devDependencies": {
+        "@types/express": "^5.0.6",
+        "eslint": "^10.0.3",
+        "nodemon": "^3.1.14",
+        "prettier": "^3.8.1",
+        "ts-node": "^10.9.2",
+        "tsx": "^4.21.0",
+        "typescript": "^5.9.3"
+    }
+}
