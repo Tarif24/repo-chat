@@ -1,5 +1,3 @@
-'use client';
-
 import Icon from '../../public/logo.svg';
 import NavLink from './navLink';
 import Image from 'next/image';
@@ -24,7 +22,7 @@ const NavBar = () => {
                     src={Icon}
                     alt="Icon"
                     className="mb-1 size-14"
-                    style={{ filter: 'brightness(0) invert(1)' }}
+                    style={{ filter: 'invert(1)' }}
                 />
                 <h1 className="font-bold text-white">Repo Chat</h1>
             </NavLink>
