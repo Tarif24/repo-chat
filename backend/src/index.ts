@@ -2,7 +2,7 @@ import express from 'express';
 import dotenv from 'dotenv';
 import { createRequire } from 'module';
 
-import { errorHandler, globalLimiter, strictLimiter } from './middleware/index.js';
+import { errorHandler, globalLimiter, strictLimiter, requestLogger } from './middleware/index.js';
 import { ingest, query } from './routes/index.js';
 import connectToDatabase from './database/connection.js';
 
@@ -59,6 +59,8 @@ const startServer = async () => {
         app.use(cors());
         // JSON body parsing
         app.use(express.json());
+        // Request logging
+        app.use(requestLogger);
         // Rate limiting
         app.use(globalLimiter);
 

@@ -5,6 +5,7 @@ dist
 build
 coverage
 logs
+logs/
 
 # Git and documentation
 .git
