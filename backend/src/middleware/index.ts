@@ -1,3 +1,4 @@
 import errorHandler from './errorHandler.js';
+import { globalLimiter, strictLimiter } from './rateLimiter.js';
 
-export { errorHandler };
+export { errorHandler, globalLimiter, strictLimiter };

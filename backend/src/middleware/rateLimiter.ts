@@ -1,0 +1,30 @@
+import type { RateLimitRequestHandler, Options } from 'express-rate-limit';
+import type { Request, Response } from 'express';
+import rateLimit from 'express-rate-limit';
+
+const rateLimitHandler = (req: Request, res: Response): void => {
+    res.status(429).json({
+        error: 'Too many requests',
+        message: 'You have exceeded the rate limit. Please try again later.',
+        retryAfter: res.getHeader('Retry-After') ?? null,
+    });
+};
+
+const globalLimiterOptions: Partial<Options> = {
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    limit: 100,
+    standardHeaders: 'draft-8',
+    legacyHeaders: false,
+    handler: rateLimitHandler,
+};
+
+const strictLimiterOptions: Partial<Options> = {
+    windowMs: 60 * 1000, // 1 minute
+    limit: 10,
+    standardHeaders: 'draft-8',
+    legacyHeaders: false,
+    handler: rateLimitHandler,
+};
+
+export const globalLimiter: RateLimitRequestHandler = rateLimit(globalLimiterOptions);
+export const strictLimiter: RateLimitRequestHandler = rateLimit(strictLimiterOptions);
