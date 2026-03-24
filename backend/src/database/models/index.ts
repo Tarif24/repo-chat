@@ -1,4 +1,4 @@
 import Chunk from './Chunk.js';
-import Repository from './Repository.js';
+import Repo from './Repo.js';
 
-export { Chunk, Repository };
+export { Chunk, Repo };

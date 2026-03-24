@@ -2,7 +2,7 @@ import express from 'express';
 import dotenv from 'dotenv';
 import { createRequire } from 'module';
 
-import { errorHandler, globalLimiter, strictLimiter, requestLogger } from './middleware/index.js';
+import { errorHandler, globalLimiter, requestLogger } from './middleware/index.js';
 import { ingest, query } from './routes/index.js';
 import connectToDatabase from './database/connection.js';
 

@@ -6,6 +6,9 @@ PORT=
 # MongoDB connection string
 MONGO_URL=
 
+# Logging level
+LOG_LEVEL=
+
 #FRONTEND ----------------------
 
 REPO-CHAT_API_URL =
