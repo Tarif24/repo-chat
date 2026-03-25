@@ -1,6 +1,8 @@
+import { env } from '../env.js';
 import OpenAI from 'openai';
 
-const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
+const OPENAI_API_KEY = env.OPENAI_API_KEY;
+const OPENAI_CHAT_MODEL = env.OPENAI_CHAT_MODEL || 'gpt-4o-mini';
 
 // Create an instance of the OpenAI class with the API key
 const openai = new OpenAI({
@@ -12,7 +14,7 @@ export async function getOpenAIResponse(
     message: string
 ): Promise<OpenAI.Chat.Completions.ChatCompletionMessage | undefined> {
     const response = await openai.chat.completions.create({
-        model: 'gpt-4o-mini',
+        model: OPENAI_CHAT_MODEL,
         messages: [{ role: 'user', content: message }],
         n: 1,
     });

@@ -9,6 +9,11 @@ MONGO_URL=
 # Logging level
 LOG_LEVEL=
 
+# OpenAI API
+OPENAI_API_KEY=
+OPENAI_CHAT_MODEL=
+OPENAI_EMBEDDING_MODEL=
+
 #FRONTEND ----------------------
 
 REPO-CHAT_API_URL =

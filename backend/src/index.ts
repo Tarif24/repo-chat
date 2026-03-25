@@ -1,5 +1,7 @@
-import express from 'express';
 import dotenv from 'dotenv';
+import 'dotenv/config';
+import { env } from './env.js';
+import express from 'express';
 import { createRequire } from 'module';
 
 import { errorHandler, globalLimiter, requestLogger } from './middleware/index.js';
@@ -64,7 +66,7 @@ const startServer = async () => {
         // Rate limiting
         app.use(globalLimiter);
 
-        const PORT = process.env.PORT || 5000;
+        const PORT = env.PORT || 5000;
 
         console.log('Setting up server signal handlers');
         serverSignalHandler();
