@@ -4,7 +4,7 @@ import { env } from './env.js';
 import express from 'express';
 import { createRequire } from 'module';
 
-import { errorHandler, globalLimiter, requestLogger } from './middleware/index.js';
+import { errorHandler, globalLimiter, requestLogger, responseHandler } from './middleware/index.js';
 import { ingest, query } from './routes/index.js';
 import connectToDatabase from './database/connection.js';
 
@@ -65,6 +65,8 @@ const startServer = async () => {
         app.use(requestLogger);
         // Rate limiting
         app.use(globalLimiter);
+        // Standard response formatting
+        app.use(responseHandler);
 
         const PORT = env.PORT || 5000;
 
