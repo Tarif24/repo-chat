@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import logger from './lib/logger.js';
+//import logger from './lib/logger.js';
 
 const envSchema = z.object({
     // app
@@ -25,10 +25,10 @@ const result = envSchema.safeParse(process.env);
 
 if (!result.success) {
     console.error('Missing or invalid environment variables:\n');
-    logger.error('Environment validation failed. Exiting.');
+    //logger.error('Environment validation failed. Exiting.');
     result.error.issues.forEach(issue => {
         console.error(`  ${issue.path.join('.')}: ${issue.message}`);
-        logger.error(`  ${issue.path.join('.')}: ${issue.message}`);
+        //logger.error(`  ${issue.path.join('.')}: ${issue.message}`);
     });
     process.exit(1);
 }

@@ -33,7 +33,7 @@ services:
         depends_on:
             - mongodb
         volumes:
-            - ./backend/logs:/app/logs
+            - ./backend/src/logs:/app/dist/logs
     mongodb:
         image: mongo:7.0
         container_name: mongo_database

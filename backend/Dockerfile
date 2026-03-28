@@ -6,11 +6,7 @@ WORKDIR /app
 
 # Copy package files and install dependencies
 COPY package*.json ./
-RUN npm install
-
-# Copy and apply patches
-#COPY patches/ ./patches/
-#RUN npx patch-package
+RUN npm install --legacy-peer-deps
 
 # Copy the rest of your app
 COPY . .

@@ -58,7 +58,7 @@ const startServer = async () => {
         // Setting up express middleware
 
         // CORS
-        app.use(cors());
+        app.use(cors({ origin: '*', methods: ['GET', 'POST', 'PUT', 'DELETE'] }));
         // JSON body parsing
         app.use(express.json());
         // Request logging
