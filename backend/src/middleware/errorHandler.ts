@@ -22,7 +22,6 @@ export default function errorHandler(err: Error, req: Request, res: Response, _n
     // Known, intentional error
     if (err instanceof AppError) {
         logger.error(`${req.method} ${req.originalUrl} — ${err.message}`, err);
-
         return res.standardResponse(
             err.statusCode,
             {

@@ -34,6 +34,7 @@ services:
             - mongodb
         volumes:
             - ./backend/src/logs:/app/dist/logs
+            - ./backend/repoCloning:/app/repoCloning
     mongodb:
         image: mongo:7.0
         container_name: mongo_database

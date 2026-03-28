@@ -23,11 +23,11 @@ const gracefulShutdown = (signal: String) => {
         process.exit(1);
     }
 
-    // Force close after 10 seconds
+    // Force close after 3 seconds
     setTimeout(() => {
         console.error('Forced shutdown after timeout');
         process.exit(1);
-    }, 10000);
+    }, 3000);
 };
 
 // Server signal handling

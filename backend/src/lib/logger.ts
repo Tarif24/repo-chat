@@ -28,8 +28,6 @@ const consoleFormat = combine(
             : `[${timestamp}] ${level}: ${message}`;
     })
 );
-const pathname = path.join(__dirname, '../logs', '%DATE%.log');
-console.log('Log file path:', pathname);
 
 const dailyRotateTransport = new DailyRotateFile({
     filename: path.join(__dirname, '../logs', '%DATE%.log'),
