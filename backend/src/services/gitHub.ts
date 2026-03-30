@@ -1,23 +1,7 @@
 import type { SimpleGit, LogResult } from 'simple-git';
 import { simpleGit } from 'simple-git';
 import { NotFoundError } from '../error/appError.js';
-import { readdir, rm } from 'fs/promises';
-import { join } from 'path';
-
-async function deleteEverythingInDir(dir: string): Promise<void> {
-    const entries = await readdir(dir, { withFileTypes: true });
-    await Promise.all(
-        entries.map(async entry => {
-            const fullPath = join(dir, entry.name);
-            if (entry.isDirectory()) {
-                await deleteEverythingInDir(fullPath);
-                await rm(fullPath, { recursive: true, force: true });
-            } else {
-                await rm(fullPath, { force: true });
-            }
-        })
-    );
-}
+import { deleteEverythingInDir } from './files.js';
 
 // Validate if a GitHub repo URL is valid and accessible
 export async function validateGithubRepo(
