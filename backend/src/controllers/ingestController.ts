@@ -1,6 +1,7 @@
 import logger from '../lib/logger.js';
 import { cloneAndGetSha } from '../services/gitHub.js';
 import { collectParseableFiles } from '../services/files.js';
+import { parseFiles } from '../services/treeSitter.js';
 
 export async function ingestRepo(
     repoUrl: string
@@ -15,7 +16,10 @@ export async function ingestRepo(
     }
 
     // Scan the cloned repository for parseable files
-    await collectParseableFiles(`./repoCloning`, repoUrl);
+    const validFiles = await collectParseableFiles(`./repoCloning`, repoUrl);
+
+    // Parse the valid files using Tree-sitter
+    parseFiles(validFiles || [], repoUrl);
 
     return { success: true, latestSha: repoSha, message: 'Repository ingested successfully' };
 }

@@ -2,10 +2,7 @@ import { env } from '../env.js';
 import winston from 'winston';
 import DailyRotateFile from 'winston-daily-rotate-file';
 import path from 'path';
-import { dirname } from 'path';
-import { fileURLToPath } from 'url';
 
-const __dirname = dirname(fileURLToPath(import.meta.url));
 const { combine, timestamp, printf, colorize, errors } = winston.format;
 
 const fileFormat = combine(
@@ -30,7 +27,7 @@ const consoleFormat = combine(
 );
 
 const dailyRotateTransport = new DailyRotateFile({
-    filename: path.join(__dirname, '../logs', '%DATE%.log'),
+    filename: path.join('./logs', '%DATE%.log'),
     datePattern: 'YYYY-MM-DD',
     maxFiles: '5d',
     format: fileFormat,

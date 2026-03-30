@@ -22,7 +22,7 @@ export async function deleteEverythingInDir(dir: string): Promise<void> {
     );
 }
 
-export type ParseableFile = {
+export type ParseableFileType = {
     absolutePath: string;
     relativePath: string;
     language: string;
@@ -33,14 +33,14 @@ export type ParseableFile = {
 export function collectParseableFiles(
     rootDir: string,
     repoURL: string
-): ParseableFile[] | undefined {
+): ParseableFileType[] | undefined {
     const resolvedRoot = path.resolve(rootDir);
 
     if (!fs.existsSync(resolvedRoot)) {
         throw new NotFoundError(`Root directory does not exist: ${resolvedRoot}`);
     }
 
-    const files: ParseableFile[] = [];
+    const files: ParseableFileType[] = [];
     let skippedCount = 0;
     let totalScanned = 0;
 
@@ -91,11 +91,6 @@ export function collectParseableFiles(
     logger.info(
         `REPO: ${repoURL} - Scanned ${totalScanned} files in ${rootDir}. Found ${files.length} parseable files and skipped ${skippedCount} files.`
     );
-
-    if (files.length === 0) {
-        logger.warn(`REPO: ${repoURL} - No parseable files found in the repository.`);
-        return;
-    }
 
     logger.info(`REPO: ${repoURL} - Finished scanning and filtering all files.`);
 
