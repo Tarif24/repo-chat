@@ -96,34 +96,3 @@ export function collectParseableFiles(
 
     return files;
 }
-
-// // Loops through parseable files and processes them in batches to avoid overwhelming the parser with too many concurrent files. Logs progress along the way.
-// export async function parseRepo(
-//     repoURL: string,
-//     rootDir: string
-//     //parseFile: (file: ParseableFile) => Promise<void>
-// ): Promise<void> {
-//     const { files, skippedCount, totalScanned } = collectParseableFiles(rootDir);
-
-//     logger.info(
-//         `REPO: ${repoURL} - Scanned ${totalScanned} files in ${rootDir}. Found ${files.length} parseable files and skipped ${skippedCount} files.`
-//     );
-
-//     if (files.length === 0) {
-//         logger.warn(`REPO: ${repoURL} - No parseable files found in the repository.`);
-//         return;
-//     }
-
-//     // Process files concurrently in batches to avoid overwhelming the parser
-//     const BATCH_SIZE = 10;
-
-//     for (let i = 0; i < files.length; i += BATCH_SIZE) {
-//         const batch = files.slice(i, i + BATCH_SIZE);
-//         logger.info(
-//             `REPO: ${repoURL} - Parsing batch ${i / BATCH_SIZE + 1} with ${batch.length} files.`
-//         );
-//         //await Promise.all(batch.map(parseFile));
-//     }
-
-//     logger.info(`REPO: ${repoURL} - Finished parsing all files.`);
-// }
