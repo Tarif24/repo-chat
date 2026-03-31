@@ -29,7 +29,7 @@ export type CodeChunkType = {
 };
 
 // Config constants for chunking and embedding
-const CHAR_LIMIT = 32000; // text-embedding 3-small has a 8191 token limit
+const CHAR_LIMIT = 2500; // text-embedding 3-small has a 8191 token limit
 const SLIDING_OVERLAP = 0.15; // 15% line overlap when falling back to sliding window
 
 // tree-sitter-typescript exposes two grammars
