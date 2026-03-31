@@ -19,7 +19,9 @@ export async function ingestRepo(
     const validFiles = await collectParseableFiles(`./repoCloning`, repoUrl);
 
     // Parse the valid files using Tree-sitter
-    parseFiles(validFiles || [], repoUrl);
+    const allCodeChunks = await parseFiles(validFiles || [], repoUrl);
+
+    console.log(allCodeChunks[0]?.language);
 
     return { success: true, latestSha: repoSha, message: 'Repository ingested successfully' };
 }
