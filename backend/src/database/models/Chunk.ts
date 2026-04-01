@@ -17,22 +17,27 @@ export interface ChunkDoc extends Document {
     metadata: ChunkMetadata;
 }
 
-const chunk = new Schema<ChunkDoc>(
+const chunkMetadataSchema = new Schema<ChunkMetadata>(
+    {
+        repoURL: String,
+        relativePath: String,
+        name: String,
+        type: String,
+        language: String,
+        parentDir: String,
+        startLine: Number,
+        endLine: Number,
+    },
+    { _id: false }
+);
+
+const chunkSchema = new Schema<ChunkDoc>(
     {
         content: { type: String, required: true },
         embedding: { type: [Number], required: true },
-        metadata: {
-            repoURL: String,
-            relativePath: String,
-            name: String,
-            type: String,
-            language: String,
-            parentDir: String,
-            startLine: Number,
-            endLine: Number,
-        },
+        metadata: { type: chunkMetadataSchema, required: true },
     },
     { timestamps: true }
 );
 
-export default mongoose.model<ChunkDoc>('Chunk', chunk);
+export default mongoose.model<ChunkDoc>('Chunk', chunkSchema);

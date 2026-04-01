@@ -7,6 +7,7 @@ import { createRequire } from 'module';
 import { errorHandler, globalLimiter, requestLogger, responseHandler } from './middleware/index.js';
 import { ingest, query } from './routes/index.js';
 import connectToDatabase from './database/connection.js';
+import logger from './lib/logger.js';
 
 // Init and config setting up express app and dotenv
 const require = createRequire(import.meta.url);
@@ -16,16 +17,16 @@ dotenv.config();
 
 // Graceful shutdown handling
 const gracefulShutdown = (signal: String) => {
-    console.log(`${signal} received, shutting down gracefully`);
+    logger.info(`${signal} received, shutting down gracefully`);
 
     if (!app) {
-        console.log('Server is not running');
+        logger.error('Express app instance not found, forcing shutdown');
         process.exit(1);
     }
 
     // Force close after 3 seconds
     setTimeout(() => {
-        console.error('Forced shutdown after timeout');
+        logger.error('Forced shutdown after timeout');
         process.exit(1);
     }, 3000);
 };
@@ -34,26 +35,26 @@ const gracefulShutdown = (signal: String) => {
 const serverSignalHandler = () => {
     // Shutdown signals handling
     process.on('SIGTERM', () => {
-        console.log('SIGTERM handler called');
+        logger.info('SIGTERM received, initiating graceful shutdown');
         gracefulShutdown('SIGTERM');
     });
     process.on('SIGINT', () => gracefulShutdown('SIGINT'));
 
     // Handle uncaught exceptions
     process.on('uncaughtException', err => {
-        console.error('Uncaught Exception:', err);
+        logger.error(`Uncaught Exception: ${err.message}`, { stack: err.stack });
         //gracefulShutdown("UNCAUGHT_EXCEPTION");
     });
 
     process.on('unhandledRejection', (reason, promise) => {
-        console.error('Unhandled Rejection at:', promise, 'reason:', reason);
+        logger.error(`Unhandled Rejection at: ${promise} reason: ${reason}`);
         //gracefulShutdown('UNHANDLED_REJECTION');
     });
 };
 
 const startServer = async () => {
     try {
-        console.log('Starting application setup');
+        logger.info('Application setup initiated');
 
         // Setting up express middleware
 
@@ -70,32 +71,32 @@ const startServer = async () => {
 
         const PORT = appConfig.port || 5000;
 
-        console.log('Setting up server signal handlers');
+        logger.info('Setting up server signal handlers');
         serverSignalHandler();
 
-        console.log('Connecting to database');
+        logger.info('Connecting to database');
         const DBConnection = await connectToDatabase();
 
         if (DBConnection) {
-            console.log('Starting server');
+            logger.info(`Starting server`);
             app.listen(PORT, () => {
-                console.log(`SERVER IS RUNNING ON PORT ${PORT}`);
+                logger.info(`SERVER IS RUNNING ON PORT ${PORT}`);
             });
 
-            console.log('Setting up express routes for ingest and query');
+            logger.info('Setting up express routes for ingest and query');
             app.use('/api/ingest', ingest);
             app.use('/api/query', query);
 
-            console.log('Application setup complete');
+            logger.info('Application setup complete');
         } else {
-            console.error('Failed to connect to database, shutting down');
+            logger.error('Failed to connect to database, shutting down');
             process.exit(1);
         }
 
         // Global error handling middleware
         app.use(errorHandler);
     } catch (error) {
-        console.error('Failed to start server:', error);
+        logger.error('Failed to start server:', error);
         process.exit(1);
     }
 };

@@ -8,3 +8,7 @@ export async function createChunk(data: {
 }) {
     return await Chunk.create(data);
 }
+
+export async function deleteChunksByRepoURL(repoURL: string) {
+    return await Chunk.deleteMany({ 'metadata.repoURL': repoURL });
+}
