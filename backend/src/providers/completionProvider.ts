@@ -1,8 +1,8 @@
-import { env } from '../env.js';
+import { openAIConfig } from '../config/config.js';
 import OpenAI from 'openai';
 
-const OPENAI_API_KEY = env.OPENAI_API_KEY;
-const OPENAI_CHAT_MODEL = env.OPENAI_CHAT_MODEL || 'gpt-4o-mini';
+const OPENAI_API_KEY = openAIConfig.apiKey;
+const OPENAI_CHAT_MODEL = openAIConfig.chatModel;
 
 // Create an instance of the OpenAI class with the API key
 const openai = new OpenAI({

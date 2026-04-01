@@ -43,6 +43,6 @@
         "moduleDetection": "force",
         "skipLibCheck": true
     },
-    "include": ["src/**/*.ts", "src/**/*.{ts,tsx}"],
+    "include": ["src/**/*.ts", "src/**/*.{ts,tsx}", "src/config/env.ts"],
     "exclude": ["node_modules", "dist"]
 }

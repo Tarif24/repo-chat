@@ -1,8 +1,8 @@
-import { env } from '../env.js';
+import { openAIConfig } from '../config/config.js';
 import OpenAI from 'openai';
 
-const OPENAI_API_KEY = env.OPENAI_API_KEY;
-const OPENAI_EMBEDDING_MODEL = env.OPENAI_EMBEDDING_MODEL || 'text-embedding-3-small';
+const OPENAI_API_KEY = openAIConfig.apiKey;
+const OPENAI_EMBEDDING_MODEL = openAIConfig.embeddingModel;
 
 // Create an instance of the OpenAI class with the API key
 const openai = new OpenAI({
@@ -10,7 +10,7 @@ const openai = new OpenAI({
     dangerouslyAllowBrowser: true,
 });
 
-export async function getEmbedding(input: string): Promise<number[] | undefined> {
+export async function createEmbedding(input: string): Promise<number[] | undefined> {
     // Create the embedding for the user message
     const embedding = await openai.embeddings.create({
         model: OPENAI_EMBEDDING_MODEL,

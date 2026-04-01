@@ -20,7 +20,7 @@ export type CodeChunkType = {
     chunk: string; // raw source of the node
     embeddingText: string; // context header + chunk — pass this to your embedding model
     language: string;
-    file: string; // relativePath of the source file
+    relativePath: string; // relativePath of the source file
     name: string; // function / class / selector name, or filename fallback
     type: string; // 'function' | 'class' | 'method' | 'selector' | 'file'
     parentDir: string; // immediate parent directory of the file
@@ -177,7 +177,7 @@ function chunkType(nodeType: string): string {
 function buildEmbeddingText(chunk: Omit<CodeChunkType, 'embeddingText'>): string {
     return [
         `Language: ${chunk.language}`,
-        `File: ${chunk.file}`,
+        `File: ${chunk.relativePath}`,
         `Parent directory: ${chunk.parentDir}`,
         `Type: ${chunk.type}`,
         `Name: ${chunk.name}`,
@@ -198,7 +198,7 @@ function buildChunk(
     const base = {
         chunk: node.text,
         language: file.language,
-        file: file.relativePath,
+        relativePath: file.relativePath,
         name: nameOverride ?? getName(node),
         type: typeOverride ?? chunkType(node.type),
         parentDir: path.basename(path.dirname(file.absolutePath)),
@@ -234,7 +234,7 @@ function slidingWindowSplit(
         const base = {
             chunk: slice,
             language: file.language,
-            file: file.relativePath,
+            relativePath: file.relativePath,
             name: `${baseName} (part ${partNum})`,
             type: 'fragment',
             parentDir: path.basename(path.dirname(file.absolutePath)),
@@ -315,7 +315,7 @@ export function parseFile(file: ParseableFileType, limit = CHAR_LIMIT): CodeChun
         const base = {
             chunk: sourceCode,
             language: file.language,
-            file: file.relativePath,
+            relativePath: file.relativePath,
             name: path.basename(file.absolutePath),
             type: 'file',
             parentDir: path.basename(path.dirname(file.absolutePath)),
@@ -334,7 +334,7 @@ export function parseFile(file: ParseableFileType, limit = CHAR_LIMIT): CodeChun
         const base = {
             chunk: sourceCode,
             language: file.language,
-            file: file.relativePath,
+            relativePath: file.relativePath,
             name: path.basename(file.absolutePath),
             type: 'file',
             parentDir: path.basename(path.dirname(file.absolutePath)),

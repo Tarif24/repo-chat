@@ -21,3 +21,9 @@ export class ValidationError extends AppError {
         super(message, 400, 'VALIDATION_ERROR');
     }
 }
+
+export class CreationError extends AppError {
+    constructor(message: string) {
+        super(message, 502, 'CREATION_ERROR');
+    }
+}

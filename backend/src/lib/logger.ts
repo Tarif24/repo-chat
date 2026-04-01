@@ -1,4 +1,3 @@
-import { env } from '../env.js';
 import winston from 'winston';
 import DailyRotateFile from 'winston-daily-rotate-file';
 import path from 'path';
@@ -34,14 +33,24 @@ const dailyRotateTransport = new DailyRotateFile({
 });
 
 const logger = winston.createLogger({
-    level: env.LOG_LEVEL ?? 'info',
+    level: 'info',
     transports: [
         dailyRotateTransport,
         new winston.transports.Console({
-            silent: env.NODE_ENV === 'production',
+            silent: false,
             format: consoleFormat,
         }),
     ],
 });
+
+export const reconfigureLogger = (logLevel: string, nodeEnv: string) => {
+    logger.level = logLevel;
+
+    logger.transports.forEach(transport => {
+        if (transport instanceof winston.transports.Console) {
+            transport.silent = nodeEnv === 'production';
+        }
+    });
+};
 
 export default logger;

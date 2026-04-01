@@ -1,6 +1,6 @@
 import dotenv from 'dotenv';
 import 'dotenv/config';
-import { env } from './env.js';
+import { appConfig } from './config/config.js';
 import express from 'express';
 import { createRequire } from 'module';
 
@@ -68,7 +68,7 @@ const startServer = async () => {
         // Standard response formatting
         app.use(responseHandler);
 
-        const PORT = env.PORT || 5000;
+        const PORT = appConfig.port || 5000;
 
         console.log('Setting up server signal handlers');
         serverSignalHandler();

@@ -2,8 +2,8 @@ import mongoose from 'mongoose';
 
 const repo = new mongoose.Schema(
     {
-        repoID: { type: String, required: true },
-        repoURL: { type: String, required: true },
+        repoURL: { type: String, required: true, unique: true },
+        lastAccessed: { type: Date, default: Date.now },
     },
     {
         timestamps: true,

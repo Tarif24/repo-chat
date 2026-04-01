@@ -2,6 +2,7 @@ import logger from '../lib/logger.js';
 import { cloneAndGetSha } from '../services/gitHub.js';
 import { collectParseableFiles } from '../services/files.js';
 import { parseFiles } from '../services/treeSitter.js';
+import { processAndStoreChunks } from '../services/chunkProcessing.js';
 
 export async function ingestRepo(
     repoUrl: string
@@ -21,7 +22,7 @@ export async function ingestRepo(
     // Parse the valid files using Tree-sitter
     const allCodeChunks = await parseFiles(validFiles || [], repoUrl);
 
-    console.log(allCodeChunks[0]?.language);
+    await processAndStoreChunks(allCodeChunks, repoUrl);
 
     return { success: true, latestSha: repoSha, message: 'Repository ingested successfully' };
 }

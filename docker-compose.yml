@@ -36,18 +36,18 @@ services:
             - ./backend/logs:/app/logs
             - ./backend/repoCloning:/app/repoCloning
     mongodb:
-        image: mongo:7.0
+        image: mongodb/mongodb-atlas-local:8.0.6
         container_name: mongo_database
+        hostname: mongo_database
         restart: unless-stopped
         ports:
             - "27017:27017"
-        command: ["mongod", "--config", "/etc/mongod.conf"]
         env_file:
             - ./database/.env # Load environment variables from database .env file
         volumes:
-            # Mount the config file from database/config directory
-            - ./database/config/mongod.conf:/etc/mongod.conf
             # Mount data directory for persistence
-            - ./database/data:/data/db
-            # Mount logs directory
-            - ./database/logs:/var/log/mongodb
+            - mongo_data:/data/db
+            - mongo_configdb:/data/configdb
+volumes:
+    mongo_data:
+    mongo_configdb:
