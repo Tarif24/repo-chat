@@ -25,6 +25,7 @@ export async function deleteEverythingInDir(dir: string): Promise<void> {
 export type ParseableFileType = {
     absolutePath: string;
     relativePath: string;
+    fileName: string;
     language: string;
     extension: string;
 };
@@ -77,6 +78,7 @@ export function collectParseableFiles(
                 files.push({
                     absolutePath: fullPath,
                     relativePath: path.relative(resolvedRoot, fullPath),
+                    fileName: entry.name,
                     language,
                     extension: ext,
                 });

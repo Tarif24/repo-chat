@@ -17,6 +17,7 @@ export async function processAndStoreChunk(chunk: CodeChunkType, repoURL: string
         metadata: {
             repoURL: repoURL,
             relativePath: chunk.relativePath,
+            fileName: chunk.fileName,
             name: chunk.name,
             type: chunk.type,
             language: chunk.language,

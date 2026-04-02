@@ -3,6 +3,7 @@ import mongoose, { Document, Schema } from 'mongoose';
 export type ChunkMetadata = {
     repoURL?: string;
     relativePath?: string;
+    fileName?: string;
     name?: string;
     type?: string;
     language?: string;
@@ -21,6 +22,7 @@ const chunkMetadataSchema = new Schema<ChunkMetadata>(
     {
         repoURL: String,
         relativePath: String,
+        fileName: String,
         name: String,
         type: String,
         language: String,

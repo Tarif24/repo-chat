@@ -21,6 +21,7 @@ export type CodeChunkType = {
     embeddingText: string; // context header + chunk — pass this to your embedding model
     language: string;
     relativePath: string; // relativePath of the source file
+    fileName: string; // name of the source file
     name: string; // function / class / selector name, or filename fallback
     type: string; // 'function' | 'class' | 'method' | 'selector' | 'file'
     parentDir: string; // immediate parent directory of the file
@@ -177,7 +178,7 @@ function chunkType(nodeType: string): string {
 function buildEmbeddingText(chunk: Omit<CodeChunkType, 'embeddingText'>): string {
     return [
         `Language: ${chunk.language}`,
-        `File: ${chunk.relativePath}`,
+        `Relative path: ${chunk.relativePath}`,
         `Parent directory: ${chunk.parentDir}`,
         `Type: ${chunk.type}`,
         `Name: ${chunk.name}`,
@@ -199,6 +200,7 @@ function buildChunk(
         chunk: node.text,
         language: file.language,
         relativePath: file.relativePath,
+        fileName: file.fileName,
         name: nameOverride ?? getName(node),
         type: typeOverride ?? chunkType(node.type),
         parentDir: path.basename(path.dirname(file.absolutePath)),
@@ -235,6 +237,7 @@ function slidingWindowSplit(
             chunk: slice,
             language: file.language,
             relativePath: file.relativePath,
+            fileName: file.fileName,
             name: `${baseName} (part ${partNum})`,
             type: 'fragment',
             parentDir: path.basename(path.dirname(file.absolutePath)),
@@ -316,6 +319,7 @@ export function parseFile(file: ParseableFileType, limit = CHAR_LIMIT): CodeChun
             chunk: sourceCode,
             language: file.language,
             relativePath: file.relativePath,
+            fileName: file.fileName,
             name: path.basename(file.absolutePath),
             type: 'file',
             parentDir: path.basename(path.dirname(file.absolutePath)),
@@ -335,6 +339,7 @@ export function parseFile(file: ParseableFileType, limit = CHAR_LIMIT): CodeChun
             chunk: sourceCode,
             language: file.language,
             relativePath: file.relativePath,
+            fileName: file.fileName,
             name: path.basename(file.absolutePath),
             type: 'file',
             parentDir: path.basename(path.dirname(file.absolutePath)),
