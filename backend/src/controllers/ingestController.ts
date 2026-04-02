@@ -1,9 +1,14 @@
 import logger from '../lib/logger.js';
 import { cloneAndGetSha, getLatestSha } from '../services/gitHub.js';
-import { collectParseableFiles } from '../services/files.js';
+import { collectParseableFiles, createParseableFilesTree } from '../services/files.js';
 import { parseFiles } from '../services/treeSitter.js';
 import { processAndStoreChunks } from '../services/chunkProcessing.js';
-import { initializeNewRepo, getRepoByURL, updateRepo } from '../services/repoProcessing.js';
+import {
+    initializeNewRepo,
+    getRepoByURL,
+    updateRepo,
+    updateRepoFileTree,
+} from '../services/repoProcessing.js';
 
 export async function ingestRepo(
     repoUrl: string
@@ -37,6 +42,11 @@ export async function ingestRepo(
     // Scan the cloned repository for parseable files
     const validFiles = await collectParseableFiles(`./repoCloning`, repoUrl);
 
+    // Create and store the file tree structure in the database
+    const fileTree = createParseableFilesTree(`./repoCloning`);
+    if (fileTree) {
+        updateRepoFileTree(repoUrl, fileTree);
+    }
     // Parse the valid files using Tree-sitter
     const allCodeChunks = await parseFiles(validFiles || [], repoUrl);
 

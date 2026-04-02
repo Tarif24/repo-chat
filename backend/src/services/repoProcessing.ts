@@ -4,6 +4,7 @@ import {
     createRepo,
     updateLastAccessed,
     updateLatestSHA,
+    updateFileTree,
 } from '../repositories/repoRepository.js';
 import logger from '../lib/logger.js';
 
@@ -42,4 +43,8 @@ export async function updateRepoLastAccessed(repoURL: string) {
 
 export async function getRepoByURL(repoURL: string) {
     return await findRepoByURL(repoURL);
+}
+
+export async function updateRepoFileTree(repoURL: string, fileTree: object) {
+    return await updateFileTree(repoURL, fileTree);
 }

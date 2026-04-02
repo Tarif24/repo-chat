@@ -98,3 +98,62 @@ export function collectParseableFiles(
 
     return files;
 }
+
+// Tree node type for directory/file structure
+export type FileTreeNode = {
+    name: string;
+    type: 'directory' | 'file';
+    children?: FileTreeNode[];
+};
+
+// Recursively builds a tree of only valid (parseable) files, root named 'root' by default
+export function createParseableFilesTree(
+    rootDir: string,
+    rootName: string = 'root'
+): FileTreeNode | undefined {
+    const resolvedRoot = path.resolve(rootDir);
+    if (!fs.existsSync(resolvedRoot)) {
+        throw new NotFoundError(`Root directory does not exist: ${resolvedRoot}`);
+    }
+
+    function walk(dir: string): FileTreeNode | null {
+        let entries: fs.Dirent[];
+        try {
+            entries = fs.readdirSync(dir, { withFileTypes: true });
+        } catch (err) {
+            return null;
+        }
+        const children: FileTreeNode[] = [];
+        for (const entry of entries) {
+            const fullPath = path.join(dir, entry.name);
+            if (entry.isDirectory()) {
+                if (!IGNORED_DIRS.has(entry.name)) {
+                    const child = walk(fullPath);
+                    if (child && child.children && child.children.length > 0) {
+                        children.push({
+                            name: entry.name,
+                            type: 'directory',
+                            children: child.children,
+                        });
+                    }
+                }
+            } else if (entry.isFile()) {
+                const ext = path.extname(entry.name).toLowerCase();
+                const language = SUPPORTED_LANGUAGES.get(ext);
+                if (language) {
+                    children.push({
+                        name: entry.name,
+                        type: 'file',
+                    });
+                }
+            }
+        }
+        if (children.length === 0) return null;
+        return { name: path.basename(dir), type: 'directory', children };
+    }
+
+    const tree = walk(resolvedRoot);
+    if (!tree) return undefined;
+    // Set the root node's name as requested
+    return { ...tree, name: rootName };
+}
