@@ -4,9 +4,13 @@ import { Send } from 'lucide-react';
 
 export default function ChatTypingBar({
     addUserMessageToChatHistory,
+    selectedRepo,
 }: {
     addUserMessageToChatHistory: (message: string) => void;
+    selectedRepo: string;
 }) {
+    const API_URL = process.env.NEXT_PUBLIC_API_URL;
+
     // State to hold the input text and typing status
     const [inputText, setInputText] = useState('');
 
@@ -19,6 +23,20 @@ export default function ChatTypingBar({
         }
 
         addUserMessageToChatHistory(inputText);
+
+        const responseJSON = await fetch(`${API_URL}/query/userQuery`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                query: inputText,
+                repoUrl: selectedRepo,
+            }),
+        });
+        const response = await responseJSON.json();
+        console.log('Response from backend:', response);
+
         setInputText('');
     };
 

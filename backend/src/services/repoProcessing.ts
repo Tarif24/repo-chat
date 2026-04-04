@@ -5,6 +5,7 @@ import {
     updateLastAccessed,
     updateLatestSHA,
     updateFileTree,
+    getAllRepositories,
 } from '../repositories/repoRepository.js';
 import logger from '../lib/logger.js';
 
@@ -47,4 +48,8 @@ export async function getRepoByURL(repoURL: string) {
 
 export async function updateRepoFileTree(repoURL: string, fileTree: object) {
     return await updateFileTree(repoURL, fileTree);
+}
+
+export async function getAllRepos() {
+    return await getAllRepositories();
 }

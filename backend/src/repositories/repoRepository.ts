@@ -12,7 +12,7 @@ export async function deleteRepoByURL(repoURL: string) {
     return await Repo.deleteOne({ repoURL });
 }
 
-export async function getAllRepos() {
+export async function getAllRepositories() {
     return await Repo.find({});
 }
 

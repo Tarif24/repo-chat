@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { use, useEffect, useRef, useState } from 'react';
 import Message from './message';
 import ChatTypingBar from './chatTypingBar';
 
@@ -10,8 +10,12 @@ export default function Chat() {
         message: string;
     };
 
+    const API_URL = process.env.NEXT_PUBLIC_API_URL;
+
     // State to hold the selected repository name
-    const [repoName, setRepoName] = useState('');
+    const [selectedRepo, setSelectedRepo] = useState<string>('');
+
+    const [repositories, setRepositories] = useState<string[]>([]);
 
     // State to hold the chat history
     const [chatHistory, setChatHistory] = useState<MessageType[]>([
@@ -41,6 +45,21 @@ export default function Chat() {
     // Reference to the end of the chat history for scrolling
     const chatEndRef = useRef<HTMLDivElement | null>(null);
 
+    useEffect(() => {
+        // Fetch the list of repositories when the component mounts
+        const fetchRepositories = async () => {
+            try {
+                const response = await fetch(`${API_URL}/query/getAllRepos`);
+                const data = await response.json();
+                setRepositories(data.data.repos);
+            } catch (error) {
+                console.error('Error fetching repositories:', error);
+            }
+        };
+
+        fetchRepositories();
+    }, []);
+
     // Scroll to the bottom of the chat history when a new message is added
     useEffect(() => {
         if (chatEndRef.current) {
@@ -63,7 +82,7 @@ export default function Chat() {
     const repoSwitchHandler = async (
         e: React.ChangeEvent<HTMLSelectElement>
     ) => {
-        setRepoName(e.target.value);
+        setSelectedRepo(e.target.value);
         //setChatHistory([]);
     };
 
@@ -76,17 +95,26 @@ export default function Chat() {
                 <select
                     className="flex-1 rounded border bg-white px-3 py-2"
                     required
-                    value={repoName}
+                    value={selectedRepo}
                     onChange={e => repoSwitchHandler(e)}
                 >
                     <option value="" disabled>
                         Select a collection
                     </option>
-                    <option value="repo1">Repo 1</option>
+                    {repositories.map((repo, index) => (
+                        <option key={index} value={repo}>
+                            {repo
+                                .replace(
+                                    /^https?:\/\/(www\.)?github\.com\//,
+                                    ''
+                                )
+                                .replace(/\/$/, '')}
+                        </option>
+                    ))}
                 </select>
             </div>
             <div
-                className={`min-h-0 w-full flex-1 flex-col rounded-2xl border bg-gray-300 ${repoName !== '' ? 'flex' : 'hidden'}`}
+                className={`min-h-0 w-full flex-1 flex-col rounded-2xl border bg-gray-300 ${selectedRepo !== '' ? 'flex' : 'hidden'}`}
             >
                 <div className="flex h-full flex-col">
                     <div className="custom-scrollbar mr-1 flex min-h-0 flex-1 flex-col overflow-y-auto pr-2 pl-4">
@@ -107,6 +135,7 @@ export default function Chat() {
                         addUserMessageToChatHistory={
                             addUserMessageToChatHistory
                         }
+                        selectedRepo={selectedRepo}
                     />
                 </div>
             </div>
