@@ -24,4 +24,9 @@ export const userQuerySchema = z.object({
     repoUrl: githubUrlSchema,
 });
 
+export const URLSchema = z.object({
+    repoUrl: githubUrlSchema,
+});
+
+export type GetRepoByURLType = z.infer<typeof URLSchema>;
 export type UserQueryType = z.infer<typeof userQuerySchema>;
