@@ -1,4 +1,5 @@
-import { createChunk } from '../repositories/chunkRepository.js';
+import { createChunk, vectorSearch } from '../repositories/chunkRepository.js';
+import type { VectorSearchParamsType } from '../repositories/chunkRepository.js';
 import { createEmbedding } from '../providers/embeddingProvider.js';
 import type { CodeChunkType } from './treeSitter.js';
 import logger from '../lib/logger.js';
@@ -47,4 +48,14 @@ export async function processAndStoreChunks(chunks: CodeChunkType[], repoURL: st
     }
 
     logger.info(`REPO: ${repoURL} - Finished processing and storing chunks.`);
+}
+
+export async function searchChunks(params: VectorSearchParamsType) {
+    try {
+        const results = await vectorSearch(params);
+        return results;
+    } catch (error) {
+        logger.error('Error searching chunks:', error);
+        throw new AppError('Error searching chunks');
+    }
 }

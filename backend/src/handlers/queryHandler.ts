@@ -6,7 +6,7 @@ import {
 } from '../controllers/queryController.js';
 
 export async function handleUserQuery(req: Request, res: Response) {
-    const queryResponse = await userQuery(req.body.query, req.body.repoUrl);
+    const queryResponse = await userQuery(req.body.query, req.body.repoUrl, req.body.chatHistory);
     res.standardResponse(200, { queryResponse }, 'Query processed successfully');
 }
 

@@ -22,6 +22,12 @@ export const userQuerySchema = z.object({
         .refine(str => str.trim().length > 0, { message: 'Query cannot be empty' })
         .transform(str => str.trim()),
     repoUrl: githubUrlSchema,
+    chatHistory: z.array(
+        z.object({
+            role: z.enum(['user', 'assistant', 'system']),
+            content: z.string(),
+        })
+    ),
 });
 
 export const URLSchema = z.object({
