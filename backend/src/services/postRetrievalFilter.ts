@@ -41,6 +41,7 @@ export function applyPostRetrievalFilters(
     return filtered;
 }
 
+// This function removes chunks that have more than 50% line overlap with a higher-scoring chunk from the same file. It assumes that the input chunks are sorted by score in descending order.
 function deduplicateOverlappingChunks(chunks: ScoredChunk[]): ScoredChunk[] {
     const kept: ScoredChunk[] = [];
 
@@ -75,6 +76,7 @@ function deduplicateOverlappingChunks(chunks: ScoredChunk[]): ScoredChunk[] {
     return kept;
 }
 
+// Returns the overlap between two line ranges
 function overlapRatio(aStart: number, aEnd: number, bStart: number, bEnd: number): number {
     const overlapStart = Math.max(aStart, bStart);
     const overlapEnd = Math.min(aEnd, bEnd);

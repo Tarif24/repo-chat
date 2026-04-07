@@ -17,6 +17,7 @@ export async function userQuery(
     // Interpret and get the filters for the query, and also get the embedding for the hypothetical chunk
     const { embedding, filters, hypotheticalChunk } = await interpretAndEmbedQuery(query);
 
+    // Temporary logging for debugging and analysis
     logger.info(
         `REPO: ${repoURL} - User query: "${query}" - Interpreted filters: ${JSON.stringify(filters)} - Hypothetical chunk: ${hypotheticalChunk}`
     );
@@ -45,6 +46,7 @@ export async function userQuery(
     // Build the system prompt and user message for the LLM
     const { systemPrompt, userMessage, contextStats } = buildQuery(query, chunks, repoURL);
 
+    // Temporary logging for debugging and analysis
     logger.info(
         `REPO: ${repoURL} - Built query for user question: "${query}" - Context stats: ${JSON.stringify(
             contextStats

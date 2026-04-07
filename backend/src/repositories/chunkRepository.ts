@@ -43,6 +43,7 @@ export async function vectorSearch(params: VectorSearchParamsType): Promise<Scor
 
     //PIPELINE
 
+    // The  pipeline is a MongoDB aggregation pipeline that first performs the vector search with the specified parameters and pre-filter, then adds the cosine similarity score to each result document, and finally projects out the embedding vector since it's not needed after search and can be large.
     const pipeline = [
         {
             $vectorSearch: {

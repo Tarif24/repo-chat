@@ -121,7 +121,7 @@ function normalizeLanguageTag(language?: string): string {
     return map[language.toLowerCase()] ?? language.toLowerCase();
 }
 
-// CONTEXT STATS (useful for logging and triggering context compression)
+// CONTEXT STATS (useful for logging, triggering context compression and providing references such as files and line numbers in the system prompt)
 
 function computeContextStats(chunks: ScoredChunk[]) {
     const totalChars = chunks.reduce((sum, c) => sum + c.content.length, 0);

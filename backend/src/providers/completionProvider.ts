@@ -1,5 +1,6 @@
 import { openAIConfig } from '../config/config.js';
 import OpenAI from 'openai';
+import { AppError } from '../error/appError.js';
 
 const OPENAI_API_KEY = openAIConfig.apiKey;
 const OPENAI_CHAT_MODEL = openAIConfig.chatModel;
@@ -57,6 +58,7 @@ export type QueryInterpretationType = {
     };
 };
 
+// Takes in a user query and generates a embedding based on a hypothetical chunk and also returns the language and directory filters if mentioned in the query
 export async function interpretQuery(question: string): Promise<QueryInterpretationType> {
     const response = await openai.chat.completions.create({
         model: OPENAI_CHAT_MODEL,
@@ -88,7 +90,7 @@ export async function interpretQuery(question: string): Promise<QueryInterpretat
     try {
         parsed = JSON.parse(raw);
     } catch {
-        throw new Error(`Query interpreter returned invalid JSON: ${raw}`);
+        throw new AppError(`Query interpreter returned invalid JSON: ${raw}`);
     }
 
     return {
