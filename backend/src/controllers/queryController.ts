@@ -41,6 +41,7 @@ export async function userQuery(
         scoreThreshold: 0.75,
         maxPerFile: 3,
         directory: filters.directory ? filters.directory : '', // fuzzy fallback
+        fileSkipScoreThreshold: 0.75,
     });
 
     // Build the system prompt and user message for the LLM
