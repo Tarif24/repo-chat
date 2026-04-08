@@ -18,13 +18,25 @@ export async function getAllRepositories() {
 
 export async function updateLastAccessed(repoURL: string) {
     const lastAccessed = new Date();
-    return await Repo.findOneAndReplace({ repoURL }, { lastAccessed }, { returnDocument: 'after' });
+    return await Repo.findOneAndUpdate(
+        { repoURL },
+        { $set: { lastAccessed } },
+        { returnDocument: 'after' }
+    );
 }
 
 export async function updateLatestSHA(repoURL: string, latestSHA: string) {
-    return await Repo.findOneAndReplace({ repoURL }, { latestSHA }, { returnDocument: 'after' });
+    return await Repo.findOneAndUpdate(
+        { repoURL },
+        { $set: { latestSHA } },
+        { returnDocument: 'after' }
+    );
 }
 
 export async function updateFileTree(repoURL: string, fileTree: object) {
-    return await Repo.findOneAndReplace({ repoURL }, { fileTree }, { returnDocument: 'after' });
+    return await Repo.findOneAndUpdate(
+        { repoURL },
+        { $set: { fileTree } },
+        { returnDocument: 'after' }
+    );
 }

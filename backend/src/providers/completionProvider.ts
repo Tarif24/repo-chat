@@ -62,7 +62,7 @@ export type QueryInterpretationType = {
 export async function interpretQuery(question: string): Promise<QueryInterpretationType> {
     const response = await openai.chat.completions.create({
         model: OPENAI_CHAT_MODEL,
-        max_tokens: 300,
+        max_completion_tokens: 300,
         response_format: { type: 'json_object' },
         messages: [
             {

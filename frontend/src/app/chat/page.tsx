@@ -6,7 +6,7 @@ import ChatTypingBar from './chatTypingBar';
 
 export default function Chat() {
     type MessageType = {
-        role: string;
+        role: 'user' | 'assistant' | 'system';
         message: string;
     };
 
@@ -18,29 +18,7 @@ export default function Chat() {
     const [repositories, setRepositories] = useState<string[]>([]);
 
     // State to hold the chat history
-    const [chatHistory, setChatHistory] = useState<MessageType[]>([
-        { role: 'assistant', message: 'Hello! How can I assist you today?' },
-        { role: 'user', message: 'Hello! I have a question about my code.' },
-        {
-            role: 'assistant',
-            message: 'Sure! Please go ahead and ask your question.',
-        },
-        { role: 'user', message: 'I am getting' },
-        { role: 'assistant', message: 'Hello! How can I assist you today?' },
-        { role: 'user', message: 'Hello! I have a question about my code.' },
-        {
-            role: 'assistant',
-            message: 'Sure! Please go ahead and ask your question.',
-        },
-        { role: 'user', message: 'I am getting' },
-        { role: 'assistant', message: 'Hello! How can I assist you today?' },
-        { role: 'user', message: 'Hello! I have a question about my code.' },
-        {
-            role: 'assistant',
-            message: 'Sure! Please go ahead and ask your question.',
-        },
-        { role: 'user', message: 'I am getting' },
-    ]);
+    const [chatHistory, setChatHistory] = useState<MessageType[]>([]);
 
     // Reference to the end of the chat history for scrolling
     const chatEndRef = useRef<HTMLDivElement | null>(null);
@@ -74,8 +52,16 @@ export default function Chat() {
         setChatHistory(organizedMessages);
     };
 
-    const addUserMessageToChatHistory = (message: string) => {
-        const updatedChatHistory = [...chatHistory, { role: 'user', message }];
+    const addMessageToChatHistory = (
+        chats: {
+            role: 'user' | 'assistant' | 'system';
+            message: string;
+        }[]
+    ) => {
+        const updatedChatHistory: {
+            role: 'user' | 'assistant' | 'system';
+            message: string;
+        }[] = [...chatHistory, ...chats];
         organizeMessageStructureAndSave(updatedChatHistory);
     };
 
@@ -132,10 +118,9 @@ export default function Chat() {
                     </div>
 
                     <ChatTypingBar
-                        addUserMessageToChatHistory={
-                            addUserMessageToChatHistory
-                        }
+                        addMessageToChatHistory={addMessageToChatHistory}
                         selectedRepo={selectedRepo}
+                        chatHistory={chatHistory}
                     />
                 </div>
             </div>

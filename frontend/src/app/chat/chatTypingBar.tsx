@@ -3,11 +3,21 @@ import { useState } from 'react';
 import { Send } from 'lucide-react';
 
 export default function ChatTypingBar({
-    addUserMessageToChatHistory,
+    addMessageToChatHistory,
     selectedRepo,
+    chatHistory,
 }: {
-    addUserMessageToChatHistory: (message: string) => void;
+    addMessageToChatHistory: (
+        chats: {
+            role: 'user' | 'assistant' | 'system';
+            message: string;
+        }[]
+    ) => void;
     selectedRepo: string;
+    chatHistory: {
+        role: 'user' | 'assistant' | 'system';
+        message: string;
+    }[];
 }) {
     const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -22,7 +32,8 @@ export default function ChatTypingBar({
             e.preventDefault();
         }
 
-        addUserMessageToChatHistory(inputText);
+        addMessageToChatHistory([{ role: 'user', message: inputText }]);
+        setInputText('');
 
         const responseJSON = await fetch(`${API_URL}/query/userQuery`, {
             method: 'POST',
@@ -32,12 +43,38 @@ export default function ChatTypingBar({
             body: JSON.stringify({
                 query: inputText,
                 repoUrl: selectedRepo,
+                chatHistory: chatHistory,
             }),
         });
         const response = await responseJSON.json();
+
+        type FileReferenceType = {
+            fileName: string;
+            relativePath: string;
+            startLine: number;
+            endLine: number;
+            name: string;
+        };
+
+        const referenceFiles =
+            response.data.queryResponse.contextStats.filesReferenced
+                .map(
+                    (ref: FileReferenceType) =>
+                        `File: ${ref.fileName} Path: ${ref.relativePath} Lines: ${ref.startLine}-${ref.endLine} Name: ${ref.name}`
+                )
+                .join('\n');
+
+        const finalResponse = `${response.data.queryResponse.response.content}\n\nReferenced files:\n${referenceFiles}`;
+
         console.log('Response from backend:', response);
 
-        setInputText('');
+        addMessageToChatHistory([
+            { role: 'user', message: inputText },
+            {
+                role: 'assistant',
+                message: finalResponse,
+            },
+        ]);
     };
 
     const handleOnTextChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {

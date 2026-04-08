@@ -45,7 +45,7 @@ export async function ingestRepo(
     // Create and store the file tree structure in the database
     const fileTree = createParseableFilesTree(`./repoCloning`);
     if (fileTree) {
-        updateRepoFileTree(repoUrl, fileTree);
+        console.log(await updateRepoFileTree(repoUrl, fileTree));
     }
     // Parse the valid files using Tree-sitter
     const allCodeChunks = await parseFiles(validFiles || [], repoUrl);
