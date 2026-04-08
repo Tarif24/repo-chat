@@ -1,4 +1,5 @@
 import type { ScoredChunk } from '../repositories/chunkRepository.js';
+import logger from '../lib/logger.js';
 
 export interface PostRetrievalFilterOptions {
     scoreThreshold?: number; // drop chunks below this cosine similarity
@@ -23,14 +24,32 @@ export function applyPostRetrievalFilters(
     // Filter 1 - Score threshold - this is the most important filter for relevance. Tune it based on your needs and embedding quality. Start high (e.g. 0.8) and lower if you need more results.
     filtered = filtered.filter(c => c.score >= scoreThreshold);
 
+    logger.info(
+        `STAGE: SCORE THRESHOLD - Raw chunks metadata and scores: ${filtered
+            .map(c => `${c.metadata.relativePath} (score: ${c.score.toFixed(3)})`)
+            .join(', ')}`
+    );
+
     // Filter 2 - Directory filter - if the query specified a directory, filter to chunks whose parentDir metadata field includes that string (case-insensitive, fuzzy match).
     if (directory) {
         const dir = directory.toLowerCase();
         filtered = filtered.filter(c => c.metadata.parentDir?.toLowerCase().includes(dir));
     }
 
+    logger.info(
+        `STAGE: DIRECTORY FILTER - Raw chunks metadata and scores: ${filtered
+            .map(c => `${c.metadata.relativePath} (score: ${c.score.toFixed(3)})`)
+            .join(', ')}`
+    );
+
     // Filter 3 - Overlap deduplication - remove chunks that have significant line overlap with a higher-scoring chunk from the same file. This prevents redundancy in the context window.
     filtered = deduplicateOverlappingChunks(filtered);
+
+    logger.info(
+        `STAGE: OVERLAP DEDUPLICATION - Raw chunks metadata and scores: ${filtered
+            .map(c => `${c.metadata.relativePath} (score: ${c.score.toFixed(3)})`)
+            .join(', ')}`
+    );
 
     // Filter 4 - Per-file cap — skip if the user is clearly targeting a specific file
     const isAllFromSameFile = filtered.every(
@@ -40,8 +59,9 @@ export function applyPostRetrievalFilters(
 
     if (!isAllFromSameFile || !isHighConfidence) {
         filtered = applyPerFileCap(filtered, maxPerFile);
+    } else {
+        filtered = applyPerFileCap(filtered, 6);
     }
-
     return filtered;
 }
 

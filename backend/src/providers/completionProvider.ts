@@ -1,6 +1,7 @@
 import { openAIConfig } from '../config/config.js';
 import OpenAI from 'openai';
 import { AppError } from '../error/appError.js';
+import type { ScoredChunk } from '../repositories/chunkRepository.js';
 
 const OPENAI_API_KEY = openAIConfig.apiKey;
 const OPENAI_CHAT_MODEL = openAIConfig.chatModel;
@@ -111,4 +112,57 @@ export async function interpretQuery(question: string): Promise<QueryInterpretat
                     : undefined,
         },
     };
+}
+
+// Scores chunks for relavence using a criteria and a llm call
+export async function scoreChunks(question: string, chunks: ScoredChunk[]): Promise<number[]> {
+    const chunkList = chunks
+        .map(
+            (c, i) =>
+                `[${i}] ${c.metadata.relativePath} lines ${c.metadata.startLine}–${c.metadata.endLine}\n${c.content.trim()}`
+        )
+        .join('\n\n---\n\n');
+
+    const response = await openai.chat.completions.create({
+        model: OPENAI_CHAT_MODEL,
+        max_completion_tokens: 200,
+        response_format: { type: 'json_object' },
+        messages: [
+            {
+                role: 'system',
+                content: `You are a relevance judge for a code search engine. You will be given a question and a list of code chunks. Score each chunk from 0.0 to 1.0 based on how directly it answers the question.
+
+Scoring guide:
+1.0 — contains the direct implementation or exact answer
+0.7–0.9 — highly relevant, closely related code
+0.4–0.6 — partially relevant, related but not the answer
+0.0–0.3 — tangentially related or irrelevant
+
+Return ONLY valid JSON in this exact shape: { "scores": [0.9, 0.4, 0.1, ...] }
+The array must have exactly ${chunks.length} numbers, one per chunk in order.`,
+            },
+            {
+                role: 'user',
+                content: `Question: ${question}\n\n${chunkList}`,
+            },
+        ],
+    });
+
+    const raw = response.choices[0]?.message.content ?? '{}';
+
+    try {
+        const parsed = JSON.parse(raw) as { scores?: unknown };
+
+        if (!Array.isArray(parsed.scores) || parsed.scores.length !== chunks.length) {
+            console.warn('Reranker returned unexpected shape, falling back to vector scores');
+            return chunks.map(c => c.score);
+        }
+
+        return (parsed.scores as unknown[]).map(s =>
+            typeof s === 'number' ? Math.min(1, Math.max(0, s)) : 0
+        );
+    } catch {
+        console.warn('Reranker JSON parse failed, falling back to vector scores');
+        return chunks.map(c => c.score);
+    }
 }

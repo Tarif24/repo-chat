@@ -4,6 +4,7 @@ import { applyPostRetrievalFilters } from '../services/postRetrievalFilter.js';
 import { searchChunks } from '../services/chunkProcessing.js';
 import { buildQuery } from '../services/queryBuilder.js';
 import { processUserQuery } from '../services/queryProcessor.js';
+import { rerankChunks } from '../services/reranker.js';
 import logger from '../lib/logger.js';
 
 export async function userQuery(
@@ -36,16 +37,46 @@ export async function userQuery(
         numCandidates: 150,
     });
 
+    logger.info(
+        `REPO: ${repoURL} - Retrieved ${rawChunks.length} raw chunks for query: "${query}" before post-retrieval filtering`
+    );
+    logger.info(
+        `REPO: ${repoURL} - Raw chunks metadata and scores: ${rawChunks
+            .map(c => `${c.metadata.relativePath} (score: ${c.score.toFixed(3)})`)
+            .join(', ')}`
+    );
+
     // Apply post-retrieval filters to the raw search results to improve relevance and reduce noise in the context window
-    const chunks = applyPostRetrievalFilters(rawChunks, {
+    const filteredChunks = applyPostRetrievalFilters(rawChunks, {
         scoreThreshold: 0.75,
         maxPerFile: 3,
         directory: filters.directory ? filters.directory : '', // fuzzy fallback
         fileSkipScoreThreshold: 0.75,
     });
 
+    logger.info(
+        `REPO: ${repoURL} - Retrieved ${filteredChunks.length} filtered chunks for query: "${query}" after post-retrieval filtering`
+    );
+    logger.info(
+        `REPO: ${repoURL} - Filtered chunks metadata and scores: ${filteredChunks
+            .map(c => `${c.metadata.relativePath} (score: ${c.score.toFixed(3)})`)
+            .join(', ')}`
+    );
+
+    // Rerank — cuts from ~15 filtered chunks down to top 8
+    const reranked = await rerankChunks(query, filteredChunks, 8);
+
+    logger.info(
+        `REPO: ${repoURL} - Retrieved ${reranked.length} Reranked for query: "${query}" after reranking`
+    );
+    logger.info(
+        `REPO: ${repoURL} - Reranked metadata and scores: ${reranked
+            .map(c => `${c.metadata.relativePath} (score: ${c.score.toFixed(3)})`)
+            .join(', ')}`
+    );
+
     // Build the system prompt and user message for the LLM
-    const { systemPrompt, userMessage, contextStats } = buildQuery(query, chunks, repoURL);
+    const { systemPrompt, userMessage, contextStats } = buildQuery(query, reranked, repoURL);
 
     // Temporary logging for debugging and analysis
     logger.info(
