@@ -2,6 +2,7 @@ import { openAIConfig } from '../config/config.js';
 import OpenAI from 'openai';
 import { AppError } from '../error/appError.js';
 import type { ScoredChunk } from '../repositories/chunkRepository.js';
+import type { RankedChunkType } from '../services/reranker.js';
 
 const OPENAI_API_KEY = openAIConfig.apiKey;
 const OPENAI_CHAT_MODEL = openAIConfig.chatModel;
@@ -164,5 +165,72 @@ The array must have exactly ${chunks.length} numbers, one per chunk in order.`,
     } catch {
         console.warn('Reranker JSON parse failed, falling back to vector scores');
         return chunks.map(c => c.score);
+    }
+}
+
+export interface CompressedChunkType extends RankedChunkType {
+    originalContent: string;
+    compressed: boolean;
+}
+
+export async function compressChunk(
+    question: string,
+    chunk: RankedChunkType
+): Promise<CompressedChunkType> {
+    // Don't bother compressing small chunks — the LLM call costs more than it saves
+    if (chunk.content.length < 800) {
+        return {
+            ...chunk.toObject(),
+            originalContent: chunk.content,
+            compressed: false,
+        };
+    }
+
+    try {
+        const response = await openai.chat.completions.create({
+            model: OPENAI_CHAT_MODEL,
+            max_completion_tokens: 500,
+            messages: [
+                {
+                    role: 'system',
+                    content: `You are a code context extractor. Given a question and a code chunk, return ONLY the lines from the chunk that are directly relevant to answering the question.
+
+Rules:
+- Preserve exact code — do not paraphrase or rewrite
+- Include enough surrounding context for the lines to be readable (function signatures, closing braces)
+- If the entire chunk is relevant, return it unchanged
+- If nothing is relevant, return the string "IRRELEVANT"
+- Return only the code, no explanation`,
+                },
+                {
+                    role: 'user',
+                    content: `Question: ${question}\n\nCode chunk from ${chunk.metadata.relativePath}:\n\n${chunk.content}`,
+                },
+            ],
+        });
+
+        const result = response.choices[0]?.message.content?.trim() ?? '';
+
+        if (result === 'IRRELEVANT' || result.length === 0) {
+            return {
+                ...chunk.toObject(),
+                originalContent: chunk.content,
+                compressed: false, // keep the original, let score threshold handle it
+            };
+        }
+
+        return {
+            ...chunk.toObject(),
+            content: result,
+            originalContent: chunk.content,
+            compressed: true,
+        };
+    } catch {
+        // On any failure, pass the original chunk through unchanged
+        return {
+            ...chunk.toObject(),
+            originalContent: chunk.content,
+            compressed: false,
+        };
     }
 }

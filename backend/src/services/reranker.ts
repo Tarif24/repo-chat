@@ -1,7 +1,7 @@
 import { scoreChunks } from '../providers/completionProvider.js';
 import type { ScoredChunk } from '../repositories/chunkRepository.js';
 
-export interface RankedChunk extends ScoredChunk {
+export interface RankedChunkType extends ScoredChunk {
     rerankScore: number;
     vectorScore: number; // preserve original for logging
 }
@@ -11,7 +11,7 @@ export async function rerankChunks(
     question: string,
     chunks: ScoredChunk[],
     topK: number = 8
-): Promise<RankedChunk[]> {
+): Promise<RankedChunkType[]> {
     if (chunks.length === 0) return [];
 
     // Skip reranking if the retrieval set is already small —

@@ -5,6 +5,7 @@ import { searchChunks } from '../services/chunkProcessing.js';
 import { buildQuery } from '../services/queryBuilder.js';
 import { processUserQuery } from '../services/queryProcessor.js';
 import { rerankChunks } from '../services/reranker.js';
+import { compressContext } from '../services/contextCompression.js';
 import logger from '../lib/logger.js';
 
 export async function userQuery(
@@ -75,8 +76,24 @@ export async function userQuery(
             .join(', ')}`
     );
 
+    // Compress the context if it's too large to fit in the LLM context window, while trying to preserve relevance and important details
+    const compressed = await compressContext(query, reranked, 5_000);
+
     // Build the system prompt and user message for the LLM
-    const { systemPrompt, userMessage, contextStats } = buildQuery(query, reranked, repoURL);
+    const { systemPrompt, userMessage, contextStats } = buildQuery(query, compressed, repoURL);
+
+    logger.info(
+        `REPO: ${repoURL} - PIPELINE STATS - ${JSON.stringify({
+            question: query,
+            raw: rawChunks.length,
+            filtered: filteredChunks.length,
+            reranked: reranked.length,
+            compressed: compressed.filter(c => c.compressed).length,
+            totalChars: contextStats.totalChars,
+            files: contextStats.filesReferenced,
+        })}
+        )}`
+    );
 
     // Temporary logging for debugging and analysis
     logger.info(
