@@ -211,6 +211,71 @@ function buildChunk(
     return { ...base, embeddingText: buildEmbeddingText(base) };
 }
 
+// Helper function Chunk README text by length
+function chunkReadmeByLength(
+    readmeText: string,
+    file: {
+        relativePath: string;
+        fileName: string;
+        absolutePath: string;
+        language?: string;
+    },
+    limit: number = 2500 // default char limit per chunk
+): CodeChunkType[] {
+    const lines = readmeText.split('\n');
+    const chunks: CodeChunkType[] = [];
+    let buffer: string[] = [];
+    let charCount = 0;
+    let chunkStartLine = 1;
+    let chunkIdx = 1;
+    const safeAbsolutePath = file.absolutePath ?? '';
+    for (let i = 0; i < lines.length; i++) {
+        const line = lines[i] ?? '';
+        if (charCount + line.length + 1 > limit && buffer.length > 0) {
+            // Emit chunk
+            const chunkText = buffer.join('\n');
+            const parentDir = path.basename(path.dirname(safeAbsolutePath));
+            const base = {
+                chunk: chunkText,
+                language: file.language ?? 'markdown',
+                relativePath: file.relativePath,
+                fileName: file.fileName,
+                name: `${file.fileName} (part ${chunkIdx})`,
+                type: 'file',
+                parentDir,
+                startLine: chunkStartLine,
+                endLine: chunkStartLine + buffer.length - 1,
+            };
+            chunks.push({ ...base, embeddingText: buildEmbeddingText(base) });
+            buffer = [];
+            charCount = 0;
+            chunkStartLine = i + 1;
+            chunkIdx++;
+        }
+
+        buffer.push(line);
+        charCount += line.length + 1; // +1 for newline
+    }
+    // Emit last chunk
+    if (buffer.length > 0) {
+        const chunkText = buffer.join('\n');
+        const parentDir = path.basename(path.dirname(safeAbsolutePath));
+        const base = {
+            chunk: chunkText,
+            language: file.language ?? 'markdown',
+            relativePath: file.relativePath,
+            fileName: file.fileName,
+            name: `${file.fileName} (part ${chunkIdx})`,
+            type: 'file',
+            parentDir,
+            startLine: chunkStartLine,
+            endLine: chunkStartLine + buffer.length - 1,
+        };
+        chunks.push({ ...base, embeddingText: buildEmbeddingText(base) });
+    }
+    return chunks;
+}
+
 // Sliding window fallback
 function slidingWindowSplit(
     node: Parser.SyntaxNode,
@@ -302,6 +367,13 @@ function extractChunks(
 const parser = new Parser();
 
 export function parseFile(file: ParseableFileType, limit = CHAR_LIMIT): CodeChunkType[] {
+    const results: CodeChunkType[] = [];
+
+    if (file.language === 'markdown') {
+        const readmeText = fs.readFileSync(file.absolutePath, 'utf-8');
+        return chunkReadmeByLength(readmeText, file, 500);
+    }
+
     const grammar = resolveGrammar(file.language, file.extension);
     if (!grammar) {
         console.warn(`No grammar found for language: ${file.language}`);
@@ -329,7 +401,6 @@ export function parseFile(file: ParseableFileType, limit = CHAR_LIMIT): CodeChun
         return [{ ...base, embeddingText: buildEmbeddingText(base) }];
     }
 
-    const results: CodeChunkType[] = [];
     const targetTypes = new Set(rule.nodeTypes);
 
     extractChunks(tree.rootNode, file, targetTypes, rule.getName, limit, results);

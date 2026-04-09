@@ -11,6 +11,7 @@ const SUPPORTED_LANGUAGES: Map<string, string> = new Map([
     ['.cs', 'c_sharp'],
     ['.html', 'html'],
     ['.css', 'css'],
+    ['.md', 'markdown'],
 ]);
 
 export default SUPPORTED_LANGUAGES;
