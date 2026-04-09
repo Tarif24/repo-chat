@@ -9,9 +9,12 @@ export default function FileTree({ tree }: { tree: any }) {
             <div className="font-medium">📁 {tree.name}</div>
             <div className="ml-3 border-l border-gray-400 pl-2">
                 {Array.isArray(tree.children) && tree.children.length > 0 ? (
-                    tree.children.map((child: any, idx: number) => (
-                        <FileTree key={idx} tree={child} />
-                    ))
+                    tree.children
+                        .slice()
+                        .sort((a: any, b: any) => a.name.localeCompare(b.name))
+                        .map((child: any, idx: number) => (
+                            <FileTree key={idx} tree={child} />
+                        ))
                 ) : (
                     <div className="pl-4 text-gray-400">(empty)</div>
                 )}
