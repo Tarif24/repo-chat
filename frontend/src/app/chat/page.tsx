@@ -3,6 +3,7 @@
 import { use, useEffect, useRef, useState } from 'react';
 import Message from './message';
 import ChatTypingBar from './chatTypingBar';
+import FileTree from './fileTree';
 
 export default function Chat() {
     type MessageType = {
@@ -14,6 +15,11 @@ export default function Chat() {
 
     // State to hold the selected repository name
     const [selectedRepo, setSelectedRepo] = useState<string>('');
+
+    const [isLoading, setIsLoading] = useState<boolean>(false);
+
+    // State to hold the repository data
+    const [repoData, setRepoData] = useState<any>(null);
 
     const [repositories, setRepositories] = useState<string[]>([]);
 
@@ -69,59 +75,89 @@ export default function Chat() {
         e: React.ChangeEvent<HTMLSelectElement>
     ) => {
         setSelectedRepo(e.target.value);
-        //setChatHistory([]);
+
+        const responseJSON = await fetch(`${API_URL}/query/getRepoByURL`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                repoUrl: e.target.value,
+            }),
+        });
+        const response = await responseJSON.json();
+
+        setRepoData(response.data.repo);
+
+        setChatHistory([]);
     };
 
     return (
-        <div className="flex h-full flex-col items-center justify-center gap-4 p-10">
-            <div className="flex w-fit flex-col items-center justify-center gap-3 pt-2 sm:flex-row sm:gap-4 sm:pt-0 sm:pb-4">
-                <h1 className="text-2xl font-bold text-gray-700">
-                    Repository Name
-                </h1>
-                <select
-                    className="flex-1 rounded border bg-white px-3 py-2"
-                    required
-                    value={selectedRepo}
-                    onChange={e => repoSwitchHandler(e)}
-                >
-                    <option value="" disabled>
-                        Select a collection
-                    </option>
-                    {repositories.map((repo, index) => (
-                        <option key={index} value={repo}>
-                            {repo
-                                .replace(
-                                    /^https?:\/\/(www\.)?github\.com\//,
-                                    ''
-                                )
-                                .replace(/\/$/, '')}
-                        </option>
-                    ))}
-                </select>
-            </div>
+        <div className="flex h-full items-center justify-center gap-4 border p-10">
             <div
-                className={`min-h-0 w-full flex-1 flex-col rounded-2xl border bg-gray-300 ${selectedRepo !== '' ? 'flex' : 'hidden'}`}
+                className={`flex h-full min-h-0 w-100 flex-col rounded-2xl border bg-gray-100 p-4 ${selectedRepo !== '' ? 'block' : 'hidden'}`}
             >
-                <div className="flex h-full flex-col">
-                    <div className="custom-scrollbar mr-1 flex min-h-0 flex-1 flex-col overflow-y-auto pr-2 pl-4">
-                        <div className="grow"></div>
-                        {chatHistory.map(({ role, message }, index) => {
-                            return (
-                                <Message
-                                    key={index}
-                                    role={role}
-                                    message={message}
-                                />
-                            );
-                        })}
-                        <div ref={chatEndRef}></div>
-                    </div>
+                <h2 className="mb-2 text-center text-2xl font-bold text-gray-700">
+                    File Tree
+                </h2>
+                <div className="custom-scrollbar min-h-0 w-full flex-1 overflow-auto">
+                    {repoData && repoData.fileTree && (
+                        <div className="mb-4">
+                            <FileTree tree={repoData.fileTree} />
+                        </div>
+                    )}
+                </div>
+            </div>
+            <div className="flex h-full flex-1 flex-col items-center justify-center">
+                <div className="flex w-fit flex-col items-center justify-center gap-3 pt-2 sm:flex-row sm:gap-4 sm:pt-0 sm:pb-4">
+                    <h1 className="text-2xl font-bold text-gray-700">
+                        Repository Name
+                    </h1>
+                    <select
+                        className="flex-1 rounded border bg-white px-3 py-2"
+                        required
+                        value={selectedRepo}
+                        onChange={e => repoSwitchHandler(e)}
+                    >
+                        <option value="" disabled>
+                            Select a collection
+                        </option>
+                        {repositories.map((repo, index) => (
+                            <option key={index} value={repo}>
+                                {repo
+                                    .replace(
+                                        /^https?:\/\/(www\.)?github\.com\//,
+                                        ''
+                                    )
+                                    .replace(/\/$/, '')}
+                            </option>
+                        ))}
+                    </select>
+                </div>
+                <div
+                    className={`min-h-0 w-full flex-1 flex-col rounded-2xl border bg-gray-300 ${selectedRepo !== '' ? 'flex' : 'hidden'}`}
+                >
+                    <div className="flex h-full flex-col">
+                        <div className="custom-scrollbar mr-1 flex min-h-0 flex-1 flex-col overflow-y-auto pr-2 pl-4">
+                            <div className="grow"></div>
+                            {chatHistory.map(({ role, message }, index) => {
+                                return (
+                                    <Message
+                                        key={index}
+                                        role={role}
+                                        message={message}
+                                    />
+                                );
+                            })}
+                            <div ref={chatEndRef}></div>
+                        </div>
 
-                    <ChatTypingBar
-                        addMessageToChatHistory={addMessageToChatHistory}
-                        selectedRepo={selectedRepo}
-                        chatHistory={chatHistory}
-                    />
+                        <ChatTypingBar
+                            addMessageToChatHistory={addMessageToChatHistory}
+                            selectedRepo={selectedRepo}
+                            chatHistory={chatHistory}
+                        />
+                    </div>
                 </div>
             </div>
         </div>
