@@ -6,6 +6,7 @@ export const appConfig = {
     logLevel: env.LOG_LEVEL,
     isDevelopment: env.NODE_ENV === 'development',
     isProduction: env.NODE_ENV === 'production',
+    repoStoragePath: env.REPO_STORAGE_PATH,
 };
 
 export const dbConfig = {

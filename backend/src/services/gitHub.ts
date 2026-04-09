@@ -1,3 +1,4 @@
+import { appConfig } from '../config/config.js';
 import type { SimpleGit, LogResult } from 'simple-git';
 import { simpleGit } from 'simple-git';
 import { NotFoundError } from '../error/appError.js';
@@ -28,11 +29,8 @@ export async function validateGithubRepo(
 }
 
 // Clone a repo and get its latest SHA
-export async function cloneAndGetSha(
-    repoUrl: string,
-    localPath = './repoCloning'
-): Promise<string> {
-    await deleteEverythingInDir('./repoCloning');
+export async function cloneAndGetSha(repoUrl: string, localPath: string): Promise<string> {
+    await deleteEverythingInDir(appConfig.repoStoragePath);
 
     const validation = await validateGithubRepo(repoUrl);
     if (!validation.isValid) {

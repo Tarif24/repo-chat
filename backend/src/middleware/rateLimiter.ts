@@ -15,7 +15,7 @@ const rateLimitHandler = (_req: Request, res: Response): void => {
 };
 
 const globalLimiterOptions: Partial<Options> = {
-    windowMs: 15 * 60 * 1000, // 15 minutes
+    windowMs: 10 * 60 * 1000, // 10 minutes
     limit: 100,
     standardHeaders: 'draft-8',
     legacyHeaders: false,
@@ -23,7 +23,7 @@ const globalLimiterOptions: Partial<Options> = {
 };
 
 const strictLimiterOptions: Partial<Options> = {
-    windowMs: 60 * 1000, // 1 minute
+    windowMs: 10 * 60 * 1000, // 10 minute
     limit: 10,
     standardHeaders: 'draft-8',
     legacyHeaders: false,

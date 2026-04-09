@@ -1,6 +1,11 @@
 import logger from '../lib/logger.js';
+import { appConfig } from '../config/config.js';
 import { cloneAndGetSha, getLatestSha } from '../services/gitHub.js';
-import { collectParseableFiles, createParseableFilesTree } from '../services/files.js';
+import {
+    collectParseableFiles,
+    createParseableFilesTree,
+    deleteEverythingInDir,
+} from '../services/files.js';
 import { parseFiles } from '../services/treeSitter.js';
 import { processAndStoreChunks } from '../services/chunkProcessing.js';
 import {
@@ -25,7 +30,7 @@ export async function ingestRepo(
     }
 
     // Clone the repository and get the latest SHA
-    const repoSha = await cloneAndGetSha(repoUrl);
+    const repoSha = await cloneAndGetSha(repoUrl, appConfig.repoStoragePath);
 
     if (!repoSha) {
         return { success: false, message: 'Failed to clone repository' };
@@ -40,13 +45,17 @@ export async function ingestRepo(
     }
 
     // Scan the cloned repository for parseable files
-    const validFiles = await collectParseableFiles(`./repoCloning`, repoUrl);
+    const validFiles = await collectParseableFiles(appConfig.repoStoragePath, repoUrl);
 
     // Create and store the file tree structure in the database
-    const fileTree = createParseableFilesTree(`./repoCloning`);
+    const fileTree = createParseableFilesTree(appConfig.repoStoragePath);
     if (fileTree) {
         await updateRepoFileTree(repoUrl, fileTree);
     }
+
+    // Clear the cloned repository from disk to save space
+    deleteEverythingInDir(appConfig.repoStoragePath);
+
     // Parse the valid files using Tree-sitter
     const allCodeChunks = await parseFiles(validFiles || [], repoUrl);
 

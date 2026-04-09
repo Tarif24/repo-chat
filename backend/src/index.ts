@@ -15,6 +15,9 @@ const app = express();
 const cors = require('cors');
 dotenv.config();
 
+// Allowed origins for CORS
+const allowedOrigins: string[] = ['http://localhost:3000', 'http://localhost:3001'];
+
 // Graceful shutdown handling
 const gracefulShutdown = (signal: String) => {
     logger.info(`${signal} received, shutting down gracefully`);
@@ -59,7 +62,23 @@ const startServer = async () => {
         // Setting up express middleware
 
         // CORS
-        app.use(cors({ origin: '*', methods: ['GET', 'POST', 'PUT', 'DELETE'] }));
+        app.use(
+            cors({
+                origin: (
+                    origin: string | undefined,
+                    callback: (err: Error | null, allow?: boolean) => void
+                ) => {
+                    // Allow requests with no origin (like mobile apps or curl)
+                    if (!origin) return callback(null, true);
+                    if (allowedOrigins.includes(origin)) {
+                        return callback(null, true);
+                    } else {
+                        return callback(new Error('Not allowed by CORS'));
+                    }
+                },
+                methods: ['GET', 'POST', 'PUT', 'DELETE'],
+            })
+        );
         // JSON body parsing
         app.use(express.json());
         // Request logging

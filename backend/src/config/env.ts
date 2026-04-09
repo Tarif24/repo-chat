@@ -6,6 +6,7 @@ const envSchema = z.object({
     NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
     PORT: z.coerce.number().int().min(1).default(5000),
     LOG_LEVEL: z.enum(['error', 'warn', 'info', 'http', 'debug', 'verbose']).default('info'),
+    REPO_STORAGE_PATH: z.string().default('./repoCloning'),
 
     // mongodb
     MONGO_URL: z.string(),
