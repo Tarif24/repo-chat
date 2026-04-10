@@ -18,7 +18,7 @@ export async function rerankChunks(
     // the overhead isn't worth it under this threshold
     if (chunks.length <= topK) {
         return chunks.map(c => ({
-            ...c.toObject(),
+            ...(typeof c.toObject === 'function' ? c.toObject() : c),
             rerankScore: c.score,
             vectorScore: c.score,
         }));
@@ -28,7 +28,7 @@ export async function rerankChunks(
 
     const ranked = chunks
         .map((chunk, i) => ({
-            ...chunk.toObject(),
+            ...(typeof chunk.toObject === 'function' ? chunk.toObject() : chunk),
             rerankScore: scores[i] ?? 0,
             vectorScore: chunk.score,
         }))

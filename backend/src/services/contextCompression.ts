@@ -14,7 +14,7 @@ export async function compressContext(
     // Don't compress if we're under the threshold
     if (totalChars <= compressionThreshold) {
         return chunks.map(c => ({
-            ...c.toObject(),
+            ...(typeof c.toObject === 'function' ? c.toObject() : c),
             originalContent: c.content,
             compressed: false,
         }));

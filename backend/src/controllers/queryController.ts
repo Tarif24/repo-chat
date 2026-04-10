@@ -64,8 +64,8 @@ export async function userQuery(
             .join(', ')}`
     );
 
-    // Rerank — cuts from ~15 filtered chunks down to top 8
-    const reranked = await rerankChunks(query, filteredChunks, 8);
+    // Rerank — cuts from ~15 filtered chunks down to top n
+    const reranked = await rerankChunks(query, filteredChunks, 5);
 
     logger.info(
         `REPO: ${repoURL} - Retrieved ${reranked.length} Reranked for query: "${query}" after reranking`

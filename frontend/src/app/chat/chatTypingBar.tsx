@@ -66,8 +66,6 @@ export default function ChatTypingBar({
 
         const finalResponse = `${response.data.queryResponse.response.content}\n\nReferenced files:\n${referenceFiles}`;
 
-        console.log('Response from backend:', response);
-
         addMessageToChatHistory([
             { role: 'user', message: inputText },
             {
