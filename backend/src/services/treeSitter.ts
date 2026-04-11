@@ -371,6 +371,25 @@ export function parseFile(file: ParseableFileType, limit = CHAR_LIMIT): CodeChun
 
     if (file.language === 'markdown') {
         const readmeText = fs.readFileSync(file.absolutePath, 'utf-8');
+
+        // Blank file check
+        if (!readmeText.trim()) {
+            return [];
+        }
+
+        // File only has comments (supports common languages)
+        const codeWithoutComments = readmeText
+            // Remove single-line comments
+            .replace(/(^|\s)(\/\/|#).*$/gm, '')
+            // Remove multi-line comments (/* ... */)
+            .replace(/\/\*[\s\S]*?\*\//gm, '')
+            .replace(/<!--([\s\S]*?)-->/gm, '') // HTML comments
+            .replace(/\s/g, '');
+
+        if (!codeWithoutComments.trim()) {
+            return [];
+        }
+
         return chunkReadmeByLength(readmeText, file, 500);
     }
 
@@ -381,6 +400,25 @@ export function parseFile(file: ParseableFileType, limit = CHAR_LIMIT): CodeChun
     }
 
     const sourceCode = fs.readFileSync(file.absolutePath, 'utf-8');
+
+    // Blank file check
+    if (!sourceCode.trim()) {
+        return [];
+    }
+
+    // File only has comments (supports common languages)
+    const codeWithoutComments = sourceCode
+        // Remove single-line comments
+        .replace(/(^|\s)(\/\/|#).*$/gm, '')
+        // Remove multi-line comments (/* ... */)
+        .replace(/\/\*[\s\S]*?\*\//gm, '')
+        .replace(/<!--([\s\S]*?)-->/gm, '') // HTML comments
+        .replace(/\s/g, '');
+
+    if (!codeWithoutComments.trim()) {
+        return [];
+    }
+
     parser.setLanguage(grammar);
     const tree = parser.parse(sourceCode);
 
@@ -418,6 +456,24 @@ export function parseFile(file: ParseableFileType, limit = CHAR_LIMIT): CodeChun
             endLine: sourceCode.split('\n').length,
         };
         return [{ ...base, embeddingText: buildEmbeddingText(base) }];
+    }
+
+    for (const chunk of results) {
+        if (
+            !chunk.chunk ||
+            !chunk.relativePath ||
+            !chunk.fileName ||
+            !chunk.name ||
+            !chunk.type ||
+            !chunk.language ||
+            !chunk.parentDir ||
+            !chunk.startLine ||
+            !chunk.endLine
+        ) {
+            logger.info(
+                `REPO: ${file.relativePath} - Extracted chunk: ${chunk.name} (${chunk.relativePath}:${chunk.startLine}-${chunk.endLine})`
+            );
+        }
     }
 
     return results;

@@ -12,6 +12,24 @@ export async function processAndStoreChunk(chunk: CodeChunkType, repoURL: string
         throw new CreationError('Failed to create embedding for chunk:' + chunk);
     }
 
+    if (
+        !chunk.chunk ||
+        !embedding ||
+        !repoURL ||
+        !chunk.relativePath ||
+        !chunk.fileName ||
+        !chunk.name ||
+        !chunk.type ||
+        !chunk.language ||
+        !chunk.parentDir ||
+        !chunk.startLine ||
+        !chunk.endLine
+    ) {
+        logger.info(
+            `REPO: ${repoURL} - Processing chunk: ${chunk.name} (${chunk.relativePath}:${chunk.startLine}-${chunk.endLine})`
+        );
+    }
+
     const newChunkData = {
         content: chunk.chunk,
         embedding,
