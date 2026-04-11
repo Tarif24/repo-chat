@@ -1,4 +1,4 @@
-import mongoose, { Document, Schema } from 'mongoose';
+import mongoose, { Schema } from 'mongoose';
 
 export type ChunkMetadata = {
     repoURL?: string;
@@ -12,7 +12,7 @@ export type ChunkMetadata = {
     endLine?: number;
 };
 
-export interface ChunkDoc extends Document {
+export interface ChunkDoc {
     content: string;
     embedding: number[];
     metadata: ChunkMetadata;

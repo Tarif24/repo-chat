@@ -48,12 +48,21 @@ export async function userQuery(
     );
 
     // Apply post-retrieval filters to the raw search results to improve relevance and reduce noise in the context window
-    const filteredChunks = applyPostRetrievalFilters(rawChunks, {
-        scoreThreshold: 0.7,
+    let filteredChunks = applyPostRetrievalFilters(rawChunks, {
+        scoreThreshold: 0.75,
         maxPerFile: 3,
         directory: filters.directory ? filters.directory : '', // fuzzy fallback
-        fileSkipScoreThreshold: 0.7,
+        fileSkipScoreThreshold: 0.75,
     });
+
+    if (filteredChunks.length === 1) {
+        filteredChunks = applyPostRetrievalFilters(rawChunks, {
+            scoreThreshold: 0.7,
+            maxPerFile: 3,
+            directory: filters.directory ? filters.directory : '', // fuzzy fallback
+            fileSkipScoreThreshold: 0.7,
+        });
+    }
 
     logger.info(
         `REPO: ${repoURL} - Retrieved ${filteredChunks.length} filtered chunks for query: "${query}" after post-retrieval filtering`

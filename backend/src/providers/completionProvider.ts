@@ -64,20 +64,35 @@ export type QueryInterpretationType = {
 export async function interpretQuery(question: string): Promise<QueryInterpretationType> {
     const response = await openai.chat.completions.create({
         model: OPENAI_CHAT_MODEL,
-        max_completion_tokens: 300,
+        max_completion_tokens: 450,
         response_format: { type: 'json_object' },
         messages: [
             {
                 role: 'system',
-                content: `You analyze questions about a code repository. Return ONLY valid JSON with exactly two fields:
+                content: `You analyze questions about a JavaScript/Node.js repository using MongoDB, Express, and Socket.IO. Return ONLY valid JSON with exactly two fields:
 
-                "hypothetical_chunk": A 3-5 sentence description of the exact code that would answer this question. Write it as if describing real source code — use technical vocabulary, mention likely function names, variable names, patterns, or structures. This will be embedded for semantic search, so match the vocabulary the code would use.
+"hypothetical_chunk": A 3-5 sentence description of the exact code that would answer this question. Write it as if describing real source code — use technical vocabulary, mention likely function names, variable names, patterns, or structures. This will be embedded for semantic search, so match the vocabulary the code would use.
 
-                "filters": An object with optional fields:
-                - "language": programming language (e.g. "typescript", "python") — only if the user explicitly mentions or strongly implies one
-                - "directory": folder name (e.g. "services", "utils", "tests") — only if the user explicitly references a layer or directory
+Use these vocabulary hints based on question type:
+- Schema/model questions: use Mongoose patterns — mongoose.Schema, required, default, timestamps, ObjectId, ref, type declarations
+- Middleware questions: use Socket.IO patterns — socket, next, handshake, emit, EVENTS, io.use()
+- Service questions: use Node.js patterns — async/await, try/catch, exported functions, repository calls
+- Auth questions: use JWT patterns — jwt.verify, jwt.sign, ACCESS_TOKEN_SECRET, decoded, token, Bearer
 
-                Only include a filter field if you are confident. Omit uncertain filters entirely.`,
+"filters": An object with optional fields:
+- "language": programming language (e.g. "typescript", "python") — only if the user explicitly mentions a language by name.
+- "directory": folder name (e.g. "services", "utils", "middleware") — only if the user explicitly names a folder, layer, or architectural component. Never infer a directory from technical concepts.
+
+Examples of when NOT to extract filters:
+- "How is JWT validated on socket connections?" → no filters (neither a language nor a folder was named)
+- "How does authentication work?" → no filters
+- "What does the Python service do?" → language: "python", no directory filter
+
+Examples of when to extract filters:
+- "What's in the middleware folder?" → directory: "middleware"
+- "How do the TypeScript services handle errors?" → language: "typescript", directory: "services"
+
+When in doubt, omit the filter entirely. A missing filter is always safer than a wrong one.`,
             },
             {
                 role: 'user',
@@ -180,7 +195,7 @@ export async function compressChunk(
     // Don't bother compressing small chunks — the LLM call costs more than it saves
     if (chunk.content.length < 800) {
         return {
-            ...chunk.toObject(),
+            ...chunk,
             originalContent: chunk.content,
             compressed: false,
         };
@@ -213,14 +228,14 @@ Rules:
 
         if (result === 'IRRELEVANT' || result.length === 0) {
             return {
-                ...chunk.toObject(),
+                ...chunk,
                 originalContent: chunk.content,
-                compressed: false, // keep the original, let score threshold handle it
+                compressed: false,
             };
         }
 
         return {
-            ...chunk.toObject(),
+            ...chunk,
             content: result,
             originalContent: chunk.content,
             compressed: true,
@@ -228,7 +243,7 @@ Rules:
     } catch {
         // On any failure, pass the original chunk through unchanged
         return {
-            ...chunk.toObject(),
+            ...chunk,
             originalContent: chunk.content,
             compressed: false,
         };
