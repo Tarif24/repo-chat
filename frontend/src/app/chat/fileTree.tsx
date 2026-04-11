@@ -1,7 +1,18 @@
-export default function FileTree({ tree }: { tree: any }) {
+export default function FileTree({
+    tree,
+    usedFiles,
+}: {
+    tree: any;
+    usedFiles: string[];
+}) {
     if (!tree) return null;
     if (tree.type === 'file') {
-        return <div className="pl-0">📄 {tree.name}</div>;
+        const isUsed = usedFiles.includes(tree.name);
+        return (
+            <div className={`pl-0 ${isUsed ? 'font-bold text-blue-600' : ''}`}>
+                📄 {tree.name}
+            </div>
+        );
     }
     // Directory
     return (
@@ -13,7 +24,11 @@ export default function FileTree({ tree }: { tree: any }) {
                         .slice()
                         .sort((a: any, b: any) => a.name.localeCompare(b.name))
                         .map((child: any, idx: number) => (
-                            <FileTree key={idx} tree={child} />
+                            <FileTree
+                                key={idx}
+                                tree={child}
+                                usedFiles={usedFiles}
+                            />
                         ))
                 ) : (
                     <div className="pl-4 text-gray-400">(empty)</div>

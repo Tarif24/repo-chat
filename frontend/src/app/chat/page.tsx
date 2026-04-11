@@ -18,6 +18,8 @@ export default function Chat() {
 
     const [isLoading, setIsLoading] = useState<boolean>(false);
 
+    const [usedFiles, setUsedFiles] = useState<string[]>([]);
+
     // State to hold the repository data
     const [repoData, setRepoData] = useState<any>(null);
 
@@ -103,7 +105,10 @@ export default function Chat() {
                 <div className="custom-scrollbar min-h-0 w-full flex-1 overflow-auto">
                     {repoData && repoData.fileTree && (
                         <div className="mb-4">
-                            <FileTree tree={repoData.fileTree} />
+                            <FileTree
+                                tree={repoData.fileTree}
+                                usedFiles={usedFiles}
+                            />
                         </div>
                     )}
                 </div>
@@ -156,6 +161,7 @@ export default function Chat() {
                             addMessageToChatHistory={addMessageToChatHistory}
                             selectedRepo={selectedRepo}
                             chatHistory={chatHistory}
+                            setUsedFiles={setUsedFiles}
                         />
                     </div>
                 </div>

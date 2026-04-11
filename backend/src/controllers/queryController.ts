@@ -49,10 +49,10 @@ export async function userQuery(
 
     // Apply post-retrieval filters to the raw search results to improve relevance and reduce noise in the context window
     const filteredChunks = applyPostRetrievalFilters(rawChunks, {
-        scoreThreshold: 0.75,
+        scoreThreshold: 0.7,
         maxPerFile: 3,
         directory: filters.directory ? filters.directory : '', // fuzzy fallback
-        fileSkipScoreThreshold: 0.75,
+        fileSkipScoreThreshold: 0.7,
     });
 
     logger.info(
@@ -92,13 +92,6 @@ export async function userQuery(
             totalChars: contextStats.totalChars,
             files: contextStats.filesReferenced,
         })}
-        )}`
-    );
-
-    // Temporary logging for debugging and analysis
-    logger.info(
-        `REPO: ${repoURL} - Built query for user question: "${query}" - Context stats: ${JSON.stringify(
-            contextStats
         )}`
     );
 

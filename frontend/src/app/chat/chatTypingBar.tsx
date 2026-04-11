@@ -6,6 +6,7 @@ export default function ChatTypingBar({
     addMessageToChatHistory,
     selectedRepo,
     chatHistory,
+    setUsedFiles,
 }: {
     addMessageToChatHistory: (
         chats: {
@@ -18,6 +19,7 @@ export default function ChatTypingBar({
         role: 'user' | 'assistant' | 'system';
         message: string;
     }[];
+    setUsedFiles: React.Dispatch<React.SetStateAction<string[]>>;
 }) {
     const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -65,6 +67,12 @@ export default function ChatTypingBar({
                 .join('\n');
 
         const finalResponse = `${response.data.queryResponse.response.content}\n\nReferenced files:\n${referenceFiles}`;
+
+        const usedFileNames =
+            response.data.queryResponse.contextStats.filesReferenced.map(
+                (ref: FileReferenceType) => ref.fileName
+            );
+        setUsedFiles(usedFileNames);
 
         addMessageToChatHistory([
             { role: 'user', message: inputText },
