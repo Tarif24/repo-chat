@@ -7,6 +7,8 @@ export interface PostRetrievalFilterOptions {
     maxPerFileDiverse?: number; // if the set is very diverse, allow less chunks per file
     directory?: string; // fuzzy match on parentDir metadata field, e.g. "services" matches "src/services"
     fileSkipScoreThreshold?: number; // if all chunks from a file are above this score, skip the per-file cap for that file
+    dominantFilePctThreshold?: number; // if the dominant file has more than this percentage of the chunks, skip the per-file cap
+    dominantDiversityFilePctThreshold?: number; // if the dominant file has more than this percentage of the chunks, but the overall set is very diverse
 }
 
 export function applyPostRetrievalFilters(
@@ -20,6 +22,8 @@ export function applyPostRetrievalFilters(
         maxPerFileDiverse = 2,
         directory,
         fileSkipScoreThreshold = 0.75,
+        dominantFilePctThreshold = 80,
+        dominantDiversityFilePctThreshold = 40,
     } = options;
 
     let filtered = chunks;
@@ -57,15 +61,24 @@ export function applyPostRetrievalFilters(
     if (filtered.length === 0) return filtered;
 
     // Filter 4 - Per-file cap — skip if the user is clearly targeting a specific file
+    const isSmallSet = filtered.length <= 4;
     const isAllFromSameFile = filtered.every(
         chunk => chunk.metadata.relativePath === filtered[0]?.metadata.relativePath
     );
+
     const isHighConfidence = filtered.every(chunk => chunk.score >= fileSkipScoreThreshold);
 
     const diversity = getChunkDiversity(filtered);
 
-    const skipCap = isAllFromSameFile && isHighConfidence;
-    const fileCap = skipCap ? 6 : diversity.dominantFilePct > 40 ? maxPerFileDiverse : maxPerFile;
+    const skipCap =
+        (isAllFromSameFile && isHighConfidence) ||
+        (!isSmallSet && diversity.dominantFilePct >= dominantFilePctThreshold) ||
+        (isSmallSet && isAllFromSameFile);
+    const fileCap = skipCap
+        ? 6
+        : diversity.dominantFilePct > dominantDiversityFilePctThreshold
+          ? maxPerFileDiverse
+          : maxPerFile;
     filtered = applyPerFileCap(filtered, fileCap);
 
     // Filter 5 - Noise filer - remove chunks that are likely to be noise based on file path patterns and question type (e.g. implementation vs. documentation question)
@@ -197,6 +210,7 @@ const NOISE_PATTERNS = [
     { pattern: /logging\.(js|ts)$/, bypassFor: null },
     // Documentation
     { pattern: /\.md$/, bypassFor: 'documentation' },
+    { pattern: /^frontend\//, bypassFor: 'frontend' },
 ];
 
 const BYPASS_KEYWORDS: Record<string, string[]> = {
@@ -225,6 +239,16 @@ const BYPASS_KEYWORDS: Record<string, string[]> = {
         'how are sockets registered',
         'startup',
         'how does the app start',
+    ],
+    frontend: [
+        'frontend',
+        'react',
+        'component',
+        'ui',
+        'interface',
+        'page',
+        'what does the',
+        'how does the ui',
     ],
 };
 

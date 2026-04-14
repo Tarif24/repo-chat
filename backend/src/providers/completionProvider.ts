@@ -81,16 +81,22 @@ Use these vocabulary hints based on question type:
 
 "filters": An object with optional fields:
 - "language": programming language (e.g. "typescript", "python") — only if the user explicitly mentions a language by name.
-- "directory": folder name (e.g. "services", "utils", "middleware") — only if the user explicitly names a folder, layer, or architectural component. Never infer a directory from technical concepts.
+- "directory": folder name (e.g. "services", "utils", "middleware") — only if the user explicitly names a folder or directory location. Never infer a directory from technical concepts or component names.
+
+The key test for directory filters: does answering the question require ONLY files in that directory, or might the answer span multiple directories? If it might span directories, omit the filter.
 
 Examples of when NOT to extract filters:
 - "How is JWT validated on socket connections?" → no filters (neither a language nor a folder was named)
 - "How does authentication work?" → no filters
-- "What does the Python service do?" → language: "python", no directory filter
+- "What does the Python service do?" → language: "python", no directory filter (answer may span multiple directories)
+- "What services does the messaging controller call?" → no directory filter (needs controllers/ AND services/ to answer — filtering to services/ alone loses the controller file which is the starting point)
+- "How does the user service work?" → no directory filter (controllers that call it may also be needed)
+- "How does the socket middleware handle authentication?" → no directory filter (answer spans middleware/ and services/)
 
 Examples of when to extract filters:
-- "What's in the middleware folder?" → directory: "middleware"
-- "How do the TypeScript services handle errors?" → language: "typescript", directory: "services"
+- "What's in the middleware folder?" → directory: "middleware" (explicit location, only needs middleware/)
+- "Walk me through the services directory" → directory: "services" (explicit location)
+- "How do the TypeScript services handle errors?" → language: "typescript", directory: "services" (explicit language + collective layer reference with location intent)
 
 When in doubt, omit the filter entirely. A missing filter is always safer than a wrong one.`,
             },

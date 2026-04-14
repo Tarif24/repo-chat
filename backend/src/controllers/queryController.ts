@@ -35,7 +35,7 @@ export async function userQuery(
         repoURL,
         filters,
         limit: 20,
-        numCandidates: 150,
+        numCandidates: 200,
     });
 
     logger.info(
@@ -49,20 +49,24 @@ export async function userQuery(
 
     // Apply post-retrieval filters to the raw search results to improve relevance and reduce noise in the context window
     let filteredChunks = applyPostRetrievalFilters(rawChunks, query, {
-        scoreThreshold: 0.75,
+        scoreThreshold: 0.72,
         maxPerFile: 3,
         maxPerFileDiverse: 2,
         directory: filters.directory ? filters.directory : '', // fuzzy fallback
         fileSkipScoreThreshold: 0.75,
+        dominantFilePctThreshold: 80,
+        dominantDiversityFilePctThreshold: 40,
     });
 
     if (filteredChunks.length === 1) {
         filteredChunks = applyPostRetrievalFilters(rawChunks, query, {
-            scoreThreshold: 0.7,
+            scoreThreshold: 0.68,
             maxPerFile: 3,
             maxPerFileDiverse: 2,
             directory: filters.directory ? filters.directory : '', // fuzzy fallback
             fileSkipScoreThreshold: 0.7,
+            dominantFilePctThreshold: 80,
+            dominantDiversityFilePctThreshold: 40,
         });
     }
 
@@ -76,7 +80,7 @@ export async function userQuery(
     );
 
     // Rerank — cuts from ~15 filtered chunks down to top n
-    const reranked = await rerankChunks(query, filteredChunks, 6);
+    const reranked = await rerankChunks(query, filteredChunks, 7);
 
     logger.info(
         `REPO: ${repoURL} - Retrieved ${reranked.length} Reranked for query: "${query}" after reranking`
@@ -88,7 +92,7 @@ export async function userQuery(
     );
 
     // Compress the context if it's too large to fit in the LLM context window, while trying to preserve relevance and important details
-    const compressed = await compressContext(query, reranked, 5_000);
+    const compressed = await compressContext(query, reranked, 8_000);
 
     // Build the system prompt and user message for the LLM
     const { systemPrompt, userMessage, contextStats } = buildQuery(query, compressed, repoURL);
