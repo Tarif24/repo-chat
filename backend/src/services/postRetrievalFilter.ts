@@ -60,7 +60,16 @@ export function applyPostRetrievalFilters(
 
     if (filtered.length === 0) return filtered;
 
-    // Filter 4 - Per-file cap — skip if the user is clearly targeting a specific file
+    // Filter 4 - Noise filer - remove chunks that are likely to be noise based on file path patterns and question type (e.g. implementation vs. documentation question)
+    filtered = applyNoiseFilter(filtered, query);
+
+    logger.info(
+        `STAGE: NOISE FILTER - Raw chunks metadata and scores: ${filtered
+            .map(c => `${c.metadata.relativePath} (score: ${c.score.toFixed(3)})` + '\n')
+            .join(', ')}`
+    );
+
+    // Filter 5 - Per-file cap — skip if the user is clearly targeting a specific file
     const isSmallSet = filtered.length <= 4;
     const isAllFromSameFile = filtered.every(
         chunk => chunk.metadata.relativePath === filtered[0]?.metadata.relativePath
@@ -81,10 +90,7 @@ export function applyPostRetrievalFilters(
           : maxPerFile;
     filtered = applyPerFileCap(filtered, fileCap);
 
-    // Filter 5 - Noise filer - remove chunks that are likely to be noise based on file path patterns and question type (e.g. implementation vs. documentation question)
-    const preReranked = applyNoiseFilter(filtered, query);
-
-    return preReranked;
+    return filtered;
 }
 
 // HELPERS FOR FILTER 3
