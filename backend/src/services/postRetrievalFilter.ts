@@ -248,13 +248,12 @@ const BYPASS_KEYWORDS: Record<string, string[]> = {
     ],
     frontend: [
         'frontend',
+        'client',
+        'client-side',
         'react',
-        'component',
-        'ui',
-        'interface',
-        'page',
-        'what does the',
-        'how does the ui',
+        'reconnection strategy',
+        'socket config',
+        'socket options',
     ],
 };
 
