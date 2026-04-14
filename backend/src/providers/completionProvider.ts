@@ -141,7 +141,7 @@ export async function scoreChunks(question: string, chunks: ScoredChunk[]): Prom
 
     const response = await openai.chat.completions.create({
         model: OPENAI_CHAT_MODEL,
-        max_completion_tokens: 200,
+        max_completion_tokens: 400,
         response_format: { type: 'json_object' },
         messages: [
             {
@@ -153,6 +153,12 @@ Scoring guide:
 0.7–0.9 — highly relevant, closely related code
 0.4–0.6 — partially relevant, related but not the answer
 0.0–0.3 — tangentially related or irrelevant
+
+For questions about data flow, end-to-end processes, or how something travels through the system:
+- Prefer chunks that represent different architectural layers (frontend, handler, controller, service, database model)
+- Penalize multiple chunks from the same file or layer when a chunk from a different layer is available
+- Entry point files (index.js, server.js, app.js) are almost never the answer to a feature flow question — score them 0.0–0.2 unless the question is explicitly about server setup or startup
+- Documentation files (README.md, *.md) should score 0.0–0.1 for implementation questions. Only keep them if the question explicitly asks about documentation or architecture overview.
 
 Return ONLY valid JSON in this exact shape: { "scores": [0.9, 0.4, 0.1, ...] }
 The array must have exactly ${chunks.length} numbers, one per chunk in order.`,

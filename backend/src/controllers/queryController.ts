@@ -43,22 +43,24 @@ export async function userQuery(
     );
     logger.info(
         `REPO: ${repoURL} - Raw chunks metadata and scores: ${rawChunks
-            .map(c => `${c.metadata.relativePath} (score: ${c.score.toFixed(3)})`)
+            .map(c => `${c.metadata.relativePath} (score: ${c.score.toFixed(3)})` + '\n')
             .join(', ')}`
     );
 
     // Apply post-retrieval filters to the raw search results to improve relevance and reduce noise in the context window
-    let filteredChunks = applyPostRetrievalFilters(rawChunks, {
+    let filteredChunks = applyPostRetrievalFilters(rawChunks, query, {
         scoreThreshold: 0.75,
         maxPerFile: 3,
+        maxPerFileDiverse: 2,
         directory: filters.directory ? filters.directory : '', // fuzzy fallback
         fileSkipScoreThreshold: 0.75,
     });
 
     if (filteredChunks.length === 1) {
-        filteredChunks = applyPostRetrievalFilters(rawChunks, {
+        filteredChunks = applyPostRetrievalFilters(rawChunks, query, {
             scoreThreshold: 0.7,
             maxPerFile: 3,
+            maxPerFileDiverse: 2,
             directory: filters.directory ? filters.directory : '', // fuzzy fallback
             fileSkipScoreThreshold: 0.7,
         });
@@ -69,19 +71,19 @@ export async function userQuery(
     );
     logger.info(
         `REPO: ${repoURL} - Filtered chunks metadata and scores: ${filteredChunks
-            .map(c => `${c.metadata.relativePath} (score: ${c.score.toFixed(3)})`)
+            .map(c => `${c.metadata.relativePath} (score: ${c.score.toFixed(3)})` + '\n')
             .join(', ')}`
     );
 
     // Rerank — cuts from ~15 filtered chunks down to top n
-    const reranked = await rerankChunks(query, filteredChunks, 5);
+    const reranked = await rerankChunks(query, filteredChunks, 6);
 
     logger.info(
         `REPO: ${repoURL} - Retrieved ${reranked.length} Reranked for query: "${query}" after reranking`
     );
     logger.info(
         `REPO: ${repoURL} - Reranked metadata and scores: ${reranked
-            .map(c => `${c.metadata.relativePath} (score: ${c.score.toFixed(3)})`)
+            .map(c => `${c.metadata.relativePath} (score: ${c.score.toFixed(3)})` + '\n')
             .join(', ')}`
     );
 
