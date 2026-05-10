@@ -1,5 +1,6 @@
 import winston from 'winston';
 import DailyRotateFile from 'winston-daily-rotate-file';
+import WinstonCloudWatch from 'winston-cloudwatch';
 import path from 'path';
 
 const { combine, timestamp, printf, colorize, errors } = winston.format;
@@ -39,6 +40,11 @@ const logger = winston.createLogger({
         new winston.transports.Console({
             silent: false,
             format: consoleFormat,
+        }),
+        new WinstonCloudWatch({
+            logGroupName: '/repo-chat/backend',
+            logStreamName: 'production',
+            awsRegion: 'ca-central-1',
         }),
     ],
 });

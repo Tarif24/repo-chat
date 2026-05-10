@@ -38,7 +38,7 @@ export async function cloneAndGetSha(repoUrl: string, localPath: string): Promis
     }
 
     const git: SimpleGit = simpleGit();
-    await git.clone(repoUrl, localPath);
+    await git.clone(repoUrl, localPath, ['--depth', '1']);
 
     const repoGit: SimpleGit = simpleGit(localPath);
     const log: LogResult = await repoGit.log({ maxCount: 1 });

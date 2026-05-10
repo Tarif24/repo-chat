@@ -37,6 +37,7 @@
         "tree-sitter-ruby": "0.23.1",
         "tree-sitter-typescript": "0.23.2",
         "winston": "^3.19.0",
+        "winston-cloudwatch": "^6.3.0",
         "winston-daily-rotate-file": "^5.0.0",
         "zod": "^4.3.6"
     },

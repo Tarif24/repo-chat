@@ -60,7 +60,7 @@ export function applyPostRetrievalFilters(
 
     if (filtered.length === 0) return filtered;
 
-    // Filter 4 - Noise filer - remove chunks that are likely to be noise based on file path patterns and question type (e.g. implementation vs. documentation question)
+    // Filter 4 - Noise filter - remove chunks that are likely to be noise based on file path patterns and question type (e.g. implementation vs. documentation question)
     filtered = applyNoiseFilter(filtered, query);
 
     logger.info(
