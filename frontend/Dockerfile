@@ -1,4 +1,4 @@
-# FIRST STAGE: Install dependencies only when needed
+# STAGE 1 - Install dependencies only when needed
 
 FROM node:20-alpine AS deps
 # Set the working directory to /app inside the container
@@ -8,7 +8,7 @@ COPY package*.json ./
 # Install dependencies using npm ci, which is faster and more reliable for production builds
 RUN npm ci
 
-# SECOND STAGE: Build the application
+# STAGE 2 - Build the application
 
 FROM node:20-alpine AS builder
 # Set the working directory to /app inside the container
@@ -27,7 +27,7 @@ ENV NEXT_TELEMETRY_DISABLED=1
 # Run the build command to create the production build of the Next.js application (should be a standalone build since it was configured in next.config.ts)
 RUN npm run build
 
-# THIRD STAGE: Production image, copy all the files and run next
+# STAGE 3 - Production image, copy all the files and run next
 
 FROM node:20-alpine AS runner
 # Set the working directory to /app inside the container
