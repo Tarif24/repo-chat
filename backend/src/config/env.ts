@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import logger, { reconfigureLogger } from '../lib/logger.js';
+import { loadSecrets } from './initializeEnv.js';
 
 const envSchema = z.object({
     // app
@@ -20,6 +21,8 @@ const envSchema = z.object({
     OPENAI_CHAT_MODEL: z.string().min(1, 'OPENAI_CHAT_MODEL is required'),
     OPENAI_EMBEDDING_MODEL: z.string().min(1, 'OPENAI_EMBEDDING_MODEL is required'),
 });
+
+await loadSecrets();
 
 const result = envSchema.safeParse(process.env);
 
