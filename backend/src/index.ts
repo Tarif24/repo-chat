@@ -5,7 +5,7 @@ import express from 'express';
 import { createRequire } from 'module';
 
 import { errorHandler, globalLimiter, requestLogger, responseHandler } from './middleware/index.js';
-import { ingest, query } from './routes/index.js';
+import { ingest, query, health } from './routes/index.js';
 import connectToDatabase from './database/connection.js';
 import logger from './lib/logger.js';
 
@@ -105,6 +105,7 @@ const startServer = async () => {
             logger.info('Setting up express routes for ingest and query');
             app.use('/api/ingest', ingest);
             app.use('/api/query', query);
+            app.use('/api/health', health);
 
             logger.info('Application setup complete');
         } else {
