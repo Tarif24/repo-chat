@@ -21,7 +21,7 @@ next-env.d.ts
 
 # next.js
 /.next/
-/out/
+out/
 
 # testing
 /coverage
