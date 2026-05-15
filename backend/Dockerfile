@@ -1,3 +1,6 @@
+# Pull the Lambda Web Adapter binary from AWS's public registry to use in the runner stage
+FROM public.ecr.aws/awsguru/aws-lambda-adapter:0.8.4 AS lambda-adapter
+
 # STAGE 1 - Install dependencies only when needed
 
 FROM node:18-alpine AS deps
@@ -32,6 +35,8 @@ ENV NODE_ENV=production
 # Create a non-root user and group to run the application for better security
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 appuser
+# Copy the Lambda Web Adapter binary into the extensions directory so Lambda discovers and runs it as an extension on startup
+COPY --from=lambda-adapter /lambda-adapter /opt/extensions/lambda-adapter
 # Only copy the compiled output and prod dependencies
 COPY --from=builder --chown=appuser:nodejs /app/dist ./dist
 COPY --from=builder --chown=appuser:nodejs /app/package*.json ./
@@ -39,10 +44,14 @@ COPY --from=builder --chown=appuser:nodejs /app/package*.json ./
 RUN npm ci --omit=dev --legacy-peer-deps
 # Switch to the non-root user to run the application
 USER appuser
-# Expose port 5000 for the application to listen on, and set environment variables for the port and hostname
-EXPOSE 5000
-ENV PORT=5000
+# Expose port 8080 which Lambda Web Adapter expects the server to listen on
+EXPOSE 8080
+# Set the port to 8080 so Express binds to the same port Lambda Web Adapter forwards requests to
+ENV PORT=8080
 ENV HOSTNAME="0.0.0.0"
-
+# Tell Lambda Web Adapter which port to forward incoming Lambda events to
+ENV AWS_LWA_PORT=8080
+# Tell Lambda Web Adapter which route to poll until it gets a 200 before accepting traffic
+ENV AWS_LWA_READINESS_CHECK_PATH=/api/health/check
 # Start the application using the command defined in the package.json
 CMD ["node", "dist/index.js"]
