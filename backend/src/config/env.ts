@@ -1,6 +1,5 @@
 import { z } from 'zod';
 import logger, { reconfigureLogger } from '../lib/logger.js';
-import { loadSecrets } from './initializeEnv.js';
 
 const envSchema = z.object({
     // app
@@ -22,8 +21,6 @@ const envSchema = z.object({
     OPENAI_EMBEDDING_MODEL: z.string().min(1, 'OPENAI_EMBEDDING_MODEL is required'),
 });
 
-await loadSecrets();
-
 const result = envSchema.safeParse(process.env);
 
 if (!result.success) {
@@ -36,6 +33,7 @@ if (!result.success) {
     process.exit(1);
 }
 
-reconfigureLogger(result.data.LOG_LEVEL, result.data.NODE_ENV);
+//reconfigureLogger(result.data.LOG_LEVEL, result.data.NODE_ENV);
+reconfigureLogger(result.data.LOG_LEVEL);
 
 export const env = result.data as z.infer<typeof envSchema>;

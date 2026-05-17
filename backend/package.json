@@ -11,7 +11,9 @@
         "lint:fix": "eslint --fix .",
         "format": "prettier --write .",
         "format:check": "prettier --check .",
-        "lint:format": "npm run lint:fix && npm run format"
+        "lint:format": "npm run lint:fix && npm run format",
+        "docker:build": "docker build -t repo-chat-backend .",
+        "docker:run": "docker run -p 5000:5000 --env-file .env repo-chat-backend"
     },
     "keywords": [],
     "author": "Tarif Mohammad",
@@ -38,7 +40,6 @@
         "tree-sitter-ruby": "0.23.1",
         "tree-sitter-typescript": "0.23.2",
         "winston": "^3.19.0",
-        "winston-cloudwatch": "^6.3.0",
         "winston-daily-rotate-file": "^5.0.0",
         "zod": "^4.3.6"
     },

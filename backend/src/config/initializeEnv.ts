@@ -1,3 +1,4 @@
+import logger from '../lib/logger.js';
 import { SSMClient, GetParameterCommand } from '@aws-sdk/client-ssm';
 
 const ssm = new SSMClient({ region: 'ca-central-1' });
@@ -20,7 +21,8 @@ export async function loadSecrets() {
             const key = name.split('/').pop()!;
             process.env[key] = result.Parameter!.Value!;
         }
+        logger.info('Secrets loaded successfully from AWS SSM');
     } catch (err) {
-        console.warn('Could not load secrets from AWS SSM. Using local environment variables.');
+        logger.warn('Could not load secrets from AWS SSM. Using local environment variables.');
     }
 }

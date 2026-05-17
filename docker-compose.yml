@@ -13,8 +13,8 @@ services:
                   target: /app
                 - action: rebuild
                   path: ./frontend/package.json
-        depends_on:
-            - backend
+        # depends_on:
+        #     - backend
 
     backend:
         build: ./backend
@@ -30,24 +30,24 @@ services:
                   target: /app
                 - action: rebuild
                   path: ./backend/package.json
-        depends_on:
-            - mongodb
+        # depends_on:
+        #     - mongodb
         volumes:
             - ./backend/logs:/app/logs
             - ./backend/repoCloning:/app/repoCloning
-    mongodb:
-        image: mongodb/mongodb-atlas-local:8.0.6
-        container_name: mongo_database
-        hostname: mongo_database
-        restart: unless-stopped
-        ports:
-            - "27017:27017"
-        env_file:
-            - ./database/.env # Load environment variables from database .env file
-        volumes:
-            # Mount data directory for persistence
-            - mongo_data:/data/db
-            - mongo_configdb:/data/configdb
-volumes:
-    mongo_data:
-    mongo_configdb:
+#     mongodb:
+#         image: mongodb/mongodb-atlas-local:8.0.6
+#         container_name: mongo_database
+#         hostname: mongo_database
+#         restart: unless-stopped
+#         ports:
+#             - "27017:27017"
+#         env_file:
+#             - ./database/.env # Load environment variables from database .env file
+#         volumes:
+#             # Mount data directory for persistence
+#             - mongo_data:/data/db
+#             - mongo_configdb:/data/configdb
+# volumes:
+#     mongo_data:
+#     mongo_configdb:

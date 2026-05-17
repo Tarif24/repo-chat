@@ -1,4 +1,7 @@
-import { env } from './env.js';
+// config.js
+import { loadSecrets } from './initializeEnv.js';
+await loadSecrets();
+const { env } = await import('./env.js');
 
 export const appConfig = {
     nodeEnv: env.NODE_ENV,

@@ -1,8 +1,8 @@
 import dotenv from 'dotenv';
 import 'dotenv/config';
-import { appConfig } from './config/config.js';
 import express from 'express';
 import { createRequire } from 'module';
+import { appConfig } from './config/config.js';
 
 import { errorHandler, globalLimiter, requestLogger, responseHandler } from './middleware/index.js';
 import { ingest, query, health } from './routes/index.js';
@@ -16,7 +16,11 @@ const cors = require('cors');
 dotenv.config();
 
 // Allowed origins for CORS
-const allowedOrigins: string[] = ['http://localhost:3000', 'http://localhost:3001'];
+const allowedOrigins: string[] = [
+    'http://localhost:3000',
+    'http://localhost:3001',
+    'https://repo-chat.tarifmohammad.com',
+];
 
 // Graceful shutdown handling
 const gracefulShutdown = (signal: String) => {
@@ -88,7 +92,7 @@ const startServer = async () => {
         // Standard response formatting
         app.use(responseHandler);
 
-        const PORT = appConfig.port || 5000;
+        const PORT = appConfig.port || 8080;
 
         logger.info('Setting up server signal handlers');
         serverSignalHandler();

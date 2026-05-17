@@ -1,6 +1,6 @@
 import mongoose from 'mongoose';
-import { dbConfig } from '../config/config.js';
 import logger from '../lib/logger.js';
+import { dbConfig } from '../config/config.js';
 
 const wait = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
@@ -52,7 +52,7 @@ const createSearchIndexes = async (retries = 10, delayMs = 5000): Promise<void> 
 const connectToDatabase = async () => {
     try {
         const options: Parameters<typeof mongoose.connect>[1] = {
-            directConnection: true,
+            //directConnection: true,
             serverSelectionTimeoutMS: 10000,
         };
 
@@ -62,7 +62,9 @@ const connectToDatabase = async () => {
         await mongoose.syncIndexes();
         logger.info('Indexes synchronized');
 
-        await createSearchIndexes();
+        //await createSearchIndexes();
+        // Run in background — does not block server startup
+        createSearchIndexes().catch(err => logger.warn('Search index creation failed:', err));
 
         return mongoose.connection.db;
     } catch (error) {

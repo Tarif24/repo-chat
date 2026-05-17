@@ -30,6 +30,8 @@ FROM node:18-alpine AS runner
 WORKDIR /app
 # Install git since it is needed for runtime to clone repositories and check SHAs
 RUN apk add --no-cache git
+# Configure git to treat /app/repoCloning as a safe directory to avoid dubious ownership errors
+RUN git config --global --add safe.directory /app/repoCloning
 # Sets the NODE_ENV to production for node to run in production mode
 ENV NODE_ENV=production
 # Create a non-root user and group to run the application for better security
@@ -44,6 +46,8 @@ COPY --from=builder --chown=appuser:nodejs /app/package*.json ./
 RUN npm ci --omit=dev --legacy-peer-deps
 # Switch to the non-root user to run the application
 USER appuser
+# Set HOME to /tmp since Lambda does not provide a home directory for non-root users
+ENV HOME=/tmp
 # Expose port 8080 which Lambda Web Adapter expects the server to listen on
 EXPOSE 8080
 # Set the port to 8080 so Express binds to the same port Lambda Web Adapter forwards requests to
@@ -53,5 +57,5 @@ ENV HOSTNAME="0.0.0.0"
 ENV AWS_LWA_PORT=8080
 # Tell Lambda Web Adapter which route to poll until it gets a 200 before accepting traffic
 ENV AWS_LWA_READINESS_CHECK_PATH=/api/health/check
-# Start the application using the command defined in the package.json
-CMD ["node", "dist/index.js"]
+# Start the application, ensuring git safe.directory is set for the running user at container startup
+CMD ["sh", "-c", "git config --global --add safe.directory /app/repoCloning && node dist/index.js"]

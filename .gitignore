@@ -19,7 +19,7 @@ next-env.d.ts
 # vercel
 .vercel
 
-# next.js
+# next.js 
 /.next/
 out/
 
@@ -37,6 +37,9 @@ dist/
 
 # Environment variables
 .env
+.env.prod
+.env.local
+.env.test
 
 # Database
 *.db
