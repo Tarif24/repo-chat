@@ -13,7 +13,9 @@
         "format:check": "prettier --check .",
         "lint:format": "npm run lint:fix && npm run format",
         "docker:build": "docker build -t repo-chat-backend .",
-        "docker:run": "docker run -p 5000:5000 --env-file .env repo-chat-backend"
+        "docker:run": "docker run --name backend -p 8080:8080 --env-file .env repo-chat-backend",
+        "docker:stop": "docker stop backend",
+        "docker:rm": "docker rm -f backend"
     },
     "keywords": [],
     "author": "Tarif Mohammad",

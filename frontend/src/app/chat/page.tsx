@@ -11,7 +11,7 @@ export default function Chat() {
         message: string;
     };
 
-    const API_URL = process.env.NEXT_PUBLIC_API_URL;
+    const API_URL = process.env.NEXT_PUBLIC_API_URL || '';
 
     // State to hold the selected repository name
     const [selectedRepo, setSelectedRepo] = useState<string>('');
@@ -35,7 +35,9 @@ export default function Chat() {
         // Fetch the list of repositories when the component mounts
         const fetchRepositories = async () => {
             try {
-                const response = await fetch(`${API_URL}/query/getAllRepos`);
+                const response = await fetch(
+                    `${API_URL}/api/query/getAllRepos`
+                );
                 const data = await response.json();
                 setRepositories(data.data.repos);
             } catch (error) {
@@ -78,7 +80,7 @@ export default function Chat() {
     ) => {
         setSelectedRepo(e.target.value);
 
-        const responseJSON = await fetch(`${API_URL}/query/getRepoByURL`, {
+        const responseJSON = await fetch(`${API_URL}/api/query/getRepoByURL`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

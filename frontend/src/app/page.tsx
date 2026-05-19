@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { Send } from 'lucide-react';
 
 export default function Home() {
-    const API_URL = process.env.NEXT_PUBLIC_API_URL;
+    const API_URL = process.env.NEXT_PUBLIC_API_URL || '';
 
     const [inputText, setInputText] = useState('');
 
@@ -14,7 +14,7 @@ export default function Home() {
 
     const handleSubmit = async (e: React.SubmitEvent<HTMLFormElement>) => {
         e.preventDefault();
-        const responseJSON = await fetch(`${API_URL}/ingest/repo`, {
+        const responseJSON = await fetch(`${API_URL}/api/ingest/repo`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

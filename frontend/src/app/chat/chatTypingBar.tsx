@@ -21,7 +21,7 @@ export default function ChatTypingBar({
     }[];
     setUsedFiles: React.Dispatch<React.SetStateAction<string[]>>;
 }) {
-    const API_URL = process.env.NEXT_PUBLIC_API_URL;
+    const API_URL = process.env.NEXT_PUBLIC_API_URL || '';
 
     // State to hold the input text and typing status
     const [inputText, setInputText] = useState('');
@@ -37,7 +37,7 @@ export default function ChatTypingBar({
         addMessageToChatHistory([{ role: 'user', message: inputText }]);
         setInputText('');
 
-        const responseJSON = await fetch(`${API_URL}/query/userQuery`, {
+        const responseJSON = await fetch(`${API_URL}/api/query/userQuery`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

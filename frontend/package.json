@@ -10,7 +10,11 @@
         "lint:fix": "eslint --fix src/",
         "format": "prettier --write src/",
         "format:check": "prettier --check src/",
-        "lint:format": "npm run lint:fix && npm run format"
+        "lint:format": "npm run lint:fix && npm run format",
+        "docker:build": "docker build --build-arg NEXT_PUBLIC_API_URL=http://localhost:8080 -t repo-chat-frontend .",
+        "docker:run": "docker run --name frontend -p 3000:3000 --env-file .env repo-chat-frontend",
+        "docker:stop": "docker stop frontend",
+        "docker:rm": "docker rm -f frontend"
     },
     "dependencies": {
         "lucide-react": "^0.577.0",
