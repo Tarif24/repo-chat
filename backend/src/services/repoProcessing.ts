@@ -6,6 +6,7 @@ import {
     updateLatestSHA,
     updateFileTree,
     getAllRepositories,
+    deleteRepoByURL,
 } from '../repositories/repoRepository.js';
 import logger from '../lib/logger.js';
 
@@ -52,4 +53,9 @@ export async function updateRepoFileTree(repoURL: string, fileTree: object) {
 
 export async function getAllRepos() {
     return await getAllRepositories();
+}
+
+export async function deleteRepo(repoURL: string) {
+    await deleteChunksByRepoURL(repoURL);
+    await deleteRepoByURL(repoURL);
 }

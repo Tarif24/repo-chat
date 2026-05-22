@@ -2,6 +2,7 @@
 import type { Request, Response, NextFunction } from 'express';
 import { AppError, OpenAIError } from '../error/appError.js';
 import { ZodError } from 'zod';
+import { deleteRepo } from '../services/repoProcessing.js';
 import logger from '../lib/logger.js';
 
 export default function errorHandler(err: Error, req: Request, res: Response, _next: NextFunction) {
@@ -16,6 +17,19 @@ export default function errorHandler(err: Error, req: Request, res: Response, _n
                 issues: err.issues.map(i => ({ field: i.path.join('.'), message: i.message })),
             },
             'Validation error'
+        );
+    }
+
+    if (req.originalUrl === '/api/ingest/repo') {
+        deleteRepo(req.body.repoUrl).catch(deleteErr => {
+            logger.error(
+                `Failed to delete repo after error during ingestion for ${req.body.repoUrl}: ${deleteErr.message}`,
+                deleteErr
+            );
+        });
+
+        logger.info(
+            `REPO: ${req.body.repoUrl} - Deleted repository due to error during ingestion.`
         );
     }
 
