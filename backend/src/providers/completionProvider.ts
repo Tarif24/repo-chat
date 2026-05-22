@@ -1,6 +1,6 @@
 import { openAIConfig } from '../config/config.js';
 import OpenAI from 'openai';
-import { AppError } from '../error/appError.js';
+import { AppError, OpenAIError } from '../error/appError.js';
 import type { ScoredChunk } from '../repositories/chunkRepository.js';
 import type { RankedChunkType } from '../services/reranker.js';
 
@@ -16,40 +16,48 @@ const openai = new OpenAI({
 export async function getOpenAIResponse(
     message: string
 ): Promise<OpenAI.Chat.Completions.ChatCompletionMessage | undefined> {
-    const response = await openai.chat.completions.create({
-        model: OPENAI_CHAT_MODEL,
-        messages: [{ role: 'user', content: message }],
-        n: 1,
-    });
+    try {
+        const response = await openai.chat.completions.create({
+            model: OPENAI_CHAT_MODEL,
+            messages: [{ role: 'user', content: message }],
+            n: 1,
+        });
 
-    if (response.choices[0]?.message) {
-        return response.choices[0].message;
+        if (response.choices[0]?.message) {
+            return response.choices[0].message;
+        }
+
+        return undefined;
+    } catch (err) {
+        throw new OpenAIError('OpenAI API error in getOpenAIResponse: ' + err);
     }
-
-    return undefined;
 }
 
 export async function getOpenAIResponseWithChatHistory(
     chatHistory: { role: 'user' | 'assistant' | 'system'; content: string }[]
 ): Promise<OpenAI.Chat.Completions.ChatCompletionMessage | undefined> {
-    const lastMessage: { role: 'user' | 'assistant' | 'system'; content: string } | undefined =
-        chatHistory[chatHistory.length - 1];
+    try {
+        const lastMessage: { role: 'user' | 'assistant' | 'system'; content: string } | undefined =
+            chatHistory[chatHistory.length - 1];
 
-    if (!lastMessage) {
+        if (!lastMessage) {
+            return undefined;
+        }
+
+        const response = await openai.chat.completions.create({
+            model: OPENAI_CHAT_MODEL,
+            messages: [lastMessage, ...chatHistory],
+            n: 1,
+        });
+
+        if (response.choices[0]?.message) {
+            return response.choices[0].message;
+        }
+
         return undefined;
+    } catch (err) {
+        throw new OpenAIError('OpenAI API error in getOpenAIResponseWithChatHistory: ' + err);
     }
-
-    const response = await openai.chat.completions.create({
-        model: OPENAI_CHAT_MODEL,
-        messages: [lastMessage, ...chatHistory],
-        n: 1,
-    });
-
-    if (response.choices[0]?.message) {
-        return response.choices[0].message;
-    }
-
-    return undefined;
 }
 
 export type QueryInterpretationType = {
@@ -62,14 +70,15 @@ export type QueryInterpretationType = {
 
 // Takes in a user query and generates a embedding based on a hypothetical chunk and also returns the language and directory filters if mentioned in the query
 export async function interpretQuery(question: string): Promise<QueryInterpretationType> {
-    const response = await openai.chat.completions.create({
-        model: OPENAI_CHAT_MODEL,
-        max_completion_tokens: 450,
-        response_format: { type: 'json_object' },
-        messages: [
-            {
-                role: 'system',
-                content: `You analyze questions about a JavaScript/Node.js repository using MongoDB, Express, and Socket.IO. Return ONLY valid JSON with exactly two fields:
+    try {
+        const response = await openai.chat.completions.create({
+            model: OPENAI_CHAT_MODEL,
+            max_completion_tokens: 450,
+            response_format: { type: 'json_object' },
+            messages: [
+                {
+                    role: 'system',
+                    content: `You analyze questions about a JavaScript/Node.js repository using MongoDB, Express, and Socket.IO. Return ONLY valid JSON with exactly two fields:
 
 "hypothetical_chunk": A 3-5 sentence description of the exact code that would answer this question. Write it as if describing real source code — use technical vocabulary, mention likely function names, variable names, patterns, or structures. This will be embedded for semantic search, so match the vocabulary the code would use.
 
@@ -99,60 +108,66 @@ Examples of when to extract filters:
 - "How do the TypeScript services handle errors?" → language: "typescript", directory: "services" (explicit language + collective layer reference with location intent)
 
 When in doubt, omit the filter entirely. A missing filter is always safer than a wrong one.`,
-            },
-            {
-                role: 'user',
-                content: question,
-            },
-        ],
-    });
+                },
+                {
+                    role: 'user',
+                    content: question,
+                },
+            ],
+        });
 
-    const raw = response.choices[0]?.message.content ?? '{}';
+        const raw = response.choices[0]?.message.content ?? '{}';
 
-    let parsed: Record<string, unknown>;
-    try {
-        parsed = JSON.parse(raw);
-    } catch {
-        throw new AppError(`Query interpreter returned invalid JSON: ${raw}`);
+        let parsed: Record<string, unknown>;
+        try {
+            parsed = JSON.parse(raw);
+        } catch {
+            throw new AppError(`Query interpreter returned invalid JSON: ${raw}`);
+        }
+
+        return {
+            hypotheticalChunk:
+                typeof parsed.hypothetical_chunk === 'string'
+                    ? parsed.hypothetical_chunk
+                    : question, // fallback: embed the raw question
+            filters: {
+                language:
+                    typeof parsed.filters === 'object' &&
+                    parsed.filters !== null &&
+                    typeof (parsed.filters as Record<string, unknown>).language === 'string'
+                        ? ((parsed.filters as Record<string, unknown>).language as string)
+                        : undefined,
+                directory:
+                    typeof parsed.filters === 'object' &&
+                    parsed.filters !== null &&
+                    typeof (parsed.filters as Record<string, unknown>).directory === 'string'
+                        ? ((parsed.filters as Record<string, unknown>).directory as string)
+                        : undefined,
+            },
+        };
+    } catch (err) {
+        throw new OpenAIError('OpenAI API error in interpretQuery:' + err);
     }
-
-    return {
-        hypotheticalChunk:
-            typeof parsed.hypothetical_chunk === 'string' ? parsed.hypothetical_chunk : question, // fallback: embed the raw question
-        filters: {
-            language:
-                typeof parsed.filters === 'object' &&
-                parsed.filters !== null &&
-                typeof (parsed.filters as Record<string, unknown>).language === 'string'
-                    ? ((parsed.filters as Record<string, unknown>).language as string)
-                    : undefined,
-            directory:
-                typeof parsed.filters === 'object' &&
-                parsed.filters !== null &&
-                typeof (parsed.filters as Record<string, unknown>).directory === 'string'
-                    ? ((parsed.filters as Record<string, unknown>).directory as string)
-                    : undefined,
-        },
-    };
 }
 
 // Scores chunks for relavence using a criteria and a llm call
 export async function scoreChunks(question: string, chunks: ScoredChunk[]): Promise<number[]> {
-    const chunkList = chunks
-        .map(
-            (c, i) =>
-                `[${i}] ${c.metadata.relativePath} lines ${c.metadata.startLine}–${c.metadata.endLine}\n${c.content.trim()}`
-        )
-        .join('\n\n---\n\n');
+    try {
+        const chunkList = chunks
+            .map(
+                (c, i) =>
+                    `[${i}] ${c.metadata.relativePath} lines ${c.metadata.startLine}–${c.metadata.endLine}\n${c.content.trim()}`
+            )
+            .join('\n\n---\n\n');
 
-    const response = await openai.chat.completions.create({
-        model: OPENAI_CHAT_MODEL,
-        max_completion_tokens: 400,
-        response_format: { type: 'json_object' },
-        messages: [
-            {
-                role: 'system',
-                content: `You are a relevance judge for a code search engine. You will be given a question and a list of code chunks. Score each chunk from 0.0 to 1.0 based on how directly it answers the question.
+        const response = await openai.chat.completions.create({
+            model: OPENAI_CHAT_MODEL,
+            max_completion_tokens: 400,
+            response_format: { type: 'json_object' },
+            messages: [
+                {
+                    role: 'system',
+                    content: `You are a relevance judge for a code search engine. You will be given a question and a list of code chunks. Score each chunk from 0.0 to 1.0 based on how directly it answers the question.
 
 Scoring guide:
 1.0 — contains the direct implementation or exact answer
@@ -168,30 +183,33 @@ For questions about data flow, end-to-end processes, or how something travels th
 
 Return ONLY valid JSON in this exact shape: { "scores": [0.9, 0.4, 0.1, ...] }
 The array must have exactly ${chunks.length} numbers, one per chunk in order.`,
-            },
-            {
-                role: 'user',
-                content: `Question: ${question}\n\n${chunkList}`,
-            },
-        ],
-    });
+                },
+                {
+                    role: 'user',
+                    content: `Question: ${question}\n\n${chunkList}`,
+                },
+            ],
+        });
 
-    const raw = response.choices[0]?.message.content ?? '{}';
+        const raw = response.choices[0]?.message.content ?? '{}';
 
-    try {
-        const parsed = JSON.parse(raw) as { scores?: unknown };
+        try {
+            const parsed = JSON.parse(raw) as { scores?: unknown };
 
-        if (!Array.isArray(parsed.scores) || parsed.scores.length !== chunks.length) {
-            console.warn('Reranker returned unexpected shape, falling back to vector scores');
+            if (!Array.isArray(parsed.scores) || parsed.scores.length !== chunks.length) {
+                console.warn('Reranker returned unexpected shape, falling back to vector scores');
+                return chunks.map(c => c.score);
+            }
+
+            return (parsed.scores as unknown[]).map(s =>
+                typeof s === 'number' ? Math.min(1, Math.max(0, s)) : 0
+            );
+        } catch {
+            console.warn('Reranker JSON parse failed, falling back to vector scores');
             return chunks.map(c => c.score);
         }
-
-        return (parsed.scores as unknown[]).map(s =>
-            typeof s === 'number' ? Math.min(1, Math.max(0, s)) : 0
-        );
-    } catch {
-        console.warn('Reranker JSON parse failed, falling back to vector scores');
-        return chunks.map(c => c.score);
+    } catch (err) {
+        throw new OpenAIError('OpenAI API error in scoreChunks: ' + err);
     }
 }
 

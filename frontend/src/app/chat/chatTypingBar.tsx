@@ -50,6 +50,10 @@ export default function ChatTypingBar({
         });
         const response = await responseJSON.json();
 
+        if (response.message.toLowerCase().includes('openai api error')) {
+            alert(response.data.message);
+        }
+
         type FileReferenceType = {
             fileName: string;
             relativePath: string;

@@ -1,6 +1,6 @@
 // middleware/errorHandler.ts
 import type { Request, Response, NextFunction } from 'express';
-import { AppError } from '../error/appError.js';
+import { AppError, OpenAIError } from '../error/appError.js';
 import { ZodError } from 'zod';
 import logger from '../lib/logger.js';
 
@@ -22,6 +22,17 @@ export default function errorHandler(err: Error, req: Request, res: Response, _n
     // Known, intentional error
     if (err instanceof AppError) {
         logger.error(`${req.method} ${req.originalUrl} — ${err.message}`, err);
+        if (err instanceof OpenAIError) {
+            logger.error(`OpenAIError details: ${err.message}`, err);
+            return res.standardResponse(
+                err.statusCode,
+                {
+                    message:
+                        'An error occurred while communicating with the OpenAI API, sorry for the inconvenience and please try again later',
+                },
+                'OpenAI API error occurred'
+            );
+        }
         return res.standardResponse(
             err.statusCode,
             {

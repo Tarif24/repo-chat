@@ -3,7 +3,7 @@ import type { VectorSearchParamsType } from '../repositories/chunkRepository.js'
 import { createEmbedding } from '../providers/embeddingProvider.js';
 import type { CodeChunkType } from './treeSitter.js';
 import logger from '../lib/logger.js';
-import { CreationError, AppError } from '../error/appError.js';
+import { CreationError, AppError, OpenAIError } from '../error/appError.js';
 
 export async function processAndStoreChunk(chunk: CodeChunkType, repoURL: string) {
     const embedding = await createEmbedding(chunk.embeddingText);
@@ -61,7 +61,14 @@ export async function processAndStoreChunks(chunks: CodeChunkType[], repoURL: st
             await processAndStoreChunk(chunk, repoURL);
         } catch (error) {
             logger.error('Error processing chunk:', error);
-            throw new AppError('Error processing chunk');
+            if (error instanceof OpenAIError) {
+                throw error;
+            } else {
+                throw new AppError(
+                    'Error processing chunk: ' +
+                        (error instanceof Error ? error.message : String(error))
+                );
+            }
         }
     }
 

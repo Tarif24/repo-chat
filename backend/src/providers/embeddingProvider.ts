@@ -1,4 +1,5 @@
 import { openAIConfig } from '../config/config.js';
+import { OpenAIError } from '../error/appError.js';
 import OpenAI from 'openai';
 
 const OPENAI_API_KEY = openAIConfig.apiKey;
@@ -11,15 +12,18 @@ const openai = new OpenAI({
 });
 
 export async function createEmbedding(input: string): Promise<number[] | undefined> {
-    // Create the embedding for the user message
-    const embedding = await openai.embeddings.create({
-        model: OPENAI_EMBEDDING_MODEL,
-        input: input,
-        encoding_format: 'float',
-    });
-
-    if (embedding?.data[0]?.embedding) {
-        return embedding.data[0].embedding;
+    try {
+        // Create the embedding for the user message
+        const embedding = await openai.embeddings.create({
+            model: OPENAI_EMBEDDING_MODEL,
+            input: input,
+            encoding_format: 'float',
+        });
+        if (embedding?.data[0]?.embedding) {
+            return embedding.data[0].embedding;
+        }
+        return undefined;
+    } catch (err) {
+        throw new OpenAIError('Failed to create embedding: ' + err);
     }
-    return undefined;
 }

@@ -25,6 +25,10 @@ export default function Home() {
         });
         const response = await responseJSON.json();
 
+        if (response.message.toLowerCase().includes('openai api error')) {
+            alert(response.data.message);
+        }
+
         setInputText('');
     };
 

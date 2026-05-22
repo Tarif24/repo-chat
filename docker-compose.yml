@@ -20,7 +20,7 @@ services:
         build: ./backend
         container_name: node_backend
         ports:
-            - "5000:5000" # Backend runs on port 5000
+            - "8080:8080" # Backend runs on port 8080
         env_file:
             - ./backend/.env # Load environment variables from backend .env file
         develop:

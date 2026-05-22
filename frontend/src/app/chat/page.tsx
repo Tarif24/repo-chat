@@ -39,6 +39,11 @@ export default function Chat() {
                     `${API_URL}/api/query/getAllRepos`
                 );
                 const data = await response.json();
+
+                if (data.message.toLowerCase().includes('openai api error')) {
+                    alert(data.data.message);
+                }
+
                 setRepositories(data.data.repos);
             } catch (error) {
                 console.error('Error fetching repositories:', error);

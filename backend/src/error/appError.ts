@@ -27,3 +27,9 @@ export class CreationError extends AppError {
         super(message, 502, 'CREATION_ERROR');
     }
 }
+
+export class OpenAIError extends AppError {
+    constructor(message: string) {
+        super(message, 502, 'OPENAI_ERROR');
+    }
+}
