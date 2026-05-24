@@ -1,6 +1,7 @@
 import Icon from '../../public/logo.svg';
 import NavLink from './navLink';
 import Image from 'next/image';
+import HamburgerNav from './hamburgerNav';
 
 const NavBar = () => {
     const classActive =
@@ -21,7 +22,7 @@ const NavBar = () => {
                 <Image
                     src={Icon}
                     alt="Icon"
-                    className="mb-1 size-14"
+                    className="mb-1 size-12 sm:size-14"
                     style={{ filter: 'invert(1)' }}
                 />
                 <h1 className="font-bold text-white">Repo Chat</h1>
@@ -42,6 +43,7 @@ const NavBar = () => {
                     Chat
                 </NavLink>
             </div>
+            <HamburgerNav />
         </nav>
     );
 };

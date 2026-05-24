@@ -8,17 +8,25 @@ export default function NavLink({
     children,
     classActive,
     classInactive,
+    onClick,
 }: {
     href: string;
     children: React.ReactNode;
     classActive: string;
     classInactive: string;
+    onClick?: () => void;
 }) {
     const pathname = usePathname();
     const isActive = pathname === href;
 
+    const finalOnClick = onClick ? onClick : () => {};
+
     return (
-        <Link href={href} className={isActive ? classActive : classInactive}>
+        <Link
+            onClick={finalOnClick}
+            href={href}
+            className={isActive ? classActive : classInactive}
+        >
             {children}
         </Link>
     );

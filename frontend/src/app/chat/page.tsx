@@ -102,9 +102,9 @@ export default function Chat() {
     };
 
     return (
-        <div className="flex h-full items-center justify-center gap-4 border p-10">
+        <div className="flex h-full items-center justify-center gap-4 border p-3 lg:p-10">
             <div
-                className={`flex h-full min-h-0 w-100 flex-col rounded-2xl border bg-gray-100 p-4 ${selectedRepo !== '' ? 'block' : 'hidden'}`}
+                className={`flex h-full min-h-0 w-100 flex-col rounded-2xl border bg-gray-100 p-4 ${selectedRepo !== '' ? 'hidden lg:block' : 'hidden'}`}
             >
                 <h2 className="mb-2 text-center text-2xl font-bold text-gray-700">
                     File Tree
@@ -120,7 +120,7 @@ export default function Chat() {
                     )}
                 </div>
             </div>
-            <div className="flex h-full flex-1 flex-col items-center justify-center">
+            <div className="flex h-full flex-1 flex-col items-center justify-center gap-4">
                 <div className="flex w-fit flex-col items-center justify-center gap-3 pt-2 sm:flex-row sm:gap-4 sm:pt-0 sm:pb-4">
                     <h1 className="text-2xl font-bold text-gray-700">
                         Repository Name

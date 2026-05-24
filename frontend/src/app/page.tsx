@@ -34,8 +34,8 @@ export default function Home() {
 
     return (
         <div className="flex h-full items-center justify-center">
-            <div className="flex w-[50%] flex-col items-center justify-center gap-4">
-                <h1 className="text-2xl font-bold text-gray-700">
+            <div className="flex w-full flex-col items-center justify-center gap-4 p-4 md:w-[50%] md:p-0">
+                <h1 className="text-[1.25rem] font-bold text-gray-700 sm:text-2xl">
                     Enter a GitHub Repository Link
                 </h1>
                 <div className="mx-2 mb-2 flex h-fit w-full items-center justify-center rounded-2xl border-2 bg-white/20 backdrop-blur-2xl">
