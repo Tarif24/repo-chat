@@ -43,6 +43,7 @@ export default function errorHandler(err: Error, req: Request, res: Response, _n
                 {
                     message:
                         'An error occurred while communicating with the OpenAI API, sorry for the inconvenience and please try again later',
+                    contextStats: null,
                 },
                 'OpenAI API error occurred'
             );

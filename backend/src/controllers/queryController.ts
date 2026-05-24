@@ -6,13 +6,27 @@ import { buildQuery } from '../services/queryBuilder.js';
 import { processUserQuery } from '../services/queryProcessor.js';
 import { rerankChunks } from '../services/reranker.js';
 import { compressContext } from '../services/contextCompression.js';
+import { isRelevant } from '../services/guards.js';
 import logger from '../lib/logger.js';
 
 export async function userQuery(
-    query: string,
+    rawQuery: string,
     repoURL: string,
     chatHistory: { role: 'user' | 'assistant' | 'system'; content: string }[]
 ) {
+    // Check if the query is relevant to the code repository Q&A context to prevent abuse of the system for general questions
+    const relevanceResult = await isRelevant(rawQuery);
+
+    if (!relevanceResult.relevant) {
+        logger.warn(`REPO: ${repoURL} - Irrelevant query blocked: "${rawQuery}"`);
+        return {
+            message: `Sorry, your query doesn't seem to be related to the code repository. Please ask questions that are specific to the codebase or its features.`,
+            contextStats: null,
+        };
+    }
+
+    const query = relevanceResult.sanitizedQuery; // Use the sanitized query for further processing
+
     // Update the last accessed time for the repository in the database
     await updateRepoLastAccessed(repoURL);
 
@@ -26,7 +40,10 @@ export async function userQuery(
 
     if (!embedding) {
         logger.warn(`REPO: ${repoURL} - Failed to create embedding for query: "${query}"`);
-        return `Sorry, I couldn't understand your query. Please try rephrasing it.`;
+        return {
+            message: `Sorry, I couldn't understand your query. Please try rephrasing it.`,
+            contextStats: null,
+        };
     }
 
     // Search for relevant chunks in the database using the embedding and filters
@@ -99,7 +116,8 @@ export async function userQuery(
 
     logger.info(
         `REPO: ${repoURL} - PIPELINE STATS - ${JSON.stringify({
-            question: query,
+            rawQuery: rawQuery,
+            query: query,
             raw: rawChunks.length,
             filtered: filteredChunks.length,
             reranked: reranked.length,
@@ -113,7 +131,7 @@ export async function userQuery(
     // Process the user query with the built system prompt and user message, and also pass the chat history
     const response = await processUserQuery(systemPrompt, userMessage, chatHistory);
 
-    return { response, contextStats };
+    return { message: response?.content, contextStats };
 }
 
 export async function getAllRepositories() {

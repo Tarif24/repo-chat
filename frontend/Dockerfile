@@ -18,10 +18,6 @@ COPY --from=deps /app/node_modules ./node_modules
 # Copy the rest of the application code to the working directory
 COPY . .
 
-# ENV vars needed for build
-ARG NEXT_PUBLIC_API_URL
-ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
-
 # Disable Next.js telemetry during build
 ENV NEXT_TELEMETRY_DISABLED=1
 # Run the build command to create the production build of the Next.js application (should be a standalone build since it was configured in next.config.ts)

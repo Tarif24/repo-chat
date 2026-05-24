@@ -11,13 +11,13 @@ export default function ChatTypingBar({
     addMessageToChatHistory: (
         chats: {
             role: 'user' | 'assistant' | 'system';
-            message: string;
+            content: string;
         }[]
     ) => void;
     selectedRepo: string;
     chatHistory: {
         role: 'user' | 'assistant' | 'system';
-        message: string;
+        content: string;
     }[];
     setUsedFiles: React.Dispatch<React.SetStateAction<string[]>>;
 }) {
@@ -34,7 +34,7 @@ export default function ChatTypingBar({
             e.preventDefault();
         }
 
-        addMessageToChatHistory([{ role: 'user', message: inputText }]);
+        addMessageToChatHistory([{ role: 'user', content: inputText }]);
         setInputText('');
 
         const responseJSON = await fetch(`${API_URL}/api/query/userQuery`, {
@@ -62,27 +62,32 @@ export default function ChatTypingBar({
             name: string;
         };
 
-        const referenceFiles =
-            response.data.queryResponse.contextStats.filesReferenced
+        let referenceFiles: string = 'No referenced files.';
+        let usedFileNames: string[] = [];
+
+        if (response.data.contextStats) {
+            referenceFiles = response.data.contextStats.filesReferenced
                 .map(
                     (ref: FileReferenceType) =>
                         `File: ${ref.fileName} Path: ${ref.relativePath} Lines: ${ref.startLine}-${ref.endLine} Name: ${ref.name}`
                 )
                 .join('\n');
+        }
 
-        const finalResponse = `${response.data.queryResponse.response.content}\n\nReferenced files:\n${referenceFiles}`;
+        const finalResponse = `${response.data.message}\n\nReferenced files:\n${referenceFiles}`;
 
-        const usedFileNames =
-            response.data.queryResponse.contextStats.filesReferenced.map(
+        if (response.data.contextStats) {
+            usedFileNames = response.data.contextStats.filesReferenced.map(
                 (ref: FileReferenceType) => ref.fileName
             );
-        setUsedFiles(usedFileNames);
+            setUsedFiles(usedFileNames);
+        }
 
         addMessageToChatHistory([
-            { role: 'user', message: inputText },
+            { role: 'user', content: inputText },
             {
                 role: 'assistant',
-                message: finalResponse,
+                content: finalResponse,
             },
         ]);
     };

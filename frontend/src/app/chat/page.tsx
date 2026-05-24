@@ -8,7 +8,7 @@ import FileTree from './fileTree';
 export default function Chat() {
     type MessageType = {
         role: 'user' | 'assistant' | 'system';
-        message: string;
+        content: string;
     };
 
     const API_URL = process.env.NEXT_PUBLIC_API_URL || '';
@@ -70,12 +70,12 @@ export default function Chat() {
     const addMessageToChatHistory = (
         chats: {
             role: 'user' | 'assistant' | 'system';
-            message: string;
+            content: string;
         }[]
     ) => {
         const updatedChatHistory: {
             role: 'user' | 'assistant' | 'system';
-            message: string;
+            content: string;
         }[] = [...chatHistory, ...chats];
         organizeMessageStructureAndSave(updatedChatHistory);
     };
@@ -152,12 +152,12 @@ export default function Chat() {
                     <div className="flex h-full flex-col">
                         <div className="custom-scrollbar mr-1 flex min-h-0 flex-1 flex-col overflow-y-auto pr-2 pl-4">
                             <div className="grow"></div>
-                            {chatHistory.map(({ role, message }, index) => {
+                            {chatHistory.map(({ role, content }, index) => {
                                 return (
                                     <Message
                                         key={index}
                                         role={role}
-                                        message={message}
+                                        content={content}
                                     />
                                 );
                             })}
