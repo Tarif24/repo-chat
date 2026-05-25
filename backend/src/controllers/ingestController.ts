@@ -14,7 +14,7 @@ import {
     updateRepo,
     updateRepoFileTree,
 } from '../services/repoProcessing.js';
-import { checkRepoBelowStorageLimit } from '../services/storage.js';
+import { checkRepoBelowStorageLimit, canIngestRepo } from '../services/storage.js';
 
 export async function ingestRepo(
     repoUrl: string
@@ -70,6 +70,30 @@ export async function ingestRepo(
         return {
             success: false,
             message: `Repository exceeds storage limit. ${storageCheck.reason}`,
+        };
+    }
+
+    // Check if the repository can be ingested based on current database storage stats
+    const dbStorageCheck = await canIngestRepo(storageCheck.bufferMB, 90);
+
+    logger.info(
+        `REPO: ${repoUrl} - Database storage check for repository ingestion: used: ${dbStorageCheck.databaseStats.usedMB.toFixed(2)}/${dbStorageCheck.databaseStats.limitMB.toFixed(
+            2
+        )} MB. Used percentage: ${dbStorageCheck.databaseStats.usedPct.toFixed(2)}%.`
+    );
+
+    // If the database does not have enough storage to ingest the repository, abort and clean up the cloned files
+    if (!dbStorageCheck.allowed) {
+        logger.warn(
+            `REPO: ${repoUrl} - Not enough database storage to ingest repository. Ingestion aborted. Reason: ${dbStorageCheck.reason}`
+        );
+
+        // Clear the cloned repository from disk to save space
+        deleteEverythingInDir(appConfig.repoStoragePath);
+
+        return {
+            success: false,
+            message: `Repository exceeds database storage limit. ${dbStorageCheck.reason}`,
         };
     }
 

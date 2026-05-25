@@ -1,3 +1,6 @@
+import type { DatabaseStorageStats } from '../repositories/databaseRepository.js';
+import { getDatabaseStorageStats } from '../repositories/databaseRepository.js';
+
 type StorageEstimate = {
     estimatedChunks: number;
     confirmedTotalBytes: number;
@@ -34,7 +37,7 @@ export function estimateRepoStorage(totalBytes: number): StorageEstimate {
     };
 }
 
-// Optional: enforce a storage cap before ingestion
+// Enforce a storage cap before ingestion
 export function checkRepoBelowStorageLimit(
     totalBytes: number,
     limitMB: number,
@@ -57,4 +60,36 @@ export function checkRepoBelowStorageLimit(
     }
 
     return { allowed: true, estimate, bufferMB: bufferMB };
+}
+
+export async function canIngestRepo(
+    sizeMB: number,
+    criticalPct: number
+): Promise<{
+    allowed: boolean;
+    reason?: string;
+    databaseStats: DatabaseStorageStats;
+}> {
+    const databaseStats = await getDatabaseStorageStats();
+
+    // If we're already critically close to the limit, block ingestion regardless of the repo size
+    if (databaseStats.usedPct > criticalPct) {
+        return {
+            allowed: false,
+            reason: `Database is at ${databaseStats.usedPct.toFixed(1)}% capacity. Please remove unused repositories.`,
+            databaseStats,
+        };
+    }
+
+    if (sizeMB > databaseStats.availableMB) {
+        return {
+            allowed: false,
+            reason:
+                `Not enough space. This repository needs ~${sizeMB.toFixed(1)} MB ` +
+                `but only ${databaseStats.availableMB.toFixed(1)} MB is available.`,
+            databaseStats,
+        };
+    }
+
+    return { allowed: true, databaseStats };
 }
