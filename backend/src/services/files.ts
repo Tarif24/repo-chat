@@ -34,7 +34,7 @@ export type ParseableFileType = {
 export function collectParseableFiles(
     rootDir: string,
     repoURL: string
-): ParseableFileType[] | undefined {
+): { validFiles: ParseableFileType[] | undefined; validFilesSize: number } {
     const resolvedRoot = path.resolve(rootDir);
 
     if (!fs.existsSync(resolvedRoot)) {
@@ -46,7 +46,8 @@ export function collectParseableFiles(
     let totalScanned = 0;
 
     // Helper function to recursively walk through directories
-    function walk(dir: string): void {
+    function walk(dir: string): number {
+        let validFilesSize = 0;
         let entries: fs.Dirent[];
 
         try {
@@ -54,7 +55,7 @@ export function collectParseableFiles(
         } catch (err) {
             // Skip directories we can't read (e.g. permission errors)
             skippedCount++;
-            return;
+            return 0;
         }
 
         for (const entry of entries) {
@@ -62,7 +63,8 @@ export function collectParseableFiles(
 
             if (entry.isDirectory()) {
                 if (!IGNORED_DIRS.has(entry.name)) {
-                    walk(fullPath);
+                    const dirSize = walk(fullPath);
+                    validFilesSize += dirSize;
                 }
                 continue;
             }
@@ -82,13 +84,17 @@ export function collectParseableFiles(
                     language,
                     extension: ext,
                 });
+
+                validFilesSize += fs.statSync(fullPath).size;
             } else {
                 skippedCount++;
             }
         }
+
+        return validFilesSize;
     }
 
-    walk(resolvedRoot);
+    const validFilesSize = walk(resolvedRoot);
 
     logger.info(
         `REPO: ${repoURL} - Scanned ${totalScanned} files in ${rootDir}. Found ${files.length} parseable files and skipped ${skippedCount} files.`
@@ -96,7 +102,7 @@ export function collectParseableFiles(
 
     logger.info(`REPO: ${repoURL} - Finished scanning and filtering all files.`);
 
-    return files;
+    return { validFiles: files, validFilesSize };
 }
 
 // Tree node type for directory/file structure
