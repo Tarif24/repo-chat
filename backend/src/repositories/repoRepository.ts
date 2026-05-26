@@ -40,3 +40,7 @@ export async function updateFileTree(repoURL: string, fileTree: object) {
         { returnDocument: 'after' }
     );
 }
+
+export async function getOldestRepo() {
+    return await Repo.findOne({}).sort({ lastAccessed: 1 }).lean();
+}

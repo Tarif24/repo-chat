@@ -1,5 +1,8 @@
 import type { DatabaseStorageStats } from '../repositories/databaseRepository.js';
-import { getDatabaseStorageStats } from '../repositories/databaseRepository.js';
+import { getDatabaseStorageStats, compactDatabase } from '../repositories/databaseRepository.js';
+import { deleteChunksByRepoURL } from '../repositories/chunkRepository.js';
+import { deleteRepoByURL, getOldestRepo } from '../repositories/repoRepository.js';
+import logger from '../lib/logger.js';
 
 type StorageEstimate = {
     estimatedChunks: number;
@@ -70,26 +73,58 @@ export async function canIngestRepo(
     reason?: string;
     databaseStats: DatabaseStorageStats;
 }> {
-    const databaseStats = await getDatabaseStorageStats();
+    let databaseStats = await getDatabaseStorageStats();
 
-    // If we're already critically close to the limit, block ingestion regardless of the repo size
-    if (databaseStats.usedPct > criticalPct) {
-        return {
-            allowed: false,
-            reason: `Database is at ${databaseStats.usedPct.toFixed(1)}% capacity. Please remove unused repositories.`,
-            databaseStats,
-        };
-    }
+    let projectedUsedPct = ((databaseStats.liveUsedMB + sizeMB) / databaseStats.limitMB) * 100;
 
-    if (sizeMB > databaseStats.availableMB) {
+    // If the projected usage exceeds the critical threshold, delete oldest repositories until it's below the threshold
+    if (projectedUsedPct > criticalPct) {
+        let deletedRepos = 0;
+
+        while (projectedUsedPct > criticalPct) {
+            const oldestRepo = await getOldestRepo();
+
+            if (!oldestRepo) {
+                logger.warn('No repositories left to delete but storage is still critically full.');
+                return {
+                    allowed: false,
+                    reason: 'Database is critically full and no repositories could be removed to free space.',
+                    databaseStats,
+                };
+            }
+
+            await deleteChunksByRepoURL(oldestRepo.repoURL);
+            await deleteRepoByURL(oldestRepo.repoURL);
+
+            databaseStats = await getDatabaseStorageStats();
+            projectedUsedPct = ((databaseStats.liveUsedMB + sizeMB) / databaseStats.limitMB) * 100;
+            deletedRepos++;
+        }
+
+        // Compact once — now storageSize catches up, final stats are accurate
+        await compactDatabase();
+        databaseStats = await getDatabaseStorageStats();
+
+        logger.info(
+            'Deleted ' + deletedRepos + ' oldest repositories to free up space for new ingestion.'
+        );
+
         return {
-            allowed: false,
-            reason:
-                `Not enough space. This repository needs ~${sizeMB.toFixed(1)} MB ` +
-                `but only ${databaseStats.availableMB.toFixed(1)} MB is available.`,
+            allowed: true,
+            reason: `Projected database usage exceeds critical threshold of ${criticalPct}%. Deleted ${deletedRepos} oldest repositories to free up space.`,
             databaseStats,
         };
     }
 
     return { allowed: true, databaseStats };
+}
+
+export async function databaseStorageStats() {
+    const databaseStats = await getDatabaseStorageStats();
+
+    return {
+        usedMB: databaseStats.usedMB,
+        limitMB: databaseStats.limitMB,
+        usedPct: databaseStats.usedPct,
+    };
 }
