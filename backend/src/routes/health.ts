@@ -4,7 +4,11 @@ import express from 'express';
 const health = express.Router();
 
 health.get('/check', (_req, res) => {
-    res.status(200).json({ status: 'ok', uptime: process.uptime() });
+    res.standardResponse(
+        200,
+        { status: 'ok', uptime: process.uptime() },
+        'Health check successful'
+    );
 });
 
 export default health;

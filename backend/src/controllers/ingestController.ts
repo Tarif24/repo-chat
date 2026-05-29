@@ -13,6 +13,7 @@ import {
     getRepoByURL,
     updateRepo,
     updateRepoFileTree,
+    updateRepoLastAccessed,
 } from '../services/repoProcessing.js';
 import { checkRepoBelowStorageLimit, canIngestRepo } from '../services/storage.js';
 
@@ -24,8 +25,9 @@ export async function ingestRepo(
     const existingRepo = await getRepoByURL(repoUrl);
     const latestSha = await getLatestSha(repoUrl);
 
-    // If the repository already exists and the latest SHA matches, skip re-ingestion
+    // If the repository already exists and the latest SHA matches, skip re-ingestion but update the last accessed time
     if (existingRepo && latestSha && existingRepo.latestSHA === latestSha) {
+        await updateRepoLastAccessed(repoUrl);
         logger.info(`REPO: ${repoUrl} - Repository is up to date. No need to re-ingest.`);
         return { success: true, latestSha, message: 'Repository is up to date' };
     }
