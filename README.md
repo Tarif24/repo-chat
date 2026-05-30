@@ -10,7 +10,7 @@ An AI-powered developer tool that lets you ask natural language questions about 
 
 RepoChat accepts a public GitHub URL, clones and parses the repository using Tree-sitter AST chunking, stores code chunks with embeddings in MongoDB Atlas, and exposes a chat interface for querying that codebase in natural language. Answers include source file references — file path, function or class name, and line numbers.
 
-The core of the project is a tuned RAG pipeline with a multi-stage post-retrieval filter stack, a query interpreter using hypothetical document embedding (HyDE), a reranker, context compression, and semantic caching. See the [RAG Pipeline doc](docs/RAG_Pipeline.pdf) for a full walkthrough and the [pipeline diagrams](docs/Ingestion_Pipeline_Diagram.pdf) for a visual overview.
+The core of the project is a tuned RAG pipeline with a multi-stage post-retrieval filter stack, a query interpreter using hypothetical document embedding (HyDE), a reranker, context compression, and semantic caching. See the [RAG Pipeline doc](docs/RepoChat-RAGPipelineExplanation.pdf) for a full walkthrough and the [pipeline diagrams](docs/RepoChat-IngestionPipelineDiagram.pdf) for a visual overview.
 
 ---
 
@@ -62,7 +62,7 @@ The query pipeline runs in this order:
 9. LLM answer generation
 10. Save to semantic cache
 
-For parameter values, prompt templates, and filter logic detail, see the [RAG Pipeline doc](docs/RAG_Pipeline.pdf). For the ingestion pipeline, see the [Ingestion Pipeline diagram](docs/Ingestion_Pipeline_Diagram.pdf).
+For parameter values, prompt templates, and filter logic detail, see the [RAG Pipeline doc](docs/RepoChat-RAGPipelineExplanation.pdf). For the ingestion pipeline, see the [Ingestion Pipeline diagram](docs/RepoChat-IngestionPipelineDiagram.pdf).
 
 ---
 
@@ -74,7 +74,7 @@ TypeScript, JavaScript, Python, Java, Go, Ruby, C++, C#, HTML, CSS, Markdown
 
 ## API
 
-Full request/response shapes for all endpoints are in the [API Endpoints doc](docs/API_Endpoints.pdf).
+Full request/response shapes for all endpoints are in the [API Endpoints doc](docs/RepoChat-APIEndpoints.pdf).
 
 | Method | Path                      | Description                            |
 | ------ | ------------------------- | -------------------------------------- |
@@ -88,9 +88,9 @@ Full request/response shapes for all endpoints are in the [API Endpoints doc](do
 
 ## Data models
 
-Schema definitions for the `repositories`, `chunks`, and `semantic_cache` collections are in the [MongoDB Models doc](docs/MongoDB_Models.pdf).
+Schema definitions for the `repositories`, `chunks`, and `semantic_cache` collections are in the [MongoDB Models doc](docs/RepoChat-DatabaseModels.pdf).
 
-The embedding dimension is 1536 (text-embedding-3-small). Each chunk stores its content, embedding, and metadata including repo URL, relative file path, file name, code block name, type, language, parent directory, and start/end lines.
+The embedding dimension is 1536 (text-embedding-3-small). Each chunk stores its content, embedding, and metadata, including repo URL, relative file path, file name, code block name, type, language, parent directory, and start/end lines.
 
 ---
 
@@ -121,7 +121,7 @@ Frontend runs at `http://localhost:3000`, backend at `http://localhost:8080`.
 
 ## Deployment
 
-The full AWS deployment architecture, Dockerfile strategy, Lambda Web Adapter configuration, and CI/CD pipeline are covered in the [Deployment doc](docs/Deployment.pdf) and [Hosting Strategy doc](docs/Hosting_Strategy.pdf).
+The full AWS deployment architecture, Dockerfile strategy, and Lambda Web Adapter configuration are covered in the [Hosting Strategy doc](docs/RepoChat-AWSHostingHandoff.pdf).
 
 CI/CD runs on GitHub Actions: PRs trigger test + build, merges to main trigger full deploy to ECR → Lambda with a smoke test against `/api/health/check`.
 
@@ -129,9 +129,9 @@ CI/CD runs on GitHub Actions: PRs trigger test + build, merges to main trigger f
 
 ## Testing
 
-The test strategy covers unit tests (Jest + ts-jest) for each pipeline service in isolation, integration tests against a real MongoDB instance (mongodb-memory-server), and E2E tests (Playwright) for the full user flow. Because `$vectorSearch` does not run in mongodb-memory-server, the vector search boundary is mocked in CI and tested separately against a seeded Atlas dev cluster.
+The test strategy covers unit tests (Jest + ts-jest) for each pipeline service in isolation, integration tests against a real MongoDB instance (mongodb-memory-server), and E2E tests (Playwright) for the full user flow. Because `$vectorSearch` does not run in MongoDB-memory-server, the vector search boundary is mocked in CI and tested separately against a seeded Atlas dev cluster.
 
-Full test matrix is in the [Plan doc](docs/Plan.pdf).
+Full test matrix is in the [Plan doc](docs/RepoChat-Plan_v2.pdf).
 
 ---
 
