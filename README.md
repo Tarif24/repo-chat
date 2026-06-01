@@ -146,3 +146,4 @@ Full test matrix is in the [Plan doc](docs/RepoChat-Plan_v2.pdf).
 | [MongoDB Models](docs/RepoChat-DatabaseModels.pdf)                       | Collection schemas                                            |
 | [API Endpoints](docs/RepoChat-APIEndpoints.pdf)                          | Request and response shapes                                   |
 | [Hosting Strategy](docs/RepoChat-AWSHostingHandoff.pdf)                  | AWS architecture, cost breakdown, deployment decisions        |
+| [Setup Guide](docs/RepoChat-SetupGuide.md)                  | Setup guide for local development        |
