@@ -14,6 +14,7 @@ export const appConfig = {
 
 export const dbConfig = {
     mongoUrl: env.MONGO_URL,
+    redisUrl: env.REDIS_URL,
 };
 
 export const openAIConfig = {
