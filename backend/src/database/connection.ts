@@ -10,13 +10,15 @@ const createSearchIndexes = async (retries = 10, delayMs = 5000): Promise<void> 
             const db = mongoose.connection.db;
             if (!db) return;
 
-            const collection = db.collection('chunks');
-            const existing = await collection.listSearchIndexes().toArray();
-            const exists = existing.some((idx: any) => idx.name === 'vector_index');
+            const chunksCollection = db.collection('chunks');
+            const chunksExisting = await chunksCollection.listSearchIndexes().toArray();
+            const chunksExists = chunksExisting.some(
+                (idx: any) => idx.name === 'chunk_vector_index'
+            );
 
-            if (!exists) {
-                await collection.createSearchIndex({
-                    name: 'vector_index',
+            if (!chunksExists) {
+                await chunksCollection.createSearchIndex({
+                    name: 'chunk_vector_index',
                     type: 'vectorSearch',
                     definition: {
                         fields: [
@@ -32,10 +34,41 @@ const createSearchIndexes = async (retries = 10, delayMs = 5000): Promise<void> 
                         ],
                     },
                 });
-                logger.info('Vector search index created');
+                logger.info('Chunk Vector search index created');
             } else {
                 logger.info('Vector search index already exists');
             }
+
+            const semanticCacheCollection = db.collection('chunks');
+            const semanticCacheExisting = await semanticCacheCollection
+                .listSearchIndexes()
+                .toArray();
+            const semanticCacheExists = semanticCacheExisting.some(
+                (idx: any) => idx.name === 'semantic_cache_vector_index'
+            );
+
+            if (!semanticCacheExists) {
+                await chunksCollection.createSearchIndex({
+                    name: 'semantic_cache_vector_index',
+                    type: 'vectorSearch',
+                    definition: {
+                        fields: [
+                            {
+                                type: 'vector',
+                                path: 'queryEmbedding',
+                                numDimensions: 1536,
+                                similarity: 'cosine',
+                            },
+                            { type: 'filter', path: 'repoURL' },
+                        ],
+                    },
+                });
+
+                logger.info('Semantic cache Vector search index created');
+            } else {
+                logger.info('Semantic cache search index already exists');
+            }
+
             return;
         } catch (err) {
             logger.warn(

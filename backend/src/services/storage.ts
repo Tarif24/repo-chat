@@ -3,6 +3,7 @@ import { getDatabaseStorageStats, compactDatabase } from '../repositories/databa
 import { deleteChunksByRepoURL } from '../repositories/chunkRepository.js';
 import { deleteRepoByURL, getOldestRepo } from '../repositories/repoRepository.js';
 import logger from '../lib/logger.js';
+import { cacheInvalidate } from './semanticCache.js';
 
 type StorageEstimate = {
     estimatedChunks: number;
@@ -95,6 +96,7 @@ export async function canIngestRepo(
 
             await deleteChunksByRepoURL(oldestRepo.repoURL);
             await deleteRepoByURL(oldestRepo.repoURL);
+            await cacheInvalidate(oldestRepo.repoURL);
 
             databaseStats = await getDatabaseStorageStats();
             projectedUsedPct = ((databaseStats.liveUsedMB + sizeMB) / databaseStats.limitMB) * 100;

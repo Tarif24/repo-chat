@@ -16,6 +16,7 @@ import {
     updateRepoLastAccessed,
 } from '../services/repoProcessing.js';
 import { checkRepoBelowStorageLimit, canIngestRepo } from '../services/storage.js';
+import { cacheInvalidate } from '../services/semanticCache.js';
 
 export async function ingestRepo(
     repoUrl: string
@@ -37,6 +38,11 @@ export async function ingestRepo(
 
     if (!repoSha) {
         return { success: false, message: 'Failed to clone repository' };
+    }
+
+    // Invalidate cache for the repository if it already exists but has new commits
+    if (existingRepo) {
+        await cacheInvalidate(repoUrl);
     }
 
     // Scan the cloned repository for parseable files

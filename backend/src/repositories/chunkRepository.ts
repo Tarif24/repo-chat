@@ -47,7 +47,7 @@ export async function vectorSearch(params: VectorSearchParamsType): Promise<Scor
     const pipeline = [
         {
             $vectorSearch: {
-                index: 'vector_index',
+                index: 'chunk_vector_index',
                 path: 'embedding',
                 queryVector: embedding,
                 numCandidates,

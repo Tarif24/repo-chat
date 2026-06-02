@@ -1,3 +1,5 @@
+import { createEmbedding } from '../providers/embeddingProvider.js';
+import { cacheCheck, cacheSave } from '../services/semanticCache.js';
 import { getAllRepos, updateRepoLastAccessed, getRepoByURL } from '../services/repoProcessing.js';
 import { interpretAndEmbedQuery } from '../services/queryInterpreter.js';
 import { applyPostRetrievalFilters } from '../services/postRetrievalFilter.js';
@@ -29,6 +31,17 @@ export async function userQuery(
 
     // Update the last accessed time for the repository in the database
     await updateRepoLastAccessed(repoURL);
+
+    // Cache check
+    const queryEmbedding = await createEmbedding(query);
+    if (queryEmbedding) {
+        // Check the semantic cache for a relevant cached response before proceeding with the full query processing pipeline
+        const cachedResponse = await cacheCheck(repoURL, queryEmbedding);
+        if (cachedResponse && cachedResponse.length > 0) {
+            logger.info(`REPO: ${repoURL} - Cache hit for query: "${query}"`);
+            return { message: cachedResponse, contextStats: null };
+        }
+    }
 
     // Interpret and get the filters for the query, and also get the embedding for the hypothetical chunk
     const { embedding, filters, hypotheticalChunk } = await interpretAndEmbedQuery(query);
@@ -130,6 +143,11 @@ export async function userQuery(
 
     // Process the user query with the built system prompt and user message, and also pass the chat history
     const response = await processUserQuery(systemPrompt, userMessage, chatHistory);
+
+    // Save the response to the semantic cache along with the query and its embedding for future cache hits
+    if (queryEmbedding) {
+        await cacheSave(repoURL, query, queryEmbedding, response?.content || '');
+    }
 
     return { message: response?.content, contextStats };
 }
