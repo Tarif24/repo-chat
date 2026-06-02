@@ -34,12 +34,12 @@ const createSearchIndexes = async (retries = 10, delayMs = 5000): Promise<void> 
                         ],
                     },
                 });
-                logger.info('Chunk Vector search index created');
+                logger.info('Chunk vector search index created');
             } else {
-                logger.info('Vector search index already exists');
+                logger.info('Chunk vector search index already exists');
             }
 
-            const semanticCacheCollection = db.collection('chunks');
+            const semanticCacheCollection = db.collection('semantic-caches');
             const semanticCacheExisting = await semanticCacheCollection
                 .listSearchIndexes()
                 .toArray();
@@ -48,7 +48,7 @@ const createSearchIndexes = async (retries = 10, delayMs = 5000): Promise<void> 
             );
 
             if (!semanticCacheExists) {
-                await chunksCollection.createSearchIndex({
+                await semanticCacheCollection.createSearchIndex({
                     name: 'semantic_cache_vector_index',
                     type: 'vectorSearch',
                     definition: {
@@ -64,9 +64,9 @@ const createSearchIndexes = async (retries = 10, delayMs = 5000): Promise<void> 
                     },
                 });
 
-                logger.info('Semantic cache Vector search index created');
+                logger.info('Semantic cache vector search index created');
             } else {
-                logger.info('Semantic cache search index already exists');
+                logger.info('Semantic cache vector search index already exists');
             }
 
             return;

@@ -12,4 +12,4 @@ const semanticCache = new mongoose.Schema(
     }
 );
 
-export default mongoose.model('SemanticCache', semanticCache);
+export default mongoose.model('Semantic-cache', semanticCache);
