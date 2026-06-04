@@ -37,17 +37,17 @@ services:
             - ./backend/logs:/app/logs
             - ./backend/repoCloning:/app/repoCloning
 
-    redis:
-        image: redis:7-alpine
-        container_name: redis_cache
-        ports:
-            - "6379:6379"
-        volumes:
-            - redis_data:/data
-        command: redis-server --appendonly yes --maxmemory 100mb --maxmemory-policy allkeys-lru # persist data across restarts
+#     redis:
+#         image: redis:7-alpine
+#         container_name: redis_cache
+#         ports:
+#             - "6379:6379"
+#         volumes:
+#             - redis_data:/data
+#         command: redis-server --appendonly yes --maxmemory 100mb --maxmemory-policy allkeys-lru # persist data across restarts
 
-volumes:
-    redis_data:
+# volumes:
+#     redis_data:
 
 #     mongodb:
 #         image: mongodb/mongodb-atlas-local:8.0.6

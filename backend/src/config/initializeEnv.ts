@@ -12,6 +12,7 @@ export async function loadSecrets() {
         '/repo-chat/prod/OPENAI_API_KEY',
         '/repo-chat/prod/OPENAI_CHAT_MODEL',
         '/repo-chat/prod/OPENAI_EMBEDDING_MODEL',
+        '/repo-chat/prod/REDIS_URL',
     ];
     try {
         for (const name of names) {

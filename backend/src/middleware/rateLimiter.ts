@@ -1,8 +1,6 @@
 import type { RateLimitRequestHandler, Options } from 'express-rate-limit';
 import type { Request, Response } from 'express';
 import rateLimit from 'express-rate-limit';
-import { RedisStore } from 'rate-limit-redis';
-import { getCacheClient } from '../providers/cacheProvider.js';
 
 const rateLimitHandler = (_req: Request, res: Response): void => {
     res.standardResponse(
@@ -22,11 +20,6 @@ const globalLimiterOptions: Partial<Options> = {
     standardHeaders: 'draft-8',
     legacyHeaders: false,
     handler: rateLimitHandler,
-    store: new RedisStore({
-        prefix: 'rl:global:',
-        sendCommand: (command: string, ...args: string[]) =>
-            getCacheClient().call(command, ...args) as Promise<number>,
-    }),
 };
 
 const strictLimiterOptions: Partial<Options> = {
@@ -35,11 +28,6 @@ const strictLimiterOptions: Partial<Options> = {
     standardHeaders: 'draft-8',
     legacyHeaders: false,
     handler: rateLimitHandler,
-    store: new RedisStore({
-        prefix: 'rl:strict:',
-        sendCommand: (command: string, ...args: string[]) =>
-            getCacheClient().call(command, ...args) as Promise<number>,
-    }),
 };
 
 export const globalLimiter: RateLimitRequestHandler = rateLimit(globalLimiterOptions);
