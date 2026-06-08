@@ -40,10 +40,17 @@
         "lint:all": "npm run lint --prefix frontend && npm run lint --prefix backend",
         "format:all": "npm run format --prefix frontend && npm run format --prefix backend",
         "format": "prettier --config ./config/.prettierrc.js --write .",
-        "lint:fix:all": "npm run lint:fix --prefix frontend && npm run lint:fix --prefix backend"
+        "lint:fix:all": "npm run lint:fix --prefix frontend && npm run lint:fix --prefix backend",
+        "test:e2e": "playwright test",
+        "test:e2e:headed": "playwright test --headed",
+        "test:e2e:debug": "playwright test --debug",
+        "test:e2e:report": "playwright show-report"
     },
     "keywords": [],
     "author": "Tarif Mohammad",
     "license": "ISC",
-    "type": "commonjs"
+    "type": "commonjs",
+    "devDependencies": {
+        "@playwright/test": "^1.60.0"
+    }
 }

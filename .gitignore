@@ -25,6 +25,10 @@ out/
 
 # testing
 /coverage
+/playwright-report
+/test-results
+/playwright-report.zip
+
 
 # misc
 .DS_Store

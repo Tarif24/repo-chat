@@ -1,17 +1,13 @@
 {
-    // Visit https://aka.ms/tsconfig to read more about this file
-
     "compilerOptions": {
         // File Layout
-        "rootDir": "./src",
         "outDir": "./dist",
 
         // Environment Settings
-        // See also https://aka.ms/tsconfig/module
         "module": "nodenext",
         "moduleResolution": "nodenext",
         "target": "esnext",
-        "types": ["./src/types/express"],
+        "types": ["./src/types/express", "node", "jest"],
         // For nodejs:
         // "lib": ["esnext"],
         // "types": ["node"],
@@ -37,12 +33,12 @@
         // Recommended Options
         "strict": true,
         "jsx": "react-jsx",
-        "verbatimModuleSyntax": true,
+        "verbatimModuleSyntax": false,
         "isolatedModules": true,
         "noUncheckedSideEffectImports": true,
         "moduleDetection": "force",
         "skipLibCheck": true
     },
-    "include": ["src/**/*.ts", "src/**/*.{ts,tsx}", "src/config/env.ts"],
+    "include": ["src/**/*.ts", "src/**/*.{ts,tsx}", "src/config/env.ts", "tests/**/*"],
     "exclude": ["node_modules", "dist"]
 }

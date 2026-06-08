@@ -5,7 +5,7 @@
     "main": "index.ts",
     "scripts": {
         "dev": "nodemon",
-        "build": "tsc",
+        "build": "tsc --project tsconfig.build.json",
         "start": "node dist/index.js",
         "lint": "eslint",
         "lint:fix": "eslint --fix .",
@@ -15,7 +15,13 @@
         "docker:build": "docker build -t repo-chat-backend .",
         "docker:run": "docker run --name backend -p 8080:8080 --env-file .env repo-chat-backend",
         "docker:stop": "docker stop backend",
-        "docker:rm": "docker rm -f backend"
+        "docker:rm": "docker rm -f backend",
+        "test": "jest",
+        "test:unit": "jest --testPathPatterns=tests/unit",
+        "test:integration": "jest --testPathPatterns=tests/integration",
+        "test:watch": "jest --watch",
+        "test:coverage": "jest --coverage",
+        "test:ci": "jest --ci --runInBand --coverage"
     },
     "keywords": [],
     "author": "Tarif Mohammad",
@@ -23,6 +29,7 @@
     "type": "module",
     "dependencies": {
         "@aws-sdk/client-ssm": "^3.1046.0",
+        "@types/supertest": "^7.2.0",
         "cors": "^2.8.6",
         "dotenv": "^17.3.1",
         "express": "^5.2.1",
@@ -30,6 +37,7 @@
         "mongoose": "^9.3.1",
         "openai": "^6.32.0",
         "simple-git": "^3.33.0",
+        "supertest": "^7.2.2",
         "tree-sitter": "0.22.4",
         "tree-sitter-c-sharp": "0.23.1",
         "tree-sitter-cpp": "0.23.4",
@@ -47,11 +55,18 @@
     },
     "devDependencies": {
         "@types/express": "^5.0.6",
+        "@types/jest": "^30.0.0",
         "eslint": "^10.0.3",
+        "jest": "^30.4.2",
+        "mongodb-memory-server": "^11.2.0",
         "nodemon": "^3.1.14",
         "prettier": "^3.8.1",
+        "ts-jest": "^29.4.11",
         "ts-node": "^10.9.2",
         "tsx": "^4.21.0",
         "typescript": "^5.9.3"
+    },
+    "mongodbMemoryServer": {
+        "version": "7.0.14"
     }
 }
