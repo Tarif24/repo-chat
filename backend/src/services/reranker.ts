@@ -12,7 +12,9 @@ export async function rerankChunks(
     chunks: ScoredChunk[],
     topK: number = 8
 ): Promise<RankedChunkType[]> {
-    if (chunks.length === 0) return [];
+    if (chunks.length === 0) {
+        return [];
+    }
 
     // Skip reranking if the retrieval set is already small —
     // the overhead isn't worth it under this threshold

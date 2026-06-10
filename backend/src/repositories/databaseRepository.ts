@@ -16,7 +16,9 @@ const FREE_TIER_LIMIT_BYTES = 512 * 1_048_576; // 512 MB in bytes
 export async function getDatabaseStorageStats(): Promise<DatabaseStorageStats> {
     const db = mongoose.connection.db;
 
-    if (!db) throw new ConnectionError('No active MongoDB connection');
+    if (!db) {
+        throw new ConnectionError('No active MongoDB connection');
+    }
 
     const stats = (await db.command({ dbStats: 1, scale: 1 })) as {
         dataSize: number;
@@ -43,6 +45,8 @@ export async function getDatabaseStorageStats(): Promise<DatabaseStorageStats> {
 export function compactDatabase() {
     const db = mongoose.connection.db;
 
-    if (!db) throw new ConnectionError('No active MongoDB connection');
+    if (!db) {
+        throw new ConnectionError('No active MongoDB connection');
+    }
     return db.command({ compact: 'chunks' });
 }

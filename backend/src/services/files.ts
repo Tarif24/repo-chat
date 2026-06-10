@@ -52,7 +52,7 @@ export function collectParseableFiles(
 
         try {
             entries = fs.readdirSync(dir, { withFileTypes: true });
-        } catch (err) {
+        } catch {
             // Skip directories we can't read (e.g. permission errors)
             skippedCount++;
             return 0;
@@ -69,7 +69,9 @@ export function collectParseableFiles(
                 continue;
             }
 
-            if (!entry.isFile()) continue;
+            if (!entry.isFile()) {
+                continue;
+            }
 
             totalScanned++;
 
@@ -126,7 +128,7 @@ export function createParseableFilesTree(
         let entries: fs.Dirent[];
         try {
             entries = fs.readdirSync(dir, { withFileTypes: true });
-        } catch (err) {
+        } catch {
             return null;
         }
         const children: FileTreeNode[] = [];
@@ -154,12 +156,16 @@ export function createParseableFilesTree(
                 }
             }
         }
-        if (children.length === 0) return null;
+        if (children.length === 0) {
+            return null;
+        }
         return { name: path.basename(dir), type: 'directory', children };
     }
 
     const tree = walk(resolvedRoot);
-    if (!tree) return undefined;
+    if (!tree) {
+        return undefined;
+    }
     // Set the root node's name as requested
     return { ...tree, name: rootName };
 }

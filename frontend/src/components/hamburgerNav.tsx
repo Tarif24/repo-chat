@@ -11,10 +11,10 @@ const HamburgerNav = () => {
     const linkClass =
         'hover:text-[#555555] decoration-[#8b8b8b] hover:underline underline-offset-[1rem] hover:cursor-pointer transition duration-300 ease-in-out';
 
-    let hamburgerNavClass = `absolute left-0 top-0 transition duration-600 ease-in-out ${
+    const hamburgerNavClass = `absolute left-0 top-0 transition duration-600 ease-in-out ${
         isActive ? 'translate-y-0' : '-translate-y-75'
     }`;
-    let backgroundClass = `absolute left-0 top-0 bg-black w-[100vw] h-[100vh] opacity-40 ${
+    const backgroundClass = `absolute left-0 top-0 bg-black w-[100vw] h-[100vh] opacity-40 ${
         isActive ? '' : 'hidden'
     }`;
 

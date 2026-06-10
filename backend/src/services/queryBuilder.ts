@@ -101,7 +101,9 @@ function formatChunk(chunk: ScoredChunk, index: number): string {
 
 // Map your internal language strings to markdown code fence tags
 function normalizeLanguageTag(language?: string): string {
-    if (!language) return '';
+    if (!language) {
+        return '';
+    }
 
     const map: Record<string, string> = {
         typescript: 'typescript',
@@ -130,12 +132,21 @@ function computeContextStats(chunks: ScoredChunk[]) {
         ...new Set(
             chunks.map(c => {
                 const obj: { [key: string]: any } = {};
-                if (c.metadata.fileName !== undefined) obj.fileName = c.metadata.fileName;
-                if (c.metadata.relativePath !== undefined)
+                if (c.metadata.fileName !== undefined) {
+                    obj.fileName = c.metadata.fileName;
+                }
+                if (c.metadata.relativePath !== undefined) {
                     obj.relativePath = c.metadata.relativePath;
-                if (c.metadata.startLine !== undefined) obj.startLine = c.metadata.startLine;
-                if (c.metadata.endLine !== undefined) obj.endLine = c.metadata.endLine;
-                if (c.metadata.name !== undefined) obj.name = c.metadata.name;
+                }
+                if (c.metadata.startLine !== undefined) {
+                    obj.startLine = c.metadata.startLine;
+                }
+                if (c.metadata.endLine !== undefined) {
+                    obj.endLine = c.metadata.endLine;
+                }
+                if (c.metadata.name !== undefined) {
+                    obj.name = c.metadata.name;
+                }
                 return obj;
             })
         ),

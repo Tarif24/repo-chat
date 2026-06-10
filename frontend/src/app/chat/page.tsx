@@ -1,6 +1,6 @@
 'use client';
 
-import { use, useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Message from './message';
 import ChatTypingBar from './chatTypingBar';
 import FileTree from './fileTree';
@@ -16,7 +16,7 @@ export default function Chat() {
     // State to hold the selected repository name
     const [selectedRepo, setSelectedRepo] = useState<string>('');
 
-    const [isLoading, setIsLoading] = useState<boolean>(false);
+    //const [isLoading, setIsLoading] = useState<boolean>(false);
 
     const [usedFiles, setUsedFiles] = useState<string[]>([]);
 
@@ -50,8 +50,8 @@ export default function Chat() {
             }
         };
 
-        fetchRepositories();
-    }, []);
+        void fetchRepositories();
+    }, [API_URL]);
 
     // Scroll to the bottom of the chat history when a new message is added
     useEffect(() => {
@@ -129,7 +129,7 @@ export default function Chat() {
                         className="flex-1 rounded border bg-white px-3 py-2"
                         required
                         value={selectedRepo}
-                        onChange={e => repoSwitchHandler(e)}
+                        onChange={e => void repoSwitchHandler(e)}
                     >
                         <option value="" disabled>
                             Select a collection

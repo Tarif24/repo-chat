@@ -1,20 +1,20 @@
 services:
-    frontend:
-        build: ./frontend
-        container_name: next_frontend
-        ports:
-            - "3000:3000" # Serve frontend on localhost:3000
-        env_file:
-            - ./frontend/.env # Load environment variables from frontend .env file
-        develop:
-            watch:
-                - action: sync
-                  path: ./frontend/src
-                  target: /app
-                - action: rebuild
-                  path: ./frontend/package.json
-        # depends_on:
-        #     - backend
+    # frontend:
+    #     build: ./frontend
+    #     container_name: next_frontend
+    #     ports:
+    #         - "3000:3000" # Serve frontend on localhost:3000
+    #     env_file:
+    #         - ./frontend/.env # Load environment variables from frontend .env file
+    #     develop:
+    #         watch:
+    #             - action: sync
+    #               path: ./frontend/src
+    #               target: /app
+    #             - action: rebuild
+    #               path: ./frontend/package.json
+    #     # depends_on:
+    #     #     - backend
 
     backend:
         build: ./backend

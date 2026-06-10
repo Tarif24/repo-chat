@@ -152,13 +152,17 @@ const EXTRACTION_RULES: Record<string, ExtractionRule> = {
 function nameFromCommonPatterns(node: Parser.SyntaxNode): string {
     // function foo() {}
     const directName = node.childForFieldName('name');
-    if (directName) return directName.text;
+    if (directName) {
+        return directName.text;
+    }
 
     // const foo = () => {}  →  parent is variable_declarator
     const parent = node.parent;
     if (parent?.type === 'variable_declarator') {
         const id = parent.childForFieldName('name');
-        if (id) return id.text;
+        if (id) {
+            return id.text;
+        }
     }
 
     // { foo() {} }  →  method_definition already handled by 'name' field above
@@ -167,10 +171,18 @@ function nameFromCommonPatterns(node: Parser.SyntaxNode): string {
 
 // Node type → chunk type label
 function chunkType(nodeType: string): string {
-    if (nodeType.includes('class') || nodeType.includes('module')) return 'class';
-    if (nodeType.includes('method') || nodeType.includes('constructor')) return 'method';
-    if (nodeType === 'rule_set') return 'selector';
-    if (nodeType === 'element') return 'element';
+    if (nodeType.includes('class') || nodeType.includes('module')) {
+        return 'class';
+    }
+    if (nodeType.includes('method') || nodeType.includes('constructor')) {
+        return 'method';
+    }
+    if (nodeType === 'rule_set') {
+        return 'selector';
+    }
+    if (nodeType === 'element') {
+        return 'element';
+    }
     return 'function';
 }
 
@@ -338,7 +350,9 @@ function splitOversizedNode(
         }
     }
 
-    if (childChunks.length > 0) return childChunks;
+    if (childChunks.length > 0) {
+        return childChunks;
+    }
 
     // No splittable children — sliding window as last resort
     return slidingWindowSplit(node, file, getName, limit);
@@ -497,7 +511,7 @@ export async function parseFiles(
         logger.info(
             `REPO: ${repoURL} - Parsing batch ${i / BATCH_SIZE + 1} with ${batch.length} files.`
         );
-        const batchResults = await Promise.all(batch.map(file => parseFile(file)));
+        const batchResults = batch.map(file => parseFile(file));
         for (const chunks of batchResults) {
             allChunks.push(...chunks);
         }

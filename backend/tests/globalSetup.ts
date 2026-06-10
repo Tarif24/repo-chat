@@ -3,7 +3,6 @@ import { MongoMemoryServer } from 'mongodb-memory-server';
 // This is a module-level variable that persists between globalSetup and globalTeardown
 // We store it so globalTeardown can stop the same server instance
 declare global {
-    // eslint-disable-next-line no-var
     var __MONGOINSTANCE: MongoMemoryServer;
 }
 

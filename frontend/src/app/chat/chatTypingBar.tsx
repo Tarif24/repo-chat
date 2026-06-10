@@ -63,7 +63,6 @@ export default function ChatTypingBar({
         };
 
         let referenceFiles: string = 'No referenced files.';
-        let usedFileNames: string[] = [];
 
         if (response.data.contextStats) {
             referenceFiles = response.data.contextStats.filesReferenced
@@ -77,9 +76,10 @@ export default function ChatTypingBar({
         const finalResponse = `${response.data.message}\n\nReferenced files:\n${referenceFiles}`;
 
         if (response.data.contextStats) {
-            usedFileNames = response.data.contextStats.filesReferenced.map(
-                (ref: FileReferenceType) => ref.fileName
-            );
+            const usedFileNames =
+                response.data.contextStats.filesReferenced.map(
+                    (ref: FileReferenceType) => ref.fileName
+                );
             setUsedFiles(usedFileNames);
         }
 
@@ -90,6 +90,13 @@ export default function ChatTypingBar({
                 content: finalResponse,
             },
         ]);
+    };
+
+    const handleSubmit = (e: React.SubmitEvent<HTMLFormElement> | string) => {
+        if (typeof e !== 'string') {
+            e.preventDefault();
+        }
+        void submitForm(e);
     };
 
     const handleOnTextChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -106,7 +113,7 @@ export default function ChatTypingBar({
         <div className="flex w-full justify-center">
             <form
                 className="mx-3 mb-2 flex h-fit w-full flex-col items-end justify-center rounded-full"
-                onSubmit={submitForm}
+                onSubmit={handleSubmit}
             >
                 <div className="flex h-fit w-full items-center justify-center rounded-2xl border-2 bg-white/20 backdrop-blur-2xl">
                     <textarea
@@ -119,7 +126,7 @@ export default function ChatTypingBar({
                             if (e.key === 'Enter' && !e.shiftKey) {
                                 e.preventDefault();
 
-                                submitForm(inputText);
+                                void submitForm(inputText);
                             }
                             // Shift+Enter will insert a newline by default
                         }}

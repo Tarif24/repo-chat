@@ -46,7 +46,7 @@ export async function ingestRepo(
     }
 
     // Scan the cloned repository for parseable files
-    const { validFiles, validFilesSize } = await collectParseableFiles(
+    const { validFiles, validFilesSize } = collectParseableFiles(
         appConfig.repoStoragePath,
         repoUrl
     );
@@ -73,7 +73,7 @@ export async function ingestRepo(
         );
 
         // Clear the cloned repository from disk to save space
-        deleteEverythingInDir(appConfig.repoStoragePath);
+        await deleteEverythingInDir(appConfig.repoStoragePath);
 
         return {
             success: false,
@@ -97,7 +97,7 @@ export async function ingestRepo(
         );
 
         // Clear the cloned repository from disk to save space
-        deleteEverythingInDir(appConfig.repoStoragePath);
+        await deleteEverythingInDir(appConfig.repoStoragePath);
 
         return {
             success: false,
@@ -120,7 +120,7 @@ export async function ingestRepo(
     }
 
     // Clear the cloned repository from disk to save space
-    deleteEverythingInDir(appConfig.repoStoragePath);
+    await deleteEverythingInDir(appConfig.repoStoragePath);
 
     // Parse the valid files using Tree-sitter
     const allCodeChunks = await parseFiles(validFiles || [], repoUrl);

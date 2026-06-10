@@ -2,7 +2,9 @@ import mongoose from 'mongoose';
 
 beforeAll(async () => {
     const uri = process.env.MONGO_TEST_URI;
-    if (!uri) throw new Error('MONGO_TEST_URI not set — did globalSetup run?');
+    if (!uri) {
+        throw new Error('MONGO_TEST_URI not set — did globalSetup run?');
+    }
     await mongoose.connect(uri);
 });
 

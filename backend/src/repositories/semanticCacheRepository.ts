@@ -22,7 +22,9 @@ export async function searchSemanticCache(
         ])
         .toArray()) as { response: string; score: number }[];
 
-    if (!results[0]) return null;
+    if (!results[0]) {
+        return null;
+    }
 
     return results[0];
 }

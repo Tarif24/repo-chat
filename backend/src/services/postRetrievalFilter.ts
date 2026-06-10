@@ -58,7 +58,9 @@ export function applyPostRetrievalFilters(
             .join(', ')}`
     );
 
-    if (filtered.length === 0) return filtered;
+    if (filtered.length === 0) {
+        return filtered;
+    }
 
     // Filter 4 - Noise filter - remove chunks that are likely to be noise based on file path patterns and question type (e.g. implementation vs. documentation question)
     filtered = applyNoiseFilter(filtered, query);
@@ -124,7 +126,9 @@ function deduplicateOverlappingChunks(chunks: ScoredChunk[]): ScoredChunk[] {
             );
         });
 
-        if (!overlapsKept) kept.push(candidate);
+        if (!overlapsKept) {
+            kept.push(candidate);
+        }
     }
 
     return kept;
@@ -147,9 +151,13 @@ function applyPerFileCap(chunks: ScoredChunk[], maxPerFile: number): ScoredChunk
 
     return chunks.filter(chunk => {
         const key = chunk.metadata.relativePath;
-        if (!key) return true; // should not happen, but just in case
+        if (!key) {
+            return true;
+        } // should not happen, but just in case
         const count = countPerFile.get(key) ?? 0;
-        if (count >= maxPerFile) return false;
+        if (count >= maxPerFile) {
+            return false;
+        }
         countPerFile.set(key, count + 1);
         return true;
     });
@@ -169,7 +177,9 @@ function getChunkDiversity(chunks: ScoredChunk[]): {
     for (const chunk of chunks) {
         const path = chunk.metadata.relativePath;
 
-        if (!path) continue; // should not happen, but just in case
+        if (!path) {
+            continue;
+        } // should not happen, but just in case
         if (chunk.metadata.parentDir) {
             dirCounts.add(chunk.metadata.parentDir);
         }
@@ -274,12 +284,16 @@ function applyNoiseFilter(chunks: ScoredChunk[], question: string): ScoredChunk[
     const activeBypass = getActiveBypassCategories(question);
 
     return chunks.filter(chunk => {
-        if (!chunk.metadata.relativePath) return true; // should not happen, but just in case
+        if (!chunk.metadata.relativePath) {
+            return true;
+        } // should not happen, but just in case
 
         const path = chunk.metadata.relativePath.toLowerCase();
 
         return !NOISE_PATTERNS.some(({ pattern, bypassFor }) => {
-            if (bypassFor && activeBypass.has(bypassFor)) return false;
+            if (bypassFor && activeBypass.has(bypassFor)) {
+                return false;
+            }
             return pattern.test(path);
         });
     });

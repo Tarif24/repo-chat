@@ -43,7 +43,9 @@ export async function cloneAndGetSha(repoUrl: string, localPath: string): Promis
     const repoGit: SimpleGit = simpleGit(localPath);
     const log: LogResult = await repoGit.log({ maxCount: 1 });
 
-    if (!log.latest) throw new NotFoundError('No commits found');
+    if (!log.latest) {
+        throw new NotFoundError('No commits found');
+    }
     return log.latest.hash;
 }
 
@@ -65,7 +67,9 @@ export async function getLatestSha(
         .split('\n')
         .find(l => l.includes(`refs/heads/${branch}`));
 
-    if (!line) throw new NotFoundError(`Branch "${branch}" not found`);
+    if (!line) {
+        throw new NotFoundError(`Branch "${branch}" not found`);
+    }
 
     const sha: string | undefined = line.split('\t')[0];
     return sha;

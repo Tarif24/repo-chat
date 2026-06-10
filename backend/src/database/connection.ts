@@ -8,7 +8,9 @@ const createSearchIndexes = async (retries = 10, delayMs = 5000): Promise<void> 
     for (let i = 0; i < retries; i++) {
         try {
             const db = mongoose.connection.db;
-            if (!db) return;
+            if (!db) {
+                return;
+            }
 
             const chunksCollection = db.collection('chunks');
             const chunksExisting = await chunksCollection.listSearchIndexes().toArray();
@@ -70,7 +72,7 @@ const createSearchIndexes = async (retries = 10, delayMs = 5000): Promise<void> 
             }
 
             return;
-        } catch (err) {
+        } catch {
             logger.warn(
                 `Attempt ${i + 1}/${retries} - Search index service not ready yet, retrying in ${delayMs / 1000}s...`
             );

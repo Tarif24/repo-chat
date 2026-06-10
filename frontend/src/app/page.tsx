@@ -41,7 +41,7 @@ export default function Home() {
                 <div className="mx-2 mb-2 flex h-fit w-full items-center justify-center rounded-2xl border-2 bg-white/20 backdrop-blur-2xl">
                     <form
                         className="flex w-full items-center"
-                        onSubmit={e => handleSubmit(e)}
+                        onSubmit={e => void handleSubmit(e)}
                     >
                         <input
                             type="text"

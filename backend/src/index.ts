@@ -23,7 +23,7 @@ const allowedOrigins: string[] = [
 ];
 
 // Graceful shutdown handling
-const gracefulShutdown = (signal: String) => {
+const gracefulShutdown = (signal: string) => {
     logger.info(`${signal} received, shutting down gracefully`);
 
     if (!app) {
@@ -73,7 +73,9 @@ const startServer = async () => {
                     callback: (err: Error | null, allow?: boolean) => void
                 ) => {
                     // Allow requests with no origin (like mobile apps or curl)
-                    if (!origin) return callback(null, true);
+                    if (!origin) {
+                        return callback(null, true);
+                    }
                     if (allowedOrigins.includes(origin)) {
                         return callback(null, true);
                     } else {
@@ -126,4 +128,4 @@ const startServer = async () => {
 };
 
 // Start the server
-startServer();
+await startServer();
