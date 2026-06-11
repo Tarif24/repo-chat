@@ -1,0 +1,215 @@
+name: RepoChat CI/CD
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+    branches: ["**"]
+
+# Prevent redundant runs on the same ref
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  AWS_REGION: ca-central-1
+  ECR_REPOSITORY: repo-chat/backend
+  LAMBDA_FUNCTION_NAME: repo-chat-backend
+  S3_BUCKET: repo-chat-frontend
+  CLOUDFRONT_DISTRIBUTION_ID: ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }}
+
+jobs:
+  # ──────────────────────────────────────────────
+  # JOB 1: CI — runs on every push to every branch
+  # ──────────────────────────────────────────────
+  ci:
+    name: CI (lint · typecheck · build · unit · integration)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # ── Node setup ──────────────────────────────
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+          cache-dependency-path: |
+            backend/package-lock.json
+            frontend/package-lock.json
+
+      # ── Install dependencies ─────────────────────
+      - name: Install backend dependencies
+        working-directory: backend
+        run: npm ci
+
+      - name: Install frontend dependencies
+        working-directory: frontend
+        run: npm ci
+
+      # ── Lint ─────────────────────────────────────
+      - name: Lint (backend)
+        working-directory: backend
+        run: npm run lint
+
+      - name: Lint (frontend)
+        working-directory: frontend
+        run: npm run lint
+
+      # ── Type check ───────────────────────────────
+      # Uses tsconfig.build.json so rootDir is enforced and test files are excluded.
+      - name: Type check (backend)
+        working-directory: backend
+        run: npx tsc --project tsconfig.build.json --noEmit
+
+      - name: Type check (frontend)
+        working-directory: frontend
+        run: npx tsc --project tsconfig.json --noEmit
+
+      # ── Build check ──────────────────────────────
+      - name: Build backend (compile TypeScript)
+        working-directory: backend
+        run: npm run build
+
+      - name: Build frontend (Next.js static export)
+        working-directory: frontend
+        run: npm run build
+
+      # ── Unit tests ───────────────────────────────
+      - name: Unit tests (backend)
+        working-directory: backend
+        run: npm run test:unit
+
+      # ── Integration tests ────────────────────────
+      - name: Integration tests (backend)
+        working-directory: backend
+        run: npm run test:integration
+
+  # ──────────────────────────────────────────────
+  # JOB 2: Deploy — only on merge to main
+  # ──────────────────────────────────────────────
+  deploy:
+    name: Deploy (frontend + backend + E2E)
+    needs: ci
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    runs-on: ubuntu-latest
+
+    # GitHub OIDC → AWS temporary credentials (no static keys stored in secrets)
+    permissions:
+      id-token: write   # required to request the JWT
+      contents: read
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # ── Node setup ──────────────────────────────
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+          cache-dependency-path: |
+            backend/package-lock.json
+            frontend/package-lock.json
+
+      - name: Install backend dependencies
+        working-directory: backend
+        run: npm ci
+
+      - name: Install frontend dependencies
+        working-directory: frontend
+        run: npm ci
+
+      # ── Build ─────────────────────────────────────
+      - name: Build backend (compile TypeScript)
+        working-directory: backend
+        run: npm run build
+
+      - name: Build frontend (Next.js static export)
+        working-directory: frontend
+        run: npm run build
+
+      # ── AWS credentials via OIDC ──────────────────
+      - name: Configure AWS credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_DEPLOY_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      # ── ECR login ─────────────────────────────────
+      - name: Log in to Amazon ECR
+        id: ecr-login
+        uses: aws-actions/amazon-ecr-login@v2
+
+      # ── Build & push Docker image ──────────────────
+      # IMPORTANT: --platform linux/amd64 — Lambda needs x86_64; Apple Silicon default is arm64.
+      # IMPORTANT: --provenance=false   — prevents a manifest list which Lambda rejects.
+      - name: Build and push backend Docker image
+        env:
+          ECR_REGISTRY: ${{ steps.ecr-login.outputs.registry }}
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          docker buildx build \
+            --platform linux/amd64 \
+            --provenance=false \
+            -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG \
+            -t $ECR_REGISTRY/$ECR_REPOSITORY:latest \
+            --push \
+            ./backend
+
+      # ── Update Lambda ─────────────────────────────
+      - name: Update Lambda to use new image
+        env:
+          ECR_REGISTRY: ${{ steps.ecr-login.outputs.registry }}
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          aws lambda update-function-code \
+            --function-name $LAMBDA_FUNCTION_NAME \
+            --image-uri $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG \
+            --region $AWS_REGION
+
+      # ── Wait for Lambda rollout ────────────────────
+      # Lambda updates are async; this blocks until the new code is live
+      # before we run E2E tests or declare success.
+      - name: Wait for Lambda update to complete
+        run: |
+          aws lambda wait function-updated \
+            --function-name $LAMBDA_FUNCTION_NAME \
+            --region $AWS_REGION
+
+      # ── Deploy frontend to S3 ─────────────────────
+      - name: Deploy frontend to S3
+        run: |
+          aws s3 sync frontend/out/ s3://$S3_BUCKET --delete
+
+      # ── Invalidate CloudFront ─────────────────────
+      # Ensures users get the new frontend immediately, not a stale cached version.
+      - name: Invalidate CloudFront cache
+        run: |
+          aws cloudfront create-invalidation \
+            --distribution-id $CLOUDFRONT_DISTRIBUTION_ID \
+            --paths "/*"
+
+      # ── E2E tests ─────────────────────────────────
+      # Runs AFTER full deployment against the live URL, not locally.
+      # playwright.config.ts lives at the monorepo root.
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium
+
+      - name: Run E2E tests (Playwright)
+        env:
+          CI: "true"
+          BASE_URL: ${{ secrets.E2E_BASE_URL }}
+        run: npm run test:e2e:ci
+
+      # ── Upload Playwright report on failure ────────
+      - name: Upload Playwright report
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 7
