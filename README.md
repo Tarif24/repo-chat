@@ -1,6 +1,6 @@
 # RepoChat
 
-A AI-powered developer tool that lets you ask natural language questions about any public GitHub repository. Paste a URL, and RepoChat ingests the codebase, builds a vector index, and answers your questions with direct references to the relevant source files.
+An AI-powered developer tool that lets you ask natural language questions about any public GitHub repository. Paste a URL, and RepoChat ingests the codebase, builds a vector index, and answers your questions with direct references to the relevant source files.
 
 → [Live demo](https://repochat.tarifmohammad.com) &nbsp;|&nbsp; [Video walkthrough](#) &nbsp;|&nbsp; [Architecture diagram](#docs)
 
