@@ -43,17 +43,13 @@ jobs:
   #     # ── Install dependencies ─────────────────────
   #     - name: Install backend dependencies
   #       working-directory: backend
-  #       run: npm ci
+  #       run: npm ci --legacy-peer-deps
 
   #     - name: Install frontend dependencies
   #       working-directory: frontend
   #       run: npm ci
 
   #     # ── Lint ─────────────────────────────────────
-  #     # Runs ESLint in check mode — fails CI if any errors are found.
-  #     # To fix issues locally run: npm run lint:fix
-  #     # Fixes are never auto-applied in CI because the runner's filesystem
-  #     # is discarded after the run — changes would never reach your repo.
   #     - name: Lint (backend)
   #       working-directory: backend
   #       run: npm run lint
@@ -124,7 +120,7 @@ jobs:
 
       - name: Install backend dependencies
         working-directory: backend
-        run: npm ci
+        run: npm ci --legacy-peer-deps
 
       - name: Install frontend dependencies
         working-directory: frontend
