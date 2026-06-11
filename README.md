@@ -33,7 +33,7 @@ User → CloudFront → /api/*  → API Gateway → Lambda (Express backend)
                   → /*      → S3 (static Next.js frontend)
 ```
 
-The backend runs as a containerised Express server via AWS Lambda Web Adapter — no application code changes required. The frontend is a statically exported Next.js build served from S3. A single CloudFront distribution handles routing, SSL termination, and CDN for both.
+The backend runs as a containerized Express server via AWS Lambda Web Adapter — no application code changes required. The frontend is a statically exported Next.js build served from S3. A single CloudFront distribution handles routing, SSL termination, and CDN for both.
 
 The backend follows a strict layered architecture:
 
@@ -146,4 +146,4 @@ Full test matrix is in the [Plan doc](docs/RepoChat-Plan_v2.pdf).
 | [MongoDB Models](docs/RepoChat-DatabaseModels.pdf)                       | Collection schemas                                            |
 | [API Endpoints](docs/RepoChat-APIEndpoints.pdf)                          | Request and response shapes                                   |
 | [Hosting Strategy](docs/RepoChat-AWSHostingHandoff.pdf)                  | AWS architecture, cost breakdown, deployment decisions        |
-| [Setup Guide](docs/RepoChat-SetupGuide.md)                  | Setup guide for local development        |
+| [Setup Guide](docs/RepoChat-SetupGuide.md)                               | Setup guide for local development                             |
