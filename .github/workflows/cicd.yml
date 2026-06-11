@@ -43,13 +43,17 @@ jobs:
   #     # ── Install dependencies ─────────────────────
   #     - name: Install backend dependencies
   #       working-directory: backend
-  #       run: npm ci --legacy-peer-deps
+  #       run: npm ci
 
   #     - name: Install frontend dependencies
   #       working-directory: frontend
   #       run: npm ci
 
   #     # ── Lint ─────────────────────────────────────
+  #     # Runs ESLint in check mode — fails CI if any errors are found.
+  #     # To fix issues locally run: npm run lint:fix
+  #     # Fixes are never auto-applied in CI because the runner's filesystem
+  #     # is discarded after the run — changes would never reach your repo.
   #     - name: Lint (backend)
   #       working-directory: backend
   #       run: npm run lint
@@ -59,7 +63,6 @@ jobs:
   #       run: npm run lint
 
   #     # ── Type check ───────────────────────────────
-  #     # Uses tsconfig.build.json so rootDir is enforced and test files are excluded.
   #     - name: Type check (backend)
   #       working-directory: backend
   #       run: npx tsc --project tsconfig.build.json --noEmit
@@ -115,15 +118,21 @@ jobs:
             backend/package-lock.json
             frontend/package-lock.json
 
+      # ── Install dependencies ─────────────────────
+      - name: Install root dependencies
+        run: npm ci
+
       - name: Install backend dependencies
         working-directory: backend
-        run: npm ci --legacy-peer-deps
+        run: npm ci
 
       - name: Install frontend dependencies
         working-directory: frontend
         run: npm ci
 
       # ── Build ─────────────────────────────────────
+      # Both apps already built and verified in CI. We rebuild here because
+      # the deploy job runs on a fresh runner with no files from the CI job.
       - name: Build backend (compile TypeScript)
         working-directory: backend
         run: npm run build
@@ -172,8 +181,6 @@ jobs:
             --region $AWS_REGION
 
       # ── Wait for Lambda rollout ────────────────────
-      # Lambda updates are async; this blocks until the new code is live
-      # before we run E2E tests or declare success.
       - name: Wait for Lambda update to complete
         run: |
           aws lambda wait function-updated \
@@ -186,22 +193,27 @@ jobs:
           aws s3 sync frontend/out/ s3://$S3_BUCKET --delete
 
       # ── Invalidate CloudFront ─────────────────────
-      # Ensures users get the new frontend immediately, not a stale cached version.
       - name: Invalidate CloudFront cache
         run: |
           aws cloudfront create-invalidation \
             --distribution-id $CLOUDFRONT_DISTRIBUTION_ID \
             --paths "/*"
 
-      # ── E2E tests ─────────────────────────────────
-      # Runs AFTER full deployment against the live URL, not locally.
-      # playwright.config.ts lives at the monorepo root.
+      # ── Playwright cache + install ─────────────────
+      - name: Cache Playwright browsers
+        uses: actions/cache@v4
+        id: playwright-cache
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ hashFiles('**/package-lock.json') }}
+
       - name: Install Playwright browsers
+        if: steps.playwright-cache.outputs.cache-hit != 'true'
         run: npx playwright install --with-deps chromium
 
+      # ── E2E tests ─────────────────────────────────
       - name: Run E2E tests (Playwright)
         env:
-          CI: "true"
           BASE_URL: ${{ secrets.E2E_BASE_URL }}
         run: npm run test:e2e:ci
 
