@@ -42,6 +42,7 @@
         "format": "prettier --config ./config/.prettierrc.js --write .",
         "lint:fix:all": "npm run lint:fix --prefix frontend && npm run lint:fix --prefix backend",
         "test:e2e": "playwright test",
+        "test:e2e:ci": "CI=true playwright test",
         "test:e2e:headed": "playwright test --headed",
         "test:e2e:debug": "playwright test --debug",
         "test:e2e:report": "playwright show-report"
