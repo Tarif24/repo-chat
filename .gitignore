@@ -1,3 +1,7 @@
+# Project specific
+repoCloning/*
+repoCloning/
+
 # Dependencies
 node_modules/
 npm-debug.log*

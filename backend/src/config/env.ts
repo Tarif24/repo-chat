@@ -10,9 +10,6 @@ const envSchema = z.object({
 
     // mongodb
     MONGO_URL: z.string(),
-
-    // redis
-    REDIS_URL: z.string(),
     // .regex(
     //     /^mongodb(\+srv)?:\/\/[^:]+:[^@]+@[^:/]+(:\d+)?\/[^?]+(\?.*)?$/,
     //     'MONGO_URL must be a valid MongoDB connection string'

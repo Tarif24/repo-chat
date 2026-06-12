@@ -30,8 +30,8 @@ services:
                   target: /app
                 - action: rebuild
                   path: ./backend/package.json
-        depends_on:
-            - redis
+        #depends_on:
+        #    - redis
         #     - mongodb
         volumes:
             - ./backend/logs:/app/logs
