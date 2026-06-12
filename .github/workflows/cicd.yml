@@ -6,7 +6,6 @@ on:
   pull_request:
     branches: ["**"]
 
-# Prevent redundant runs on the same ref
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
@@ -20,136 +19,150 @@ env:
 
 jobs:
   # ──────────────────────────────────────────────
-  # JOB 1: CI — runs on every push to every branch
+  # JOB 0: Detect which parts of the repo changed
   # ──────────────────────────────────────────────
-  ci:
-    name: CI (lint · typecheck · build · unit · integration)
+  changes:
+    name: Detect changed paths
+    runs-on: ubuntu-latest
+    outputs:
+      backend: ${{ steps.filter.outputs.backend }}
+      frontend: ${{ steps.filter.outputs.frontend }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            backend:
+              - 'backend/**'
+            frontend:
+              - 'frontend/**'
+
+  # ──────────────────────────────────────────────
+  # JOB 1a: Backend CI — only if backend/ changed
+  # ──────────────────────────────────────────────
+  ci-backend:
+    name: CI Backend (lint · typecheck · build · unit · integration)
+    needs: changes
+    if: needs.changes.outputs.backend == 'true'
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      # ── Node setup ──────────────────────────────
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
           node-version: "20"
           cache: "npm"
-          cache-dependency-path: |
-            backend/package-lock.json
-            frontend/package-lock.json
+          cache-dependency-path: backend/package-lock.json
 
-      # ── Install dependencies ─────────────────────
       - name: Install backend dependencies
         working-directory: backend
         run: npm ci --legacy-peer-deps
 
-      - name: Install frontend dependencies
-        working-directory: frontend
-        run: npm ci
-
-      # ── Lint ─────────────────────────────────────
       - name: Lint (backend)
         working-directory: backend
         run: npm run lint
 
-      - name: Lint (frontend)
-        working-directory: frontend
-        run: npm run lint
-
-      # ── Type check ───────────────────────────────
       - name: Type check (backend)
         working-directory: backend
         run: npx tsc --project tsconfig.build.json --noEmit
 
-      - name: Type check (frontend)
-        working-directory: frontend
-        run: npx tsc --project tsconfig.json --noEmit
-
-      # ── Build check ──────────────────────────────
       - name: Build backend (compile TypeScript)
         working-directory: backend
         run: npm run build
 
-      - name: Build frontend (Next.js static export)
-        working-directory: frontend
-        run: npm run build
-
-      # ── Unit tests ───────────────────────────────
       - name: Unit tests (backend)
         working-directory: backend
         run: npm run test:unit
 
-      # ── Integration tests ────────────────────────
       - name: Integration tests (backend)
         working-directory: backend
         run: npm run test:integration
 
   # ──────────────────────────────────────────────
-  # JOB 2: Deploy — only on merge to main
+  # JOB 1b: Frontend CI — only if frontend/ changed
   # ──────────────────────────────────────────────
-  deploy:
-    name: Deploy (frontend + backend + E2E)
-    needs: ci
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+  ci-frontend:
+    name: CI Frontend (lint · typecheck · build)
+    needs: changes
+    if: needs.changes.outputs.frontend == 'true'
     runs-on: ubuntu-latest
 
-    # GitHub OIDC → AWS temporary credentials (no static keys stored in secrets)
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install frontend dependencies
+        working-directory: frontend
+        run: npm ci
+
+      - name: Lint (frontend)
+        working-directory: frontend
+        run: npm run lint
+
+      - name: Type check (frontend)
+        working-directory: frontend
+        run: npx tsc --project tsconfig.json --noEmit
+
+      - name: Build frontend (Next.js static export)
+        working-directory: frontend
+        run: npm run build
+
+  # ──────────────────────────────────────────────
+  # JOB 2a: Deploy Backend — main only, backend changed
+  # ──────────────────────────────────────────────
+  deploy-backend:
+    name: Deploy Backend (Lambda)
+    needs: [changes, ci-backend]
+    if: |
+      github.ref == 'refs/heads/main' &&
+      github.event_name == 'push' &&
+      needs.changes.outputs.backend == 'true'
+    runs-on: ubuntu-latest
+
     permissions:
-      id-token: write   # required to request the JWT
+      id-token: write
       contents: read
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      # ── Node setup ──────────────────────────────
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
           node-version: "20"
           cache: "npm"
-          cache-dependency-path: |
-            backend/package-lock.json
-            frontend/package-lock.json
-
-      # ── Install dependencies ─────────────────────
-      - name: Install root dependencies
-        run: npm ci
+          cache-dependency-path: backend/package-lock.json
 
       - name: Install backend dependencies
         working-directory: backend
         run: npm ci --legacy-peer-deps
 
-      - name: Install frontend dependencies
-        working-directory: frontend
-        run: npm ci
-
-      # ── Build ─────────────────────────────────────
-      # Both apps already built and verified in CI. We rebuild here because
-      # the deploy job runs on a fresh runner with no files from the CI job.
       - name: Build backend (compile TypeScript)
         working-directory: backend
         run: npm run build
 
-      - name: Build frontend (Next.js static export)
-        working-directory: frontend
-        run: npm run build
-
-      # ── AWS credentials via OIDC ──────────────────
       - name: Configure AWS credentials (OIDC)
         uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: ${{ secrets.AWS_DEPLOY_ROLE_ARN }}
           aws-region: ${{ env.AWS_REGION }}
 
-      # ── ECR login ─────────────────────────────────
       - name: Log in to Amazon ECR
         id: ecr-login
         uses: aws-actions/amazon-ecr-login@v2
 
-      # ── Build & push Docker image ──────────────────
       # IMPORTANT: --platform linux/amd64 — Lambda needs x86_64; Apple Silicon default is arm64.
       # IMPORTANT: --provenance=false   — prevents a manifest list which Lambda rejects.
       - name: Build and push backend Docker image
@@ -165,7 +178,6 @@ jobs:
             --push \
             ./backend
 
-      # ── Update Lambda ─────────────────────────────
       - name: Update Lambda to use new image
         env:
           ECR_REGISTRY: ${{ steps.ecr-login.outputs.registry }}
@@ -176,26 +188,91 @@ jobs:
             --image-uri $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG \
             --region $AWS_REGION
 
-      # ── Wait for Lambda rollout ────────────────────
       - name: Wait for Lambda update to complete
         run: |
           aws lambda wait function-updated \
             --function-name $LAMBDA_FUNCTION_NAME \
             --region $AWS_REGION
 
-      # ── Deploy frontend to S3 ─────────────────────
+  # ──────────────────────────────────────────────
+  # JOB 2b: Deploy Frontend — main only, frontend changed
+  # ──────────────────────────────────────────────
+  deploy-frontend:
+    name: Deploy Frontend (S3 + CloudFront)
+    needs: [changes, ci-frontend]
+    if: |
+      github.ref == 'refs/heads/main' &&
+      github.event_name == 'push' &&
+      needs.changes.outputs.frontend == 'true'
+    runs-on: ubuntu-latest
+
+    permissions:
+      id-token: write
+      contents: read
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install frontend dependencies
+        working-directory: frontend
+        run: npm ci
+
+      - name: Build frontend (Next.js static export)
+        working-directory: frontend
+        run: npm run build
+
+      - name: Configure AWS credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_DEPLOY_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
       - name: Deploy frontend to S3
         run: |
           aws s3 sync frontend/out/ s3://$S3_BUCKET --delete
 
-      # ── Invalidate CloudFront ─────────────────────
       - name: Invalidate CloudFront cache
         run: |
           aws cloudfront create-invalidation \
             --distribution-id $CLOUDFRONT_DISTRIBUTION_ID \
             --paths "/*"
 
-      # ── Playwright cache + install ─────────────────
+  # ──────────────────────────────────────────────
+  # JOB 3: E2E — runs if either deploy ran successfully
+  # ──────────────────────────────────────────────
+  e2e:
+    name: E2E tests (Playwright)
+    needs: [deploy-backend, deploy-frontend]
+    if: |
+      always() &&
+      github.ref == 'refs/heads/main' &&
+      github.event_name == 'push' &&
+      (needs.deploy-backend.result == 'success' || needs.deploy-frontend.result == 'success') &&
+      needs.deploy-backend.result != 'failure' &&
+      needs.deploy-frontend.result != 'failure'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Install root dependencies
+        run: npm ci
+
       - name: Cache Playwright browsers
         uses: actions/cache@v4
         id: playwright-cache
@@ -207,13 +284,11 @@ jobs:
         if: steps.playwright-cache.outputs.cache-hit != 'true'
         run: npx playwright install --with-deps chromium
 
-      # ── E2E tests ─────────────────────────────────
       - name: Run E2E tests (Playwright)
         env:
           BASE_URL: ${{ secrets.E2E_BASE_URL }}
         run: npm run test:e2e:ci
 
-      # ── Upload Playwright report on failure ────────
       - name: Upload Playwright report
         if: failure()
         uses: actions/upload-artifact@v4

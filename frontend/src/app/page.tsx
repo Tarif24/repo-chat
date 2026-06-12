@@ -45,7 +45,7 @@ export default function Home() {
                     >
                         <input
                             type="text"
-                            placeholder="Enter a repo link..."
+                            placeholder="Enter a repo link...."
                             className="relative h-full w-full rounded-[5rem] px-5 wrap-break-word text-black focus:outline-none"
                             value={inputText}
                             onChange={e => handleTyping(e)}

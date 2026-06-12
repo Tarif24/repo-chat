@@ -61,7 +61,7 @@ const serverSignalHandler = () => {
 
 const startServer = async () => {
     try {
-        logger.info('Application setup initiated');
+        logger.info('Application setup initiated ');
 
         // Setting up express middleware
 
