@@ -1,18 +1,9 @@
 import type { Metadata } from 'next';
-import { Geist, Geist_Mono } from 'next/font/google';
+import { ThemeProvider } from '../components/themeProvider';
+import { sans, mono } from './fonts';
 import './globals.css';
 
 import NavBar from '../components/navBar';
-
-const geistSans = Geist({
-    variable: '--font-geist-sans',
-    subsets: ['latin'],
-});
-
-const geistMono = Geist_Mono({
-    variable: '--font-geist-mono',
-    subsets: ['latin'],
-});
 
 export const metadata: Metadata = {
     title: 'Repo Chat',
@@ -26,13 +17,15 @@ export default function RootLayout({
     children: React.ReactNode;
 }>) {
     return (
-        <html lang="en">
-            <body
-                className={`${geistSans.variable} ${geistMono.variable} flex h-screen w-screen flex-col antialiased`}
-            >
+        <html
+            lang="en"
+            suppressHydrationWarning
+            className={`${sans.variable} ${mono.variable}`}
+        >
+            <body className={`flex h-screen w-screen flex-col antialiased`}>
                 <NavBar />
                 <main className="min-h-0 flex-1 overflow-hidden">
-                    {children}
+                    <ThemeProvider>{children}</ThemeProvider>
                 </main>
             </body>
         </html>

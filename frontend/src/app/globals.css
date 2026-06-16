@@ -1,26 +1,77 @@
 @import 'tailwindcss';
+@import 'tailwindcss/preflight';
+@tailwind utilities;
 
-@layer utilities {
-    .custom-scrollbar::-webkit-scrollbar {
-        width: 7px;
-        height: 7px;
+@layer base {
+    html {
+        /* Lets the browser style native form controls (e.g. default checkbox/
+       scrollbar rendering in some browsers) appropriately for either theme. */
+        color-scheme: light dark;
     }
 
-    .custom-scrollbar::-webkit-scrollbar-track {
-        background: rgb(119, 119, 119);
-        border-radius: 8px;
-        margin-top: 10px;
-        margin-bottom: 10px;
-        margin-left: 10px;
-        margin-right: 10px;
+    body {
+        @apply bg-white text-slate-800 antialiased dark:bg-slate-900 dark:text-slate-100;
+        font-family:
+            var(--font-sans),
+            ui-sans-serif,
+            system-ui,
+            -apple-system,
+            sans-serif;
+        /* Smooths the light/dark switch instead of an instant, jarring snap. */
+        transition:
+            background-color 0.15s ease,
+            color 0.15s ease;
     }
 
-    .custom-scrollbar::-webkit-scrollbar-thumb {
-        background: rgb(0, 0, 0);
-        border-radius: 8px;
+    code,
+    pre {
+        font-family:
+            var(--font-mono), ui-monospace, SFMono-Regular, Menlo, monospace;
     }
 
-    .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-        background: rgb(0, 0, 0);
+    /* Visible focus rings on every interactive element, for accessibility
+    (covers buttons, links, and the theme toggle by default; inputs already
+    have their own focus-within ring defined inline in the components). */
+    *:focus-visible {
+        @apply ring-2 ring-blue-400 ring-offset-2 ring-offset-white outline-none dark:ring-blue-500 dark:ring-offset-slate-900;
     }
+}
+
+/* Scrollbar styling — subtle, matches the dev-tool aesthetic instead of the
+   browser's default scrollbar in either theme. */
+::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background-color: theme('colors.gray.300');
+    border-radius: 6px;
+    border: 2px solid transparent;
+    background-clip: content-box;
+}
+
+.dark ::-webkit-scrollbar-thumb {
+    background-color: theme('colors.slate.600');
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background-color: theme('colors.gray.400');
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+    background-color: theme('colors.slate.500');
+}
+
+/* Text selection color matching the accent, in both themes. */
+::selection {
+    background-color: theme('colors.blue.200');
+}
+
+.dark ::selection {
+    background-color: theme('colors.blue.800');
 }
