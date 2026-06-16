@@ -121,7 +121,7 @@ Frontend runs at `http://localhost:3000`, backend at `http://localhost:8080`.
 
 ## Deployment
 
-The full AWS deployment architecture, Dockerfile strategy, and Lambda Web Adapter configuration are covered in the [Hosting Strategy doc](docs/RepoChat-AWSHostingHandoff.pdf).
+The full AWS deployment architecture, Dockerfile strategy, and Lambda Web Adapter configuration are covered in the [Hosting Strategy doc](docs/RepoChat-AWSHosting.pdf).
 
 CI/CD runs on GitHub Actions: PRs trigger test + build, merges to main trigger full deploy to ECR → Lambda with a smoke test against `/api/health/check`.
 
@@ -145,6 +145,6 @@ Full test matrix is in the [Plan doc](docs/RepoChat-Plan_v2.pdf).
 | [Query Pipeline Diagram](docs/RepoChat-QueryPipelineDiagram.pdf)         | Query flow diagram                                            |
 | [MongoDB Models](docs/RepoChat-DatabaseModels.pdf)                       | Collection schemas                                            |
 | [API Endpoints](docs/RepoChat-APIEndpoints.pdf)                          | Request and response shapes                                   |
-| [Hosting Strategy](docs/RepoChat-AWSHostingHandoff.pdf)                  | AWS architecture, cost breakdown, deployment decisions        |
+| [Hosting Strategy](docs/RepoChat-AWSHosting.pdf)                         | AWS architecture, cost breakdown, deployment decisions        |
 | [Setup Guide](docs/RepoChat-SetupGuide.md)                               | Setup guide for local development                             |
 | [CICD Setup](docs/RepoChat-CICD.pdf)                                     | CICD pipeline                                                 |
