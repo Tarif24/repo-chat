@@ -147,3 +147,4 @@ Full test matrix is in the [Plan doc](docs/RepoChat-Plan_v2.pdf).
 | [API Endpoints](docs/RepoChat-APIEndpoints.pdf)                          | Request and response shapes                                   |
 | [Hosting Strategy](docs/RepoChat-AWSHostingHandoff.pdf)                  | AWS architecture, cost breakdown, deployment decisions        |
 | [Setup Guide](docs/RepoChat-SetupGuide.md)                               | Setup guide for local development                             |
+| [CICD Setup](docs/RepoChat-CICD.pdf)                                     | CICD pipeline                                                 |
