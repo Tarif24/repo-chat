@@ -1,19 +1,44 @@
 'use client';
 
 import { useState } from 'react';
-import { Send } from 'lucide-react';
+import { Sparkles, ArrowRight, GitBranch, Quote, Zap } from 'lucide-react';
 
-export default function Home() {
+const EXAMPLE_REPOS = [
+    'Tarif24/repo-chat',
+    'facebook/react',
+    'expressjs/express',
+];
+
+const FEATURES = [
+    {
+        icon: GitBranch,
+        title: 'CST-aware chunking',
+        description:
+            'Code is split along real boundaries, not arbitrary line counts.',
+    },
+    {
+        icon: Quote,
+        title: 'Cited sources',
+        description:
+            'Every answer links back to the exact file and line range it came from.',
+    },
+    {
+        icon: Zap,
+        title: 'Cached answers',
+        description:
+            'Semantic caching means repeat-ish questions return instantly.',
+    },
+];
+
+export default function HomePage() {
     const API_URL = process.env.NEXT_PUBLIC_API_URL || '';
 
     const [inputText, setInputText] = useState('');
-
-    const handleTyping = (e: React.ChangeEvent<HTMLInputElement>) => {
-        setInputText(e.target.value);
-    };
+    const [isLoading, setIsLoading] = useState(false);
 
     const handleSubmit = async (e: React.SubmitEvent<HTMLFormElement>) => {
         e.preventDefault();
+        setIsLoading(true);
         const responseJSON = await fetch(`${API_URL}/api/ingest/repo`, {
             method: 'POST',
             headers: {
@@ -30,35 +55,80 @@ export default function Home() {
         }
 
         setInputText('');
+        setIsLoading(false);
     };
 
     return (
-        <div className="flex h-full items-center justify-center">
-            <div className="flex w-full flex-col items-center justify-center gap-4 p-4 md:w-[50%] md:p-0">
-                <h1 className="text-[1.25rem] font-bold text-gray-700 sm:text-2xl">
-                    Enter a GitHub Repository Link
-                </h1>
-                <div className="mx-2 mb-2 flex h-fit w-full items-center justify-center rounded-2xl border-2 bg-white/20 backdrop-blur-2xl">
-                    <form
-                        className="flex w-full items-center"
-                        onSubmit={e => void handleSubmit(e)}
-                    >
-                        <input
-                            type="text"
-                            placeholder="Enter a repo link..."
-                            className="relative h-full w-full rounded-[5rem] px-5 wrap-break-word text-black focus:outline-none"
-                            value={inputText}
-                            onChange={e => handleTyping(e)}
-                        />
-                        <button
-                            className="flex h-full items-center justify-center rounded-[5rem] border-4 border-white bg-black p-3 text-white transition duration-300 ease-in-out hover:cursor-pointer hover:bg-gray-700"
-                            type="submit"
-                        >
-                            <Send className="size-4 rounded-[5rem] sm:size-6" />
-                        </button>
-                    </form>
+        <div className="flex h-full flex-col bg-white transition-colors dark:bg-slate-900">
+            {/* Hero */}
+            <section className="flex w-full flex-1 flex-col items-center justify-center text-center">
+                <div className="mb-6 inline-flex w-fit items-center gap-1.5 rounded-md bg-gray-100 px-2.5 py-1 text-sm text-gray-500 dark:bg-slate-800 dark:text-slate-400">
+                    <Sparkles className="h-4 w-4" />
+                    RAG-powered code search
                 </div>
-            </div>
+
+                <h1 className="mb-4 text-4xl font-medium text-slate-800 dark:text-slate-100">
+                    Ask any GitHub repo a question
+                </h1>
+
+                <p className="mx-auto mb-7 max-w-md text-[17px] leading-relaxed text-gray-500 dark:text-slate-400">
+                    Paste a repo link and get answers grounded in the actual
+                    source, with file paths and line numbers, not guesses.
+                </p>
+
+                <form
+                    onSubmit={handleSubmit}
+                    className="mx-auto flex w-[50%] overflow-hidden rounded-md border border-gray-300 bg-gray-50 focus-within:ring-2 focus-within:ring-blue-200 dark:border-slate-700 dark:bg-slate-800 dark:focus-within:ring-blue-900"
+                >
+                    <div className="flex items-center px-3 font-mono text-[13px] text-gray-600 dark:text-slate-300">
+                        github.com/
+                    </div>
+                    <input
+                        type="text"
+                        value={inputText}
+                        onChange={e => setInputText(e.target.value)}
+                        placeholder="vercel/next.js"
+                        className="flex-1 border-none bg-transparent py-2.5 font-mono text-[13px] text-slate-800 outline-none placeholder:text-gray-400 dark:text-slate-100 dark:placeholder:text-slate-500"
+                    />
+                    <button
+                        type="submit"
+                        className="flex items-center gap-1.5 border-none bg-slate-800 px-5 text-[13px] font-medium text-white transition-colors hover:bg-slate-900 dark:bg-blue-600 dark:hover:bg-blue-700"
+                    >
+                        Analyze
+                        <ArrowRight className="h-3.5 w-3.5" />
+                    </button>
+                </form>
+
+                <div className="mt-8 flex w-full items-center justify-center gap-2">
+                    <span className="pt-1 text-sm text-gray-400 dark:text-slate-500">
+                        Try:
+                    </span>
+                    {EXAMPLE_REPOS.map(repo => (
+                        <button
+                            key={repo}
+                            onClick={() => setInputText(repo)}
+                            className="rounded-md border border-gray-200 px-2.5 py-1 font-mono text-sm text-gray-600 transition-colors hover:bg-gray-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
+                        >
+                            {repo}
+                        </button>
+                    ))}
+                </div>
+            </section>
+
+            {/* Feature row */}
+            <section className="mx-auto mb-16 grid max-w-7xl grid-cols-1 gap-20 border-t border-gray-200 px-6 py-8 sm:grid-cols-3 dark:border-slate-700">
+                {FEATURES.map(({ icon: Icon, title, description }) => (
+                    <div key={title}>
+                        <Icon className="mb-2 h-7 w-7 text-blue-600 dark:text-blue-400" />
+                        <p className="mb-1 font-medium text-slate-800 dark:text-slate-100">
+                            {title}
+                        </p>
+                        <p className="leading-relaxed text-gray-500 dark:text-slate-400">
+                            {description}
+                        </p>
+                    </div>
+                ))}
+            </section>
         </div>
     );
 }

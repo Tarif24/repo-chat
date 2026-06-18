@@ -23,10 +23,12 @@ export default function RootLayout({
             className={`${sans.variable} ${mono.variable}`}
         >
             <body className={`flex h-screen w-screen flex-col antialiased`}>
-                <NavBar />
-                <main className="min-h-0 flex-1 overflow-hidden">
-                    <ThemeProvider>{children}</ThemeProvider>
-                </main>
+                <ThemeProvider>
+                    <NavBar />
+                    <main className="min-h-0 flex-1 overflow-hidden">
+                        {children}
+                    </main>
+                </ThemeProvider>
             </body>
         </html>
     );

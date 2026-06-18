@@ -152,3 +152,4 @@ Thumbs.db
 
 database/data/
 database/logs/
+frontend/src/app/chat/page.tsx
