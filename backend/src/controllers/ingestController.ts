@@ -30,7 +30,11 @@ export async function ingestRepo(
     if (existingRepo && latestSha && existingRepo.latestSHA === latestSha) {
         await updateRepoLastAccessed(repoUrl);
         logger.info(`REPO: ${repoUrl} - Repository is up to date. No need to re-ingest.`);
-        return { success: true, latestSha, message: 'Repository is up to date' };
+        return {
+            success: true,
+            latestSha,
+            message: 'Repository is up to date. No need to re-ingest',
+        };
     }
 
     // Clone the repository and get the latest SHA
@@ -119,11 +123,11 @@ export async function ingestRepo(
         await updateRepoFileTree(repoUrl, fileTree);
     }
 
-    // Clear the cloned repository from disk to save space
-    await deleteEverythingInDir(appConfig.repoStoragePath);
-
     // Parse the valid files using Tree-sitter
     const allCodeChunks = await parseFiles(validFiles || [], repoUrl);
+
+    // Clear the cloned repository from disk to save space
+    await deleteEverythingInDir(appConfig.repoStoragePath);
 
     // Process and store the code chunks in the database
     await processAndStoreChunks(allCodeChunks, repoUrl);

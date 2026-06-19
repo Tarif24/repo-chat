@@ -1,12 +1,21 @@
 'use client';
 import { useState } from 'react';
-import { Send } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
+
+export type FileReferenceType = {
+    fileName: string;
+    relativePath: string;
+    startLine: number;
+    endLine: number;
+    name: string;
+};
 
 export default function ChatTypingBar({
     addMessageToChatHistory,
     selectedRepo,
     chatHistory,
     setUsedFiles,
+    setIsLoading,
 }: {
     addMessageToChatHistory: (
         chats: {
@@ -19,12 +28,13 @@ export default function ChatTypingBar({
         role: 'user' | 'assistant' | 'system';
         content: string;
     }[];
-    setUsedFiles: React.Dispatch<React.SetStateAction<string[]>>;
+    setUsedFiles: React.Dispatch<React.SetStateAction<FileReferenceType[]>>;
+    setIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
 }) {
     const API_URL = process.env.NEXT_PUBLIC_API_URL || '';
 
     // State to hold the input text and typing status
-    const [inputText, setInputText] = useState('');
+    const [input, setInput] = useState('');
 
     // Submit form handler
     const submitForm = async (
@@ -34,8 +44,10 @@ export default function ChatTypingBar({
             e.preventDefault();
         }
 
-        addMessageToChatHistory([{ role: 'user', content: inputText }]);
-        setInputText('');
+        addMessageToChatHistory([{ role: 'user', content: input }]);
+        setInput('');
+
+        setIsLoading(true);
 
         const responseJSON = await fetch(`${API_URL}/api/query/userQuery`, {
             method: 'POST',
@@ -43,7 +55,7 @@ export default function ChatTypingBar({
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify({
-                query: inputText,
+                query: input,
                 repoUrl: selectedRepo,
                 chatHistory: chatHistory,
             }),
@@ -54,42 +66,22 @@ export default function ChatTypingBar({
             alert(response.data.message);
         }
 
-        type FileReferenceType = {
-            fileName: string;
-            relativePath: string;
-            startLine: number;
-            endLine: number;
-            name: string;
-        };
-
-        let referenceFiles: string = 'No referenced files.';
+        const finalResponse = response.data.message;
 
         if (response.data.contextStats) {
-            referenceFiles = response.data.contextStats.filesReferenced
-                .map(
-                    (ref: FileReferenceType) =>
-                        `File: ${ref.fileName} Path: ${ref.relativePath} Lines: ${ref.startLine}-${ref.endLine} Name: ${ref.name}`
-                )
-                .join('\n');
-        }
-
-        const finalResponse = `${response.data.message}\n\nReferenced files:\n${referenceFiles}`;
-
-        if (response.data.contextStats) {
-            const usedFileNames =
-                response.data.contextStats.filesReferenced.map(
-                    (ref: FileReferenceType) => ref.fileName
-                );
+            const usedFileNames = response.data.contextStats.filesReferenced;
             setUsedFiles(usedFileNames);
         }
 
         addMessageToChatHistory([
-            { role: 'user', content: inputText },
+            { role: 'user', content: input },
             {
                 role: 'assistant',
                 content: finalResponse,
             },
         ]);
+
+        setIsLoading(false);
     };
 
     const handleSubmit = (e: React.SubmitEvent<HTMLFormElement> | string) => {
@@ -100,7 +92,7 @@ export default function ChatTypingBar({
     };
 
     const handleOnTextChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-        setInputText(e.target.value);
+        setInput(e.target.value);
 
         e.target.style.height = 'auto';
         e.target.style.height =
@@ -110,37 +102,37 @@ export default function ChatTypingBar({
     };
 
     return (
-        <div className="flex w-full justify-center">
+        <div className="flex w-full flex-col justify-center">
             <form
-                className="mx-3 mb-2 flex h-fit w-full flex-col items-end justify-center rounded-full"
                 onSubmit={handleSubmit}
+                className="flex items-center gap-2.5 border-t border-gray-200 px-6 py-4 dark:border-slate-700"
             >
-                <div className="flex h-fit w-full items-center justify-center rounded-2xl border-2 bg-white/20 backdrop-blur-2xl">
+                <div className="flex flex-1 items-center gap-2.5 rounded-md border border-gray-300 px-4 py-3 focus-within:ring-2 focus-within:ring-blue-200 dark:border-slate-700 dark:focus-within:ring-blue-900">
                     <textarea
-                        value={inputText}
-                        placeholder="Send a message..."
+                        value={input}
+                        placeholder="Ask about this repo..."
                         rows={1}
-                        className="custom-scrollbar relative mr-1 h-full w-full resize-none overflow-auto rounded-2xl px-3 wrap-break-word text-black focus:outline-none"
+                        className="text-md flex-1 resize-none border-none bg-transparent text-slate-800 outline-none placeholder:text-gray-400 focus-within:ring-0 dark:text-slate-100 dark:placeholder:text-slate-500"
                         onChange={e => handleOnTextChange(e)}
                         onKeyDown={e => {
                             if (e.key === 'Enter' && !e.shiftKey) {
                                 e.preventDefault();
 
-                                void submitForm(inputText);
+                                void submitForm(input);
                             }
-                            // Shift+Enter will insert a newline by default
                         }}
                     />
-                    <div className="mr-2 text-[0.8rem] text-black sm:text-[1rem]">
-                        {inputText.length}/500
-                    </div>
-                    <button
-                        className="flex h-full items-center justify-center rounded-[5rem] border-2 border-gray-300 bg-black p-3 text-white transition duration-300 ease-in-out hover:cursor-pointer hover:bg-gray-700"
-                        type="submit"
-                    >
-                        <Send className="size-4 rounded-[5rem] sm:size-6" />
-                    </button>
+                    <span className="font-mono text-[13px] text-gray-400 dark:text-slate-500">
+                        {input.length}/500
+                    </span>
                 </div>
+                <button
+                    type="submit"
+                    aria-label="Send"
+                    className="flex h-8.5 w-8.5 shrink-0 items-center justify-center rounded-md bg-slate-800 transition-colors hover:cursor-pointer hover:bg-slate-900 dark:bg-blue-600 dark:hover:bg-blue-700"
+                >
+                    <ArrowRight className="h-4 w-4 text-white" />
+                </button>
             </form>
         </div>
     );

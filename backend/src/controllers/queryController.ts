@@ -37,9 +37,9 @@ export async function userQuery(
     if (queryEmbedding) {
         // Check the semantic cache for a relevant cached response before proceeding with the full query processing pipeline
         const cachedResponse = await cacheCheck(repoURL, queryEmbedding);
-        if (cachedResponse && cachedResponse.length > 0) {
+        if (cachedResponse && cachedResponse.response.length > 0) {
             logger.info(`REPO: ${repoURL} - Cache hit for query: "${query}"`);
-            return { message: cachedResponse, contextStats: null };
+            return { message: cachedResponse.response, contextStats: cachedResponse.contextStats };
         }
     }
 
@@ -146,7 +146,7 @@ export async function userQuery(
 
     // Save the response to the semantic cache along with the query and its embedding for future cache hits
     if (queryEmbedding) {
-        await cacheSave(repoURL, query, queryEmbedding, response?.content || '');
+        await cacheSave(repoURL, query, queryEmbedding, response?.content || '', contextStats);
     }
 
     return { message: response?.content, contextStats };

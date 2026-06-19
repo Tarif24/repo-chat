@@ -1,11 +1,15 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
-import Message from './message';
-import ChatTypingBar from './chatTypingBar';
+import { useState, useEffect, useRef } from 'react';
+import { PulseLoader } from 'react-spinners';
 import FileTree from './fileTree';
+import ChatTypingBar from './chatTypingBar';
+import type { FileReferenceType } from './chatTypingBar';
+import Message from './message';
+import RepoSelector from './repoSelector';
+import RepoEmptyState from './repoEmptyState';
 
-export default function Chat() {
+export default function ChatPage() {
     type MessageType = {
         role: 'user' | 'assistant' | 'system';
         content: string;
@@ -18,7 +22,7 @@ export default function Chat() {
 
     //const [isLoading, setIsLoading] = useState<boolean>(false);
 
-    const [usedFiles, setUsedFiles] = useState<string[]>([]);
+    const [usedFiles, setUsedFiles] = useState<FileReferenceType[]>([]);
 
     // State to hold the repository data
     const [repoData, setRepoData] = useState<any>(null);
@@ -27,6 +31,8 @@ export default function Chat() {
 
     // State to hold the chat history
     const [chatHistory, setChatHistory] = useState<MessageType[]>([]);
+
+    const [isLoading, setIsLoading] = useState(false);
 
     // Reference to the end of the chat history for scrolling
     const chatEndRef = useRef<HTMLDivElement | null>(null);
@@ -83,7 +89,11 @@ export default function Chat() {
     const repoSwitchHandler = async (
         e: React.ChangeEvent<HTMLSelectElement>
     ) => {
-        setSelectedRepo(e.target.value);
+        await onRepoSwitch(e.target.value);
+    };
+
+    const onRepoSwitch = async (repo: string) => {
+        setSelectedRepo(repo);
 
         const responseJSON = await fetch(`${API_URL}/api/query/getRepoByURL`, {
             method: 'POST',
@@ -91,7 +101,7 @@ export default function Chat() {
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify({
-                repoUrl: e.target.value,
+                repoUrl: repo,
             }),
         });
         const response = await responseJSON.json();
@@ -102,77 +112,73 @@ export default function Chat() {
     };
 
     return (
-        <div className="flex h-full items-center justify-center gap-4 border p-3 lg:p-10">
-            <div
-                className={`flex h-full min-h-0 w-100 flex-col rounded-2xl border bg-gray-100 p-4 ${selectedRepo !== '' ? 'hidden lg:block' : 'hidden'}`}
-            >
-                <h2 className="mb-2 text-center text-2xl font-bold text-gray-700">
-                    File Tree
-                </h2>
-                <div className="custom-scrollbar min-h-0 w-full flex-1 overflow-auto">
-                    {repoData && repoData.fileTree && (
-                        <div className="mb-4">
-                            <FileTree
-                                tree={repoData.fileTree}
-                                usedFiles={usedFiles}
-                            />
-                        </div>
-                    )}
-                </div>
-            </div>
-            <div className="flex h-full flex-1 flex-col items-center justify-center gap-4">
-                <div className="flex w-fit flex-col items-center justify-center gap-3 pt-2 sm:flex-row sm:gap-4 sm:pt-0 sm:pb-4">
-                    <h1 className="text-2xl font-bold text-gray-700">
-                        Repository Name
-                    </h1>
-                    <select
-                        className="flex-1 rounded border bg-white px-3 py-2"
-                        required
-                        value={selectedRepo}
-                        onChange={e => void repoSwitchHandler(e)}
-                    >
-                        <option value="" disabled>
-                            Select a collection
-                        </option>
-                        {repositories.map((repo, index) => (
-                            <option key={index} value={repo}>
-                                {repo
-                                    .replace(
-                                        /^https?:\/\/(www\.)?github\.com\//,
-                                        ''
-                                    )
-                                    .replace(/\/$/, '')}
-                            </option>
-                        ))}
-                    </select>
-                </div>
-                <div
-                    className={`min-h-0 w-full flex-1 flex-col rounded-2xl border bg-gray-300 ${selectedRepo !== '' ? 'flex' : 'hidden'}`}
-                >
-                    <div className="flex h-full flex-col">
-                        <div className="custom-scrollbar mr-1 flex min-h-0 flex-1 flex-col overflow-y-auto pr-2 pl-4">
-                            <div className="grow"></div>
-                            {chatHistory.map(({ role, content }, index) => {
-                                return (
-                                    <Message
-                                        key={index}
-                                        role={role}
-                                        content={content}
-                                    />
-                                );
-                            })}
-                            <div ref={chatEndRef}></div>
-                        </div>
-
-                        <ChatTypingBar
-                            addMessageToChatHistory={addMessageToChatHistory}
+        <div className="flex h-full flex-col bg-white transition-colors dark:bg-slate-900">
+            {repoData !== null ? (
+                <>
+                    {/* Repo selector bar */}
+                    <div className="flex items-center justify-end border-b border-gray-200 px-6 py-3 dark:border-slate-700">
+                        <RepoSelector
+                            repositories={repositories}
                             selectedRepo={selectedRepo}
-                            chatHistory={chatHistory}
-                            setUsedFiles={setUsedFiles}
+                            onRepoChange={repoSwitchHandler}
                         />
                     </div>
-                </div>
-            </div>
+                    <div className="hidden min-h-0 min-w-0 flex-1 lg:flex">
+                        {/* Sidebar */}
+                        <div className="min-w-100 flex-none overflow-auto border-gray-200 bg-gray-50 dark:border-slate-700 dark:bg-slate-800">
+                            <p className="mb-2.5 px-1.5 text-[15px] font-medium text-gray-400 dark:text-slate-500">
+                                FILES
+                            </p>
+                            <div className="wrap-break-words min-h-0 font-mono text-[12.5px] text-gray-600 dark:text-slate-300">
+                                <FileTree
+                                    tree={repoData.fileTree}
+                                    usedFiles={usedFiles.map(
+                                        (ref: FileReferenceType) => ref.fileName
+                                    )}
+                                />
+                            </div>
+                        </div>
+
+                        {/* Chat column */}
+                        <main className="flex min-h-0 flex-1 flex-col justify-between">
+                            <div className="flex min-h-0 flex-1 flex-col overflow-auto py-5 pr-2 pl-4">
+                                <div className="grow" />
+                                {chatHistory.map((message, idx) => (
+                                    <Message
+                                        key={idx}
+                                        role={message.role}
+                                        content={message.content}
+                                        sources={usedFiles}
+                                    />
+                                ))}
+                                <div ref={chatEndRef} />
+                                <PulseLoader
+                                    color="#487aaf"
+                                    loading={isLoading}
+                                    size={12}
+                                    speedMultiplier={1}
+                                    className="pl-2"
+                                />
+                            </div>
+
+                            <ChatTypingBar
+                                addMessageToChatHistory={
+                                    addMessageToChatHistory
+                                }
+                                selectedRepo={selectedRepo}
+                                chatHistory={chatHistory}
+                                setUsedFiles={setUsedFiles}
+                                setIsLoading={setIsLoading}
+                            />
+                        </main>
+                    </div>
+                </>
+            ) : (
+                <RepoEmptyState
+                    repositories={repositories}
+                    onSelectRepo={onRepoSwitch}
+                />
+            )}
         </div>
     );
 }

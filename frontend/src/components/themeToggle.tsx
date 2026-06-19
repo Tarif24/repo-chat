@@ -9,7 +9,10 @@ export function ThemeToggle() {
     const [mounted, setMounted] = useState(false);
 
     // Avoid rendering theme-dependent UI until mounted (prevents hydration mismatch)
-    useEffect(() => setMounted(true), []);
+    useEffect(() => {
+        const timeoutId = window.setTimeout(() => setMounted(true), 0);
+        return () => window.clearTimeout(timeoutId);
+    }, []);
 
     if (!mounted) {
         // Reserve the final size so nothing shifts once this mounts.

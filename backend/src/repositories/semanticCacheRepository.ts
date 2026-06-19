@@ -4,7 +4,7 @@ import { SemanticCache } from '../database/models/index.js';
 export async function searchSemanticCache(
     repoURL: string,
     embedding: number[]
-): Promise<{ response: string; score: number } | null> {
+): Promise<{ response: string; score: number; contextStats: any } | null> {
     const results = (await SemanticCache.collection
         .aggregate([
             {
@@ -18,9 +18,9 @@ export async function searchSemanticCache(
                 },
             },
             { $addFields: { score: { $meta: 'vectorSearchScore' } } },
-            { $project: { response: 1, score: 1, _id: 0 } },
+            { $project: { response: 1, score: 1, _id: 0, contextStats: 1 } },
         ])
-        .toArray()) as { response: string; score: number }[];
+        .toArray()) as { response: string; score: number; contextStats: any }[];
 
     if (!results[0]) {
         return null;
@@ -33,9 +33,10 @@ export async function saveSemanticCache(
     repoURL: string,
     query: string,
     queryEmbedding: number[],
-    response: string
+    response: string,
+    contextStats: any
 ): Promise<void> {
-    await SemanticCache.create({ repoURL, query, queryEmbedding, response });
+    await SemanticCache.create({ repoURL, query, queryEmbedding, response, contextStats });
 }
 
 export async function invalidateSemanticCache(repoURL: string): Promise<void> {

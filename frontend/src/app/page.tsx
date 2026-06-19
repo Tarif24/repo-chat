@@ -2,6 +2,9 @@
 
 import { useState } from 'react';
 import { Sparkles, ArrowRight, GitBranch, Quote, Zap } from 'lucide-react';
+import { validateRepoPath } from '../helper/validateRepoPath';
+import { toast } from 'react-toastify';
+import RepoLoadingState from './repoLoadingState';
 
 const EXAMPLE_REPOS = [
     'Tarif24/repo-chat',
@@ -34,10 +37,26 @@ export default function HomePage() {
     const API_URL = process.env.NEXT_PUBLIC_API_URL || '';
 
     const [inputText, setInputText] = useState('');
+    const [currentIngestingRepo, setCurrentIngestingRepo] = useState('');
     const [isLoading, setIsLoading] = useState(false);
 
     const handleSubmit = async (e: React.SubmitEvent<HTMLFormElement>) => {
         e.preventDefault();
+
+        const validationResult = validateRepoPath(inputText);
+        if (!validationResult.valid) {
+            toast.success(validationResult.error);
+            return;
+        }
+
+        const validatedRepoURL =
+            'https://github.com/' +
+            validationResult.owner +
+            '/' +
+            validationResult.repo;
+
+        setCurrentIngestingRepo(validatedRepoURL);
+
         setIsLoading(true);
         const responseJSON = await fetch(`${API_URL}/api/ingest/repo`, {
             method: 'POST',
@@ -45,20 +64,29 @@ export default function HomePage() {
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify({
-                repoUrl: inputText,
+                repoUrl: validatedRepoURL,
             }),
         });
         const response = await responseJSON.json();
 
         if (response.message.toLowerCase().includes('openai api error')) {
-            alert(response.data.message);
+            toast.success(response.data.message);
         }
 
         setInputText('');
+        setCurrentIngestingRepo('');
         setIsLoading(false);
+
+        if (responseJSON.ok) {
+            toast.success(response.data.message);
+        } else {
+            toast.error(
+                'Sorry the repo could not be ingested at this time please try again later'
+            );
+        }
     };
 
-    return (
+    return !isLoading ? (
         <div className="flex h-full flex-col bg-white transition-colors dark:bg-slate-900">
             {/* Hero */}
             <section className="flex w-full flex-1 flex-col items-center justify-center text-center">
@@ -77,7 +105,7 @@ export default function HomePage() {
                 </p>
 
                 <form
-                    onSubmit={handleSubmit}
+                    onSubmit={e => void handleSubmit(e)}
                     className="mx-auto flex w-[50%] overflow-hidden rounded-md border border-gray-300 bg-gray-50 focus-within:ring-2 focus-within:ring-blue-200 dark:border-slate-700 dark:bg-slate-800 dark:focus-within:ring-blue-900"
                 >
                     <div className="flex items-center px-3 font-mono text-[13px] text-gray-600 dark:text-slate-300">
@@ -92,7 +120,7 @@ export default function HomePage() {
                     />
                     <button
                         type="submit"
-                        className="flex items-center gap-1.5 border-none bg-slate-800 px-5 text-[13px] font-medium text-white transition-colors hover:bg-slate-900 dark:bg-blue-600 dark:hover:bg-blue-700"
+                        className="flex items-center gap-1.5 border-none bg-slate-800 px-5 text-[13px] font-medium text-white transition-colors hover:cursor-pointer hover:bg-slate-900 dark:bg-blue-600 dark:hover:bg-blue-700"
                     >
                         Analyze
                         <ArrowRight className="h-3.5 w-3.5" />
@@ -130,5 +158,7 @@ export default function HomePage() {
                 ))}
             </section>
         </div>
+    ) : (
+        <RepoLoadingState repoLabel={currentIngestingRepo} />
     );
 }

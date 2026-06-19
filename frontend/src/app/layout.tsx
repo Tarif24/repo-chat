@@ -2,6 +2,8 @@ import type { Metadata } from 'next';
 import { ThemeProvider } from '../components/themeProvider';
 import { sans, mono } from './fonts';
 import './globals.css';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 import NavBar from '../components/navBar';
 
@@ -28,6 +30,7 @@ export default function RootLayout({
                     <main className="min-h-0 flex-1 overflow-hidden">
                         {children}
                     </main>
+                    <ToastContainer />
                 </ThemeProvider>
             </body>
         </html>
