@@ -141,8 +141,8 @@ export default function ChatPage() {
 
                         {/* Chat column */}
                         <div className="flex min-h-0 flex-1 flex-col justify-between">
-                            <div className="flex min-h-0 flex-1 flex-col overflow-auto py-5 pr-2 pl-4">
-                                <div className="grow" />
+                            <div className="flex min-h-0 flex-1 flex-col overflow-auto px-4 py-5">
+                                <div className="flex-1" />
                                 {chatHistory.map((message, idx) => (
                                     <Message
                                         key={idx}
