@@ -125,7 +125,7 @@ export default function ChatPage() {
                     </div>
                     <div className="hidden min-h-0 min-w-0 flex-1 lg:flex">
                         {/* Sidebar */}
-                        <div className="min-w-100 flex-none overflow-auto border-gray-200 bg-gray-50 dark:border-slate-700 dark:bg-slate-800">
+                        <div className="min-w-100 flex-none overflow-auto border-gray-200 bg-gray-50 p-4 dark:border-slate-700 dark:bg-slate-800">
                             <p className="mb-2.5 px-1.5 text-[15px] font-medium text-gray-400 dark:text-slate-500">
                                 FILES
                             </p>

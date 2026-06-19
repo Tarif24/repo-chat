@@ -29,7 +29,9 @@ export default function RootLayout({
                 <ThemeProvider>
                     <NavVisibilityProvider>
                         <NavBar />
-                        <main className="min-h-0 flex-1">{children}</main>
+                        <main className="min-h-0 flex-1 overflow-auto">
+                            {children}
+                        </main>
                         <ToastContainer />
                     </NavVisibilityProvider>
                 </ThemeProvider>
