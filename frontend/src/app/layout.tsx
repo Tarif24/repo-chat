@@ -6,6 +6,7 @@ import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
 import NavBar from '../components/navBar';
+import { NavVisibilityProvider } from '../components/navVisibility';
 
 export const metadata: Metadata = {
     title: 'Repo Chat',
@@ -26,11 +27,13 @@ export default function RootLayout({
         >
             <body className={`flex h-screen w-screen flex-col antialiased`}>
                 <ThemeProvider>
-                    <NavBar />
-                    <main className="min-h-0 flex-1 overflow-hidden">
-                        {children}
-                    </main>
-                    <ToastContainer />
+                    <NavVisibilityProvider>
+                        <NavBar />
+                        <main className="min-h-0 flex-1 overflow-hidden">
+                            {children}
+                        </main>
+                        <ToastContainer />
+                    </NavVisibilityProvider>
                 </ThemeProvider>
             </body>
         </html>

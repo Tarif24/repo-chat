@@ -1,10 +1,11 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Sparkles, ArrowRight, GitBranch, Quote, Zap } from 'lucide-react';
 import { validateRepoPath } from '../helper/validateRepoPath';
 import { toast } from 'react-toastify';
 import RepoLoadingState from './repoLoadingState';
+import { useNavVisibility } from '../components/navVisibility';
 
 const EXAMPLE_REPOS = [
     'Tarif24/repo-chat',
@@ -39,8 +40,13 @@ export default function HomePage() {
     const [inputText, setInputText] = useState('');
     const [currentIngestingRepo, setCurrentIngestingRepo] = useState('');
     const [isLoading, setIsLoading] = useState(false);
+    const { setVisible } = useNavVisibility();
 
-    const handleSubmit = async (e: React.SubmitEvent<HTMLFormElement>) => {
+    useEffect(() => {
+        setVisible(!isLoading);
+    }, [isLoading, setVisible]);
+
+    const handleSubmit = async (e: React.SyntheticEvent<HTMLFormElement>) => {
         e.preventDefault();
 
         const validationResult = validateRepoPath(inputText);
@@ -135,7 +141,7 @@ export default function HomePage() {
                         <button
                             key={repo}
                             onClick={() => setInputText(repo)}
-                            className="rounded-md border border-gray-200 px-2.5 py-1 font-mono text-sm text-gray-600 transition-colors hover:bg-gray-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
+                            className="rounded-md border border-gray-200 px-2.5 py-1 font-mono text-sm text-gray-600 transition-colors hover:cursor-pointer hover:bg-gray-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
                         >
                             {repo}
                         </button>

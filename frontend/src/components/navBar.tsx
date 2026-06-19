@@ -1,9 +1,18 @@
+'use client';
+
 import NavLink from './navLink';
 import HamburgerNav from './hamburgerNav';
 import { SearchCode, Github } from 'lucide-react';
 import { ThemeToggle } from '../components/themeToggle';
+import { useNavVisibility } from './navVisibility';
 
 const NavBar = () => {
+    const { visible } = useNavVisibility();
+
+    if (!visible) {
+        return null;
+    }
+
     return (
         <header className="flex items-center justify-between border-b border-gray-200 bg-slate-700 px-6 py-5 text-white dark:border-slate-700 dark:bg-slate-950">
             <NavLink

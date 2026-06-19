@@ -140,7 +140,7 @@ export default function ChatPage() {
                         </div>
 
                         {/* Chat column */}
-                        <main className="flex min-h-0 flex-1 flex-col justify-between">
+                        <div className="flex min-h-0 flex-1 flex-col justify-between">
                             <div className="flex min-h-0 flex-1 flex-col overflow-auto py-5 pr-2 pl-4">
                                 <div className="grow" />
                                 {chatHistory.map((message, idx) => (
@@ -170,7 +170,7 @@ export default function ChatPage() {
                                 setUsedFiles={setUsedFiles}
                                 setIsLoading={setIsLoading}
                             />
-                        </main>
+                        </div>
                     </div>
                 </>
             ) : (
