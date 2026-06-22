@@ -312,6 +312,10 @@ Examples of RELEVANT queries:
 - "What does the README say?"
 - "Give me an overview of the architecture"
 - "What technologies does this project use?"
+- "How do I add something to this project?"
+- "How do I add something to this website?"
+- "How do I add something to this app?"
+- "How do I add something to this application?"
 
 Examples of MIXED queries:
 - "How does this project handle auth? Also how do I write a for loop?" → sanitizedQuery: "How does this project handle auth?"
