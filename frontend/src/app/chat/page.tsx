@@ -53,10 +53,6 @@ export default function ChatPage() {
         }
     }, [chatHistory]);
 
-    useEffect(() => {
-        setSidebarOpen(false);
-    }, [selectedRepo]);
-
     const organizeMessageStructureAndSave = (messages: MessageType[]) => {
         setChatHistory(messages.map(m => ({ ...m })));
     };
@@ -75,6 +71,8 @@ export default function ChatPage() {
 
     const onRepoSwitch = async (repo: string) => {
         setSelectedRepo(repo);
+        setSidebarOpen(false);
+
         const responseJSON = await fetch(`${API_URL}/api/query/getRepoByURL`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
