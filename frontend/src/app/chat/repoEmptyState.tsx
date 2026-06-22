@@ -1,4 +1,4 @@
-import { SearchCode, Github, ChevronDown } from 'lucide-react';
+import { SearchCode, Github, ChevronDown, Loader2 } from 'lucide-react';
 
 const SKELETON_FILES = [
     { width: 'w-20', indent: 0 },
@@ -20,9 +20,11 @@ const SKELETON_MESSAGES = [
 export default function RepoEmptyState({
     repositories,
     onSelectRepo,
+    isLoadingRepos = false,
 }: {
     repositories: string[];
     onSelectRepo: (repo: string) => Promise<void>;
+    isLoadingRepos?: boolean;
 }) {
     const suggestions = repositories.slice(0, 3);
 
@@ -83,14 +85,18 @@ export default function RepoEmptyState({
                         </p>
                     </div>
 
-                    {suggestions.length > 0 && (
+                    {/* Loading state */}
+                    {isLoadingRepos ? (
+                        <div className="flex items-center gap-2 pt-1 text-xs text-gray-400 dark:text-slate-500">
+                            <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                            Fetching repositories…
+                        </div>
+                    ) : suggestions.length > 0 ? (
                         <div className="flex flex-wrap items-center justify-center gap-1.5 pt-1">
                             {suggestions.map(repo => (
                                 <button
                                     key={repo}
-                                    onClick={() => {
-                                        void onSelectRepo(repo);
-                                    }}
+                                    onClick={() => void onSelectRepo(repo)}
                                     className="rounded-md border border-gray-200 px-2.5 py-1 font-mono text-xs text-gray-600 transition-colors hover:cursor-pointer hover:bg-gray-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-700"
                                 >
                                     {repo
@@ -102,7 +108,7 @@ export default function RepoEmptyState({
                                 </button>
                             ))}
                         </div>
-                    )}
+                    ) : null}
                 </div>
             </div>
         </div>

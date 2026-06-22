@@ -25,6 +25,7 @@ export default function ChatPage() {
     const [repositories, setRepositories] = useState<string[]>([]);
     const [chatHistory, setChatHistory] = useState<MessageType[]>([]);
     const [isLoading, setIsLoading] = useState(false);
+    const [isLoadingRepos, setIsLoadingRepos] = useState(true);
     const [sidebarOpen, setSidebarOpen] = useState(false);
 
     const chatEndRef = useRef<HTMLDivElement | null>(null);
@@ -40,6 +41,7 @@ export default function ChatPage() {
                     alert(data.data.message);
                 }
                 setRepositories(data.data.repos);
+                setIsLoadingRepos(false);
             } catch (error) {
                 console.error('Error fetching repositories:', error);
             }
@@ -238,6 +240,7 @@ export default function ChatPage() {
                 <RepoEmptyState
                     repositories={repositories}
                     onSelectRepo={onRepoSwitch}
+                    isLoadingRepos={isLoadingRepos}
                 />
             )}
         </div>
