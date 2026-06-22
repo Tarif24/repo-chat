@@ -1,77 +1,110 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
+import { Menu, X, Github, SearchCode } from 'lucide-react';
 import NavLink from './navLink';
-import { Menu } from 'lucide-react';
-import { X } from 'lucide-react';
+import { ThemeToggle } from '../components/themeToggle';
 
 const HamburgerNav = () => {
-    const [isActive, setIsActive] = useState(false);
-
-    const linkClass =
-        'hover:text-[#555555] decoration-[#8b8b8b] hover:underline underline-offset-[1rem] hover:cursor-pointer transition duration-300 ease-in-out';
-
-    const hamburgerNavClass = `absolute left-0 top-0 transition duration-600 ease-in-out ${
-        isActive ? 'translate-y-0' : '-translate-y-75'
-    }`;
-    const backgroundClass = `absolute left-0 top-0 bg-black w-[100vw] h-[100vh] opacity-40 ${
-        isActive ? '' : 'hidden'
-    }`;
-
-    useEffect(() => {
-        if (isActive) {
-            window.scrollTo(0, 0);
-            document.body.style.overflow = 'hidden';
-        } else {
-            document.body.style.overflow = 'auto';
-        }
-
-        return () => {
-            document.body.style.overflow = 'auto';
-        };
-    }, [isActive]);
+    const [isOpen, setIsOpen] = useState(false);
 
     return (
         <div className="flex lg:hidden">
-            <div
-                className="hover:cursor-pointer"
-                onClick={() => {
-                    setIsActive(true);
-                }}
+            {/* Hamburger trigger */}
+            <button
+                onClick={() => setIsOpen(true)}
+                aria-label="Open menu"
+                className="rounded-md p-1 text-white transition-colors hover:bg-white/10"
             >
-                <Menu size="2.5rem" color="white" />
-            </div>
-            <div className={backgroundClass}></div>
-            <div id="nav" className={hamburgerNavClass}>
-                <div className="flex w-screen flex-col items-center justify-center gap-8 rounded-b-2xl bg-white py-8 text-center">
-                    <div
-                        className="absolute top-4 right-4 hover:cursor-pointer"
-                        onClick={() => {
-                            setIsActive(false);
-                        }}
-                    >
-                        <X size="2rem" />
-                    </div>
+                <Menu className="h-7 w-7" />
+            </button>
+
+            {/* Backdrop */}
+            <div
+                onClick={() => setIsOpen(false)}
+                aria-hidden="true"
+                style={{
+                    position: 'fixed',
+                    inset: 0,
+                    zIndex: 40,
+                    background: 'rgba(0,0,0,0.4)',
+                    opacity: isOpen ? 1 : 0,
+                    pointerEvents: isOpen ? 'auto' : 'none',
+                    transition: 'opacity 200ms',
+                }}
+            />
+
+            {/* Drawer — portalled via inline fixed, slides in from right */}
+            <div
+                aria-modal="true"
+                role="dialog"
+                style={{
+                    position: 'fixed',
+                    top: 0,
+                    right: 0,
+                    bottom: 0,
+                    width: 'min(280px, 85vw)',
+                    zIndex: 50,
+                    transform: isOpen ? 'translateX(0)' : 'translateX(100%)',
+                    transition: 'transform 220ms ease',
+                    display: 'flex',
+                    flexDirection: 'column',
+                }}
+                className="bg-slate-800 dark:bg-slate-950"
+            >
+                {/* Drawer header — mirrors the nav brand */}
+                <div className="flex items-center justify-between border-b border-slate-700 px-5 py-4">
                     <NavLink
                         href="/"
-                        classActive={linkClass}
-                        classInactive={linkClass}
-                        onClick={() => {
-                            setIsActive(false);
-                        }}
+                        classInactive="flex items-center gap-2"
+                        classActive="flex items-center gap-2"
+                        onClick={() => setIsOpen(false)}
+                    >
+                        <SearchCode className="h-6 w-6 text-blue-300" />
+                        <span className="text-lg font-medium text-white">
+                            Repo Chat
+                        </span>
+                    </NavLink>
+                    <button
+                        onClick={() => setIsOpen(false)}
+                        aria-label="Close menu"
+                        className="rounded-md p-1 text-slate-400 transition-colors hover:bg-white/10 hover:text-white"
+                    >
+                        <X className="h-5 w-5" />
+                    </button>
+                </div>
+
+                {/* Nav links */}
+                <nav className="flex flex-col gap-1 px-3 py-4">
+                    <NavLink
+                        href="/"
+                        classInactive="rounded-md px-3 py-2.5 text-[15px] text-slate-300 transition-colors hover:bg-white/10 hover:text-white"
+                        classActive="rounded-md px-3 py-2.5 text-[15px] font-medium text-white bg-white/10"
+                        onClick={() => setIsOpen(false)}
                     >
                         Home
                     </NavLink>
                     <NavLink
                         href="/chat"
-                        classActive={linkClass}
-                        classInactive={linkClass}
-                        onClick={() => {
-                            setIsActive(false);
-                        }}
+                        classInactive="rounded-md px-3 py-2.5 text-[15px] text-slate-300 transition-colors hover:bg-white/10 hover:text-white"
+                        classActive="rounded-md px-3 py-2.5 text-[15px] font-medium text-white bg-white/10"
+                        onClick={() => setIsOpen(false)}
                     >
                         Chat
                     </NavLink>
+                </nav>
+
+                {/* Bottom row — GitHub + theme toggle */}
+                <div className="mt-auto flex items-center justify-between border-t border-slate-700 px-5 py-4">
+                    <NavLink
+                        href="https://github.com/Tarif24/repo-chat"
+                        classInactive="flex items-center gap-2 text-[13px] text-slate-400 transition-colors hover:text-white"
+                        classActive="flex items-center gap-2 text-[13px] text-slate-400 transition-colors hover:text-white"
+                    >
+                        <Github className="h-5 w-5" />
+                        <span>View on GitHub</span>
+                    </NavLink>
+                    <ThemeToggle />
                 </div>
             </div>
         </div>
