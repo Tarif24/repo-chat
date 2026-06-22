@@ -88,7 +88,7 @@ export async function userQuery(
         dominantDiversityFilePctThreshold: 40,
     });
 
-    if (filteredChunks.length === 1) {
+    if (filteredChunks.length === 0) {
         filteredChunks = applyPostRetrievalFilters(rawChunks, query, {
             scoreThreshold: 0.68,
             maxPerFile: 3,
@@ -145,7 +145,7 @@ export async function userQuery(
     const response = await processUserQuery(systemPrompt, userMessage, chatHistory);
 
     // Save the response to the semantic cache along with the query and its embedding for future cache hits
-    if (queryEmbedding) {
+    if (queryEmbedding && reranked.length !== 0) {
         await cacheSave(repoURL, query, queryEmbedding, response?.content || '', contextStats);
     }
 

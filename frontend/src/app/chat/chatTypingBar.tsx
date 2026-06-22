@@ -21,6 +21,7 @@ export default function ChatTypingBar({
         chats: {
             role: 'user' | 'assistant' | 'system';
             content: string;
+            usedFiles: FileReferenceType[];
         }[]
     ) => void;
     selectedRepo: string;
@@ -42,7 +43,9 @@ export default function ChatTypingBar({
             e.preventDefault();
         }
 
-        addMessageToChatHistory([{ role: 'user', content: input }]);
+        addMessageToChatHistory([
+            { role: 'user', content: input, usedFiles: [] },
+        ]);
         setInput('');
 
         setIsLoading(true);
@@ -67,17 +70,27 @@ export default function ChatTypingBar({
         const finalResponse = response.data.message;
 
         if (response.data.contextStats) {
-            const usedFileNames = response.data.contextStats.filesReferenced;
-            setUsedFiles(usedFileNames);
+            const usedFiles = response.data.contextStats.filesReferenced;
+            setUsedFiles(usedFiles);
+            addMessageToChatHistory([
+                { role: 'user', content: input, usedFiles: [] },
+                {
+                    role: 'assistant',
+                    content: finalResponse,
+                    usedFiles: usedFiles,
+                },
+            ]);
+        } else {
+            setUsedFiles([]);
+            addMessageToChatHistory([
+                { role: 'user', content: input, usedFiles: [] },
+                {
+                    role: 'assistant',
+                    content: finalResponse,
+                    usedFiles: [],
+                },
+            ]);
         }
-
-        addMessageToChatHistory([
-            { role: 'user', content: input },
-            {
-                role: 'assistant',
-                content: finalResponse,
-            },
-        ]);
 
         setIsLoading(false);
     };

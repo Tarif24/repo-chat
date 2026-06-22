@@ -15,6 +15,7 @@ export default function ChatPage() {
     type MessageType = {
         role: 'user' | 'assistant' | 'system';
         content: string;
+        usedFiles: FileReferenceType[];
     };
 
     const API_URL = process.env.NEXT_PUBLIC_API_URL || '';
@@ -60,7 +61,11 @@ export default function ChatPage() {
     };
 
     const addMessageToChatHistory = (
-        chats: { role: 'user' | 'assistant' | 'system'; content: string }[]
+        chats: {
+            role: 'user' | 'assistant' | 'system';
+            content: string;
+            usedFiles: FileReferenceType[];
+        }[]
     ) => {
         organizeMessageStructureAndSave([...chatHistory, ...chats]);
     };
@@ -83,6 +88,7 @@ export default function ChatPage() {
         const response = await responseJSON.json();
         setRepoData(response.data.repo);
         setChatHistory([]);
+        setUsedFiles([]);
     };
 
     return (
@@ -204,14 +210,14 @@ export default function ChatPage() {
 
                         {/* Chat column */}
                         <div className="flex min-h-0 min-w-0 flex-1 flex-col">
-                            <div className="flex min-h-0 flex-1 flex-col overflow-auto px-4 py-5">
+                            <div className="flex min-h-0 flex-1 flex-col gap-4 overflow-auto px-4 py-5">
                                 <div className="flex-1" />
                                 {chatHistory.map((message, idx) => (
                                     <Message
                                         key={idx}
                                         role={message.role}
                                         content={message.content}
-                                        sources={usedFiles}
+                                        sources={message.usedFiles}
                                     />
                                 ))}
                                 <div ref={chatEndRef} />
