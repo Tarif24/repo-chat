@@ -21,7 +21,7 @@ const NavBar = () => {
                 classActive="flex items-center gap-2.5"
             >
                 <SearchCode className="h-8 w-8 text-blue-300" />
-                <span className="text-2xl font-medium">RepoChat</span>
+                <span className="text-2xl font-medium">Repo Chat</span>
             </NavLink>
             <nav className="hidden items-center gap-8 text-sm lg:flex">
                 <NavLink

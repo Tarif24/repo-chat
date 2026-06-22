@@ -95,45 +95,47 @@ export default function HomePage() {
     return !isLoading ? (
         <div className="flex h-full flex-col bg-white transition-colors dark:bg-slate-900">
             {/* Hero */}
-            <section className="flex w-full flex-1 flex-col items-center justify-center text-center">
+            <section className="flex w-full flex-1 flex-col items-center justify-center px-4 py-8 text-center sm:px-6 sm:py-4">
                 <div className="mb-6 inline-flex w-fit items-center gap-1.5 rounded-md bg-gray-100 px-2.5 py-1 text-sm text-gray-500 dark:bg-slate-800 dark:text-slate-400">
                     <Sparkles className="h-4 w-4" />
                     RAG-powered code search
                 </div>
 
-                <h1 className="mb-4 text-4xl font-medium text-slate-800 dark:text-slate-100">
+                <h1 className="mb-4 text-3xl font-medium text-slate-800 sm:text-4xl dark:text-slate-100">
                     Ask any GitHub repo a question
                 </h1>
 
-                <p className="mx-auto mb-7 max-w-md text-[17px] leading-relaxed text-gray-500 dark:text-slate-400">
+                <p className="mx-auto mb-7 max-w-md text-base leading-relaxed text-gray-500 sm:text-[17px] dark:text-slate-400">
                     Paste a repo link and get answers grounded in the actual
                     source, with file paths and line numbers, not guesses.
                 </p>
 
                 <form
                     onSubmit={e => void handleSubmit(e)}
-                    className="mx-auto flex w-[50%] overflow-hidden rounded-md border border-gray-300 bg-gray-50 focus-within:ring-2 focus-within:ring-blue-200 dark:border-slate-700 dark:bg-slate-800 dark:focus-within:ring-blue-900"
+                    className="mx-auto flex w-full max-w-xl overflow-hidden rounded-md border border-gray-300 bg-gray-50 focus-within:ring-2 focus-within:ring-blue-200 dark:border-slate-700 dark:bg-slate-800 dark:focus-within:ring-blue-900"
                 >
-                    <div className="flex items-center px-3 font-mono text-[13px] text-gray-600 dark:text-slate-300">
+                    {/* Hide the prefix on very small screens to save space */}
+                    <div className="hidden items-center px-3 font-mono text-[13px] text-gray-600 sm:flex dark:text-slate-300">
                         github.com/
                     </div>
                     <input
                         type="text"
                         value={inputText}
                         onChange={e => setInputText(e.target.value)}
-                        placeholder="vercel/next.js"
-                        className="flex-1 border-none bg-transparent py-2.5 font-mono text-[13px] text-slate-800 outline-none placeholder:text-gray-400 dark:text-slate-100 dark:placeholder:text-slate-500"
+                        placeholder="owner/repo"
+                        className="flex-1 border-none bg-transparent px-3 py-2.5 font-mono text-[13px] text-slate-800 outline-none placeholder:text-gray-400 sm:px-0 dark:text-slate-100 dark:placeholder:text-slate-500"
                     />
                     <button
                         type="submit"
-                        className="flex items-center gap-1.5 border-none bg-slate-800 px-5 text-[13px] font-medium text-white transition-colors hover:cursor-pointer hover:bg-slate-900 dark:bg-blue-600 dark:hover:bg-blue-700"
+                        className="flex shrink-0 items-center gap-1.5 border-none bg-slate-800 px-4 text-[13px] font-medium text-white transition-colors hover:cursor-pointer hover:bg-slate-900 sm:px-5 dark:bg-blue-600 dark:hover:bg-blue-700"
                     >
                         Analyze
                         <ArrowRight className="h-3.5 w-3.5" />
                     </button>
                 </form>
 
-                <div className="mt-8 flex w-full items-center justify-center gap-2">
+                {/* Example repo chips — wrap naturally on small screens */}
+                <div className="mt-6 flex w-full flex-wrap items-center justify-center gap-2 px-4">
                     <span className="pt-1 text-sm text-gray-400 dark:text-slate-500">
                         Try:
                     </span>
@@ -141,7 +143,7 @@ export default function HomePage() {
                         <button
                             key={repo}
                             onClick={() => setInputText(repo)}
-                            className="rounded-md border border-gray-200 px-2.5 py-1 font-mono text-sm text-gray-600 transition-colors hover:cursor-pointer hover:bg-gray-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
+                            className="rounded-md border border-gray-200 px-2.5 py-1 font-mono text-xs text-gray-600 transition-colors hover:cursor-pointer hover:bg-gray-50 sm:text-sm dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
                         >
                             {repo}
                         </button>
@@ -150,7 +152,7 @@ export default function HomePage() {
             </section>
 
             {/* Feature row */}
-            <section className="mx-auto mb-16 grid max-w-7xl grid-cols-1 gap-20 border-t border-gray-200 px-6 py-8 sm:grid-cols-3 dark:border-slate-700">
+            <section className="mx-auto mb-12 grid w-full max-w-7xl grid-cols-1 gap-8 border-t border-gray-200 px-6 py-8 sm:mb-16 sm:grid-cols-3 sm:gap-20 dark:border-slate-700">
                 {FEATURES.map(({ icon: Icon, title, description }) => (
                     <div key={title}>
                         <Icon className="mb-2 h-7 w-7 text-blue-600 dark:text-blue-400" />
