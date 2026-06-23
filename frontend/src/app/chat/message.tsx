@@ -7,7 +7,7 @@ interface Source {
 }
 
 interface MessageProps {
-    role: 'user' | 'assistant';
+    role: 'user' | 'assistant' | 'system';
     content: string;
     sources: Source[];
 }
@@ -263,6 +263,10 @@ function MarkdownBlocks({ text }: { text: string }) {
 // ── Message Component ─────────────────────────────────────────────────────────
 
 export default function Message({ role, content, sources }: MessageProps) {
+    if (role === 'system') {
+        return null;
+    }
+
     if (role === 'user') {
         return (
             <div className="flex justify-end">
