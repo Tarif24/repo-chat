@@ -5,6 +5,14 @@ import logger from '../lib/logger.js';
 import { NotFoundError } from '../error/appError.js';
 import SUPPORTED_LANGUAGES from '../lib/supportedLanguages.js';
 import IGNORED_DIRS from '../lib/ignoredDirs.js';
+import { appConfig } from '../config/config.js';
+
+export function initializeDirectory(): void {
+    const repoStoragePath = appConfig.repoStoragePath || '/tmp/repoCloning';
+
+    // Create the directory if it does not exist
+    fs.mkdirSync(repoStoragePath, { recursive: true });
+}
 
 // Recursively deletes all files and subdirectories in the specified directory
 export async function deleteEverythingInDir(dir: string): Promise<void> {

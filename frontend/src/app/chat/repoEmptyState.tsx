@@ -108,7 +108,11 @@ export default function RepoEmptyState({
                                 </button>
                             ))}
                         </div>
-                    ) : null}
+                    ) : (
+                        <div className="flex items-center gap-2 pt-1 text-xs text-gray-400 dark:text-slate-500">
+                            Please ingest a repo first
+                        </div>
+                    )}
                 </div>
             </div>
         </div>

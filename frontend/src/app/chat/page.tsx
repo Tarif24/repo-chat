@@ -120,11 +120,11 @@ export default function ChatPage() {
                          * Desktop sidebar — static, always visible on sm+
                          * Hidden on mobile; the drawer (portalled below) handles mobile.
                          */}
-                        <aside className="hidden min-h-0 w-fit max-w-[30vw] min-w-55 flex-col overflow-x-hidden overflow-y-auto border-r border-gray-200 bg-gray-50 p-4 sm:flex dark:border-slate-700 dark:bg-slate-800">
+                        <aside className="hidden min-h-0 w-fit max-w-[30vw] min-w-55 flex-col overflow-auto overflow-x-hidden overflow-y-auto border-r border-gray-200 bg-gray-50 p-4 sm:flex dark:border-slate-700 dark:bg-slate-800">
                             <p className="mb-2.5 px-1.5 text-[15px] font-medium text-gray-400 dark:text-slate-500">
                                 FILES
                             </p>
-                            <div className="min-h-0 overflow-x-auto font-mono text-[12.5px] text-gray-600 dark:text-slate-300">
+                            <div className="min-h-0 font-mono text-[12.5px] text-gray-600 dark:text-slate-300">
                                 <FileTree
                                     tree={repoData.fileTree}
                                     usedFiles={usedFiles.map(

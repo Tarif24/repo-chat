@@ -2,6 +2,7 @@ import logger from '../lib/logger.js';
 import { appConfig } from '../config/config.js';
 import { cloneAndGetSha, getLatestSha } from '../services/gitHub.js';
 import {
+    initializeDirectory,
     collectParseableFiles,
     createParseableFilesTree,
     deleteEverythingInDir,
@@ -22,6 +23,8 @@ export async function ingestRepo(
     repoUrl: string
 ): Promise<{ success: boolean; latestSha?: string; message: string }> {
     logger.info(`REPO: ${repoUrl} - Starting ingestion process.`);
+
+    initializeDirectory();
 
     const existingRepo = await getRepoByURL(repoUrl);
     const latestSha = await getLatestSha(repoUrl);
