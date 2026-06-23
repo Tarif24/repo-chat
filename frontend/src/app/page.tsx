@@ -9,8 +9,9 @@ import { useNavVisibility } from '../components/navVisibility';
 
 const EXAMPLE_REPOS = [
     'Tarif24/repo-chat',
-    'facebook/react',
-    'expressjs/express',
+    'typicode/json-server',
+    'websockets/ws',
+    'motdotla/dotenv',
 ];
 
 const FEATURES = [
