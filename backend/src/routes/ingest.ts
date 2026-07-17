@@ -1,5 +1,5 @@
 import express from 'express';
-import { handleIngestRepo } from '../handlers/ingestHandler.js';
+import { handleIngestRepo, handleIngestProgress } from '../handlers/ingestHandler.js';
 import { validate } from '../middleware/validate.js';
 import { ingestRepoSchema } from '../schemas/ingest.schema.js';
 import { strictLimiter } from '../middleware/rateLimiter.js';
@@ -8,5 +8,8 @@ import { strictLimiter } from '../middleware/rateLimiter.js';
 const ingest = express.Router();
 
 ingest.post('/repo', strictLimiter, validate(ingestRepoSchema), handleIngestRepo);
+
+// Progress route — no body validation needed, jobId comes from the URL
+ingest.get('/progress/:jobId', handleIngestProgress);
 
 export default ingest;

@@ -49,6 +49,7 @@
         "tree-sitter-python": "0.23.6",
         "tree-sitter-ruby": "0.23.1",
         "tree-sitter-typescript": "0.23.2",
+        "uuid": "^14.0.1",
         "winston": "^3.19.0",
         "winston-daily-rotate-file": "^5.0.0",
         "zod": "^4.3.6"
@@ -57,6 +58,7 @@
         "@eslint/js": "^10.0.1",
         "@types/express": "^5.0.6",
         "@types/jest": "^30.0.0",
+        "@types/uuid": "^10.0.0",
         "eslint": "^10.4.1",
         "globals": "^17.6.0",
         "jest": "^30.4.2",

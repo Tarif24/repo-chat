@@ -53,17 +53,27 @@ export async function processAndStoreChunk(chunk: CodeChunkType, repoURL: string
     }
 }
 
-export async function processAndStoreChunks(chunks: CodeChunkType[], repoURL: string) {
+export async function processAndStoreChunks(
+    chunks: CodeChunkType[],
+    repoURL: string,
+    emit: (event: string, data: object) => void
+) {
+    let totalProcessedChunks = 0;
     logger.info(`REPO: ${repoURL} - Processing and storing ${chunks.length} chunks...`);
 
     for (const chunk of chunks) {
         try {
             await processAndStoreChunk(chunk, repoURL);
+            totalProcessedChunks++;
+            emit('chunking', { message: totalProcessedChunks, totalChunks: chunks.length });
         } catch (error) {
             logger.error('Error processing chunk:', error);
+
             if (error instanceof OpenAIError) {
+                emit('error', { message: error.message || 'Chunk processing failed' });
                 throw error;
             } else {
+                emit('error', { message: error || 'Chunk processing failed' });
                 throw new AppError(
                     'Error processing chunk: ' +
                         (error instanceof Error ? error.message : String(error))
