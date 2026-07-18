@@ -86,6 +86,12 @@ export async function ingestRepo(jobId: string, repoUrl: string): Promise<void> 
             )} MB.`
         );
 
+        emit('storageCheck', {
+            message: 'Checking storage limits...',
+            estimateMB: storageCheck.estimate.confirmedTotalMB.toFixed(2),
+            estimateWithBufferMB: storageCheck.bufferMB.toFixed(2),
+        });
+
         // If the repository exceeds the storage limit, abort ingestion and clean up the cloned files
         if (!storageCheck.allowed) {
             logger.warn(

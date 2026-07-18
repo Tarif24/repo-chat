@@ -2,10 +2,11 @@
 
 import { useState, useEffect } from 'react';
 import { Sparkles, ArrowRight, GitBranch, Quote, Zap } from 'lucide-react';
-import { validateRepoPath } from '../helper/validateRepoPath';
+import { validateRepoPath } from '../lib/validateRepoPath';
 import { toast } from 'react-toastify';
 import RepoLoadingState from './repoLoadingState';
 import { useNavVisibility } from '../components/navVisibility';
+import { startIngestion, openIngestionStream } from '../lib/api';
 
 const EXAMPLE_REPOS = [
     'Tarif24/repo-chat',
@@ -42,6 +43,8 @@ export default function HomePage() {
     const [currentIngestingRepo, setCurrentIngestingRepo] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const { setVisible } = useNavVisibility();
+    const [jobStage, setJobStage] = useState<string | null>(null);
+    const [stageDetails, setStageDetails] = useState<string>('');
 
     useEffect(() => {
         setVisible(!isLoading);
@@ -65,32 +68,62 @@ export default function HomePage() {
         setCurrentIngestingRepo(validatedRepoURL);
 
         setIsLoading(true);
-        const responseJSON = await fetch(`${API_URL}/api/ingest/repo`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
+        const { jobId } = await startIngestion(validatedRepoURL);
+
+        setJobStage('cloning');
+
+        openIngestionStream(jobId, {
+            onCloning: () => {
+                setJobStage('cloning');
+                setStageDetails('Cloning repository...');
             },
-            body: JSON.stringify({
-                repoUrl: validatedRepoURL,
-            }),
+            onScanning: d => {
+                setJobStage('scanning');
+                setStageDetails(`${d.fileCount} files found`);
+            },
+            onStorageCheck: d => {
+                setJobStage('storageCheck');
+                setStageDetails(
+                    `Estimated size: ${d.estimateWithBufferMB} MB)`
+                );
+            },
+            onChunking: d => {
+                setJobStage('chunking');
+                setStageDetails(`${d.chunkCount} chunks produced`);
+            },
+            onEmbeddingAndProcessing: d => {
+                setJobStage('embeddingAndProcessing');
+                setStageDetails(
+                    `${d.current} / ${d.totalChunks} chunks embedded`
+                );
+            },
+            onStoring: () => {
+                setJobStage('storing');
+                setStageDetails('Writing to database...');
+            },
+            onComplete: () => {
+                setJobStage('complete');
+                setInputText('');
+                setCurrentIngestingRepo('');
+                setIsLoading(false);
+                toast.success(
+                    'Repo Successfully Ingested! You can now ask questions about it.'
+                );
+            },
+            onError: d => {
+                setJobStage('error');
+                setStageDetails(d.message);
+                setInputText('');
+                setCurrentIngestingRepo('');
+                setIsLoading(false);
+                toast.error(
+                    'Sorry the repo could not be ingested at this time please try again later'
+                );
+                if (d.message.toLowerCase().includes('openai api error')) {
+                    toast.success(d.data.message);
+                }
+            },
         });
-        const response = await responseJSON.json();
-
-        if (response.message.toLowerCase().includes('openai api error')) {
-            toast.success(response.data.message);
-        }
-
-        setInputText('');
-        setCurrentIngestingRepo('');
-        setIsLoading(false);
-
-        if (responseJSON.ok) {
-            toast.success(response.data.message);
-        } else {
-            toast.error(
-                'Sorry the repo could not be ingested at this time please try again later'
-            );
-        }
     };
 
     return !isLoading ? (
@@ -168,6 +201,10 @@ export default function HomePage() {
             </section>
         </div>
     ) : (
-        <RepoLoadingState repoLabel={currentIngestingRepo} />
+        <RepoLoadingState
+            repoLabel={currentIngestingRepo}
+            jobStage={jobStage}
+            stageDetails={stageDetails}
+        />
     );
 }

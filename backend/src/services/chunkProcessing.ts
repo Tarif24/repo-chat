@@ -65,7 +65,11 @@ export async function processAndStoreChunks(
         try {
             await processAndStoreChunk(chunk, repoURL);
             totalProcessedChunks++;
-            emit('chunking', { message: totalProcessedChunks, totalChunks: chunks.length });
+            emit('embeddingAndProcessing', {
+                message: 'Processing and storing chunks...',
+                current: totalProcessedChunks,
+                totalChunks: chunks.length,
+            });
         } catch (error) {
             logger.error('Error processing chunk:', error);
 
