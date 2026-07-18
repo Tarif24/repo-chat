@@ -37,8 +37,6 @@ const FEATURES = [
 ];
 
 export default function HomePage() {
-    const API_URL = process.env.NEXT_PUBLIC_API_URL || '';
-
     const [inputText, setInputText] = useState('');
     const [currentIngestingRepo, setCurrentIngestingRepo] = useState('');
     const [isLoading, setIsLoading] = useState(false);

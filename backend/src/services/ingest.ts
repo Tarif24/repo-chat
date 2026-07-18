@@ -24,7 +24,7 @@ import { getJob } from '../lib/jobRegistry.js';
 export async function ingestRepo(jobId: string, repoUrl: string): Promise<void> {
     const emit = (event: string, data: object) => {
         const sender = getJob(jobId);
-        if (sender) sender(event, data);
+        if (sender) {sender(event, data);}
     };
 
     try {

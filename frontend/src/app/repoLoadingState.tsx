@@ -47,7 +47,6 @@ export default function RepoLoadingState({
                 {STAGES.map((stage, i) => {
                     const isDone = activeIndex > i;
                     const isActive = activeIndex === i;
-                    const isPending = activeIndex < i;
 
                     return (
                         <div
