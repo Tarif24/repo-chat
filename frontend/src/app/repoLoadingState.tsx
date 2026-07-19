@@ -1,15 +1,12 @@
 import { SearchCode, Check, Loader2 } from 'lucide-react';
-//import { PulseLoader } from 'react-spinners';
+import { PulseLoader } from 'react-spinners';
 
 const STAGES = [
     { key: 'cloning', label: 'Cloning repository' },
     { key: 'scanning', label: 'Scanning files' },
-    { key: 'storageCheck', label: 'Checking storage limits' },
+    { key: 'storageCheck', label: 'Checking storage' },
     { key: 'chunking', label: 'Chunking code' },
-    {
-        key: 'embeddingAndProcessing',
-        label: 'Embedding and processing chunks...',
-    },
+    { key: 'embeddingAndProcessing', label: 'Embedding chunks' },
 ] as const;
 
 function getStageIndex(key: string | null): number {
@@ -20,20 +17,21 @@ export default function RepoLoadingState({
     repoLabel,
     jobStage,
     stageDetails,
+    stageHistory,
 }: {
     repoLabel: string;
     jobStage: string | null;
     stageDetails: string;
+    stageHistory: Record<string, string>;
 }) {
     const activeIndex = getStageIndex(jobStage);
 
     return (
         <div className="flex h-full w-full flex-col items-center justify-center gap-6 px-6">
-            {/* Icon */}
             <div className="flex h-11 w-11 items-center justify-center rounded-md bg-blue-50 dark:bg-blue-950">
                 <SearchCode className="h-7 w-7 text-blue-600 dark:text-blue-400" />
             </div>
-            {/* Repo name */}
+
             <div className="flex flex-col items-center gap-1">
                 <p className="text-sm text-gray-500 dark:text-slate-400">
                     Indexing
@@ -42,20 +40,17 @@ export default function RepoLoadingState({
                     {repoLabel.replace(/^https?:\/\/(www\.)?github\.com\//, '')}
                 </p>
             </div>
-            {/* Stage list */}
-            <div className="flex w-full max-w-xs flex-col gap-2">
+
+            <div className="flex w-full max-w-md flex-col gap-2">
                 {STAGES.map((stage, i) => {
                     const isDone = activeIndex > i;
                     const isActive = activeIndex === i;
 
                     return (
-                        <div
-                            key={stage.key}
-                            className="flex items-center gap-3"
-                        >
+                        <div key={stage.key} className="flex items-start gap-3">
                             {/* Step indicator */}
                             <div
-                                className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full border transition-colors ${
+                                className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border transition-colors ${
                                     isDone
                                         ? 'border-blue-500 bg-blue-500 dark:border-blue-400 dark:bg-blue-400'
                                         : isActive
@@ -72,8 +67,8 @@ export default function RepoLoadingState({
                                 )}
                             </div>
 
-                            {/* Label + details */}
-                            <div className="flex min-w-0 flex-1 items-baseline gap-2">
+                            {/* Label + detail */}
+                            <div className="flex min-w-0 flex-1 items-center gap-4">
                                 <span
                                     className={`text-sm transition-colors ${
                                         isDone
@@ -85,9 +80,18 @@ export default function RepoLoadingState({
                                 >
                                     {stage.label}
                                 </span>
+
+                                {/* Active: live detail */}
                                 {isActive && stageDetails && (
-                                    <span className="truncate font-mono text-xs text-blue-600 dark:text-blue-400">
+                                    <span className="font-mono text-xs text-blue-600 dark:text-blue-400">
                                         {stageDetails}
+                                    </span>
+                                )}
+
+                                {/* Done: persisted summary from stageHistory */}
+                                {isDone && stageHistory[stage.key] && (
+                                    <span className="font-mono text-xs text-gray-400 dark:text-slate-600">
+                                        {stageHistory[stage.key]}
                                     </span>
                                 )}
                             </div>
@@ -96,12 +100,11 @@ export default function RepoLoadingState({
                 })}
             </div>
 
-            {/* Shimmer bar */}
             <div className="h-1 w-56 overflow-hidden rounded-full bg-gray-100 dark:bg-slate-800">
                 <div className="h-full w-1/3 animate-[shimmer_1.6s_ease-in-out_infinite] rounded-full bg-blue-500 dark:bg-blue-400" />
             </div>
 
-            {/* <PulseLoader color="#487aaf" loading size={8} speedMultiplier={1} /> */}
+            <PulseLoader color="#487aaf" loading size={8} speedMultiplier={1} />
 
             <p className="max-w-xs text-center text-xs text-gray-400 dark:text-slate-500">
                 First-time indexing can take a minute or two depending on repo

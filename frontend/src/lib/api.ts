@@ -17,6 +17,7 @@ export function openIngestionStream(
     handlers: {
         onCloning?: (data: any) => void;
         onScanning?: (data: any) => void;
+        onScanResult?: (data: any) => void;
         onStorageCheck?: (data: any) => void;
         onChunking?: (data: any) => void;
         onEmbeddingAndProcessing?: (data: any) => void;
@@ -33,6 +34,9 @@ export function openIngestionStream(
     source.addEventListener('scanning', e =>
         handlers.onScanning?.(JSON.parse(e.data))
     );
+    source.addEventListener('scanResult', e => {
+        handlers.onScanResult?.(JSON.parse(e.data));
+    });
     source.addEventListener('storageCheck', e =>
         handlers.onStorageCheck?.(JSON.parse(e.data))
     );

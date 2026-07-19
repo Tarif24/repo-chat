@@ -36,6 +36,16 @@ const FEATURES = [
     },
 ];
 
+function snapshotStage(
+    setStageHistory: React.Dispatch<
+        React.SetStateAction<Record<string, string>>
+    >,
+    stage: string,
+    detail: string
+) {
+    setStageHistory(prev => ({ ...prev, [stage]: detail }));
+}
+
 export default function HomePage() {
     const [inputText, setInputText] = useState('');
     const [currentIngestingRepo, setCurrentIngestingRepo] = useState('');
@@ -43,6 +53,9 @@ export default function HomePage() {
     const { setVisible } = useNavVisibility();
     const [jobStage, setJobStage] = useState<string | null>(null);
     const [stageDetails, setStageDetails] = useState<string>('');
+    const [stageHistory, setStageHistory] = useState<Record<string, string>>(
+        {}
+    );
 
     useEffect(() => {
         setVisible(!isLoading);
@@ -74,20 +87,43 @@ export default function HomePage() {
             onCloning: () => {
                 setJobStage('cloning');
                 setStageDetails('Cloning repository...');
+                snapshotStage(
+                    setStageHistory,
+                    'cloning',
+                    'Cloning repository...'
+                );
             },
-            onScanning: d => {
+            onScanning: () => {
                 setJobStage('scanning');
-                setStageDetails(`${d.fileCount} files found`);
+                setStageDetails('Scanning files...');
+            },
+            onScanResult: d => {
+                setStageDetails(
+                    `Found ${d.fileCount} parseable files (scanned ${d.totalFileCount})`
+                );
+                snapshotStage(
+                    setStageHistory,
+                    'scanning',
+                    `Found ${d.fileCount} parseable files (scanned ${d.totalFileCount})`
+                );
             },
             onStorageCheck: d => {
                 setJobStage('storageCheck');
-                setStageDetails(
-                    `Estimated size: ${d.estimateWithBufferMB} MB)`
+                setStageDetails(`Estimated size: ${d.estimateWithBufferMB} MB`);
+                snapshotStage(
+                    setStageHistory,
+                    'storageCheck',
+                    `Estimated size: ${d.estimateWithBufferMB} MB`
                 );
             },
             onChunking: d => {
                 setJobStage('chunking');
                 setStageDetails(`${d.chunkCount} chunks produced`);
+                snapshotStage(
+                    setStageHistory,
+                    'chunking',
+                    `${d.chunkCount} chunks produced`
+                );
             },
             onEmbeddingAndProcessing: d => {
                 setJobStage('embeddingAndProcessing');
@@ -96,11 +132,18 @@ export default function HomePage() {
                 );
             },
             onStoring: () => {
+                snapshotStage(
+                    setStageHistory,
+                    'embeddingAndProcessing',
+                    stageDetails
+                );
                 setJobStage('storing');
                 setStageDetails('Writing to database...');
             },
             onComplete: () => {
-                setJobStage('complete');
+                setJobStage('');
+                setStageDetails('');
+                setStageHistory({});
                 setInputText('');
                 setCurrentIngestingRepo('');
                 setIsLoading(false);
@@ -109,8 +152,9 @@ export default function HomePage() {
                 );
             },
             onError: d => {
-                setJobStage('error');
-                setStageDetails(d.message);
+                setJobStage('');
+                setStageDetails('');
+                setStageHistory({});
                 setInputText('');
                 setCurrentIngestingRepo('');
                 setIsLoading(false);
@@ -203,6 +247,7 @@ export default function HomePage() {
             repoLabel={currentIngestingRepo}
             jobStage={jobStage}
             stageDetails={stageDetails}
+            stageHistory={stageHistory}
         />
     );
 }

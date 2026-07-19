@@ -24,7 +24,9 @@ import { getJob } from '../lib/jobRegistry.js';
 export async function ingestRepo(jobId: string, repoUrl: string): Promise<void> {
     const emit = (event: string, data: object) => {
         const sender = getJob(jobId);
-        if (sender) {sender(event, data);}
+        if (sender) {
+            sender(event, data);
+        }
     };
 
     try {
@@ -64,12 +66,18 @@ export async function ingestRepo(jobId: string, repoUrl: string): Promise<void> 
 
         // --- scanning stage ---
 
+        emit('scanning', { message: 'Scanning files...' });
+
         // Scan the cloned repository for parseable files
-        const { validFiles, validFilesSize } = collectParseableFiles(
+        const { validFiles, validFilesSize, totalScanned } = collectParseableFiles(
             appConfig.repoStoragePath,
             repoUrl
         );
-        emit('scanning', { message: 'Scanning files...', fileCount: validFiles?.length ?? 0 });
+        emit('scanResult', {
+            message: 'Scanning files...',
+            fileCount: validFiles?.length ?? 0,
+            totalFileCount: totalScanned ? totalScanned : 0,
+        });
 
         // Estimate the storage requirements for the repository and check against limits
         const storageCheck = checkRepoBelowStorageLimit(validFilesSize, 25, false, true);

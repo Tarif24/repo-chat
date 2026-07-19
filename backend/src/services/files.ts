@@ -42,7 +42,12 @@ export type ParseableFileType = {
 export function collectParseableFiles(
     rootDir: string,
     repoURL: string
-): { validFiles: ParseableFileType[] | undefined; validFilesSize: number } {
+): {
+    validFiles: ParseableFileType[] | undefined;
+    validFilesSize: number;
+    totalScanned: number;
+    skippedCount: number;
+} {
     const resolvedRoot = path.resolve(rootDir);
 
     if (!fs.existsSync(resolvedRoot)) {
@@ -112,7 +117,7 @@ export function collectParseableFiles(
 
     logger.info(`REPO: ${repoURL} - Finished scanning and filtering all files.`);
 
-    return { validFiles: files, validFilesSize };
+    return { validFiles: files, validFilesSize, totalScanned, skippedCount };
 }
 
 // Tree node type for directory/file structure
