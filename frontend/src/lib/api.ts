@@ -49,13 +49,22 @@ export function startPollingIngestionStatus(
                 return;
             }
 
-            setTimeout(poll, intervalMs);
+            if (!cancelled) {
+                setTimeout(() => {
+                    void poll();
+                }, intervalMs);
+            }
         } catch (err) {
-            if (!cancelled) setTimeout(poll, intervalMs);
+            console.error('Error polling ingestion status:', err);
+            if (!cancelled) {
+                setTimeout(() => {
+                    void poll();
+                }, intervalMs);
+            }
         }
     };
 
-    poll();
+    void poll();
 
     // Return a cancel function so callers can stop polling on unmount.
     return () => {

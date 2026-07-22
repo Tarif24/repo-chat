@@ -84,7 +84,7 @@ export default function HomePage() {
 
         setJobStage('cloning');
 
-        const stopPolling = startPollingIngestionStatus(
+        startPollingIngestionStatus(
             validatedRepoURL,
             {
                 onUpdate: status => {

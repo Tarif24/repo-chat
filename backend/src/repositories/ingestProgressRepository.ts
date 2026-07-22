@@ -49,7 +49,7 @@ export async function getIngestProgressStatus(repoURL: string) {
         { status: 1, statusStage: 1, statusMessage: 1, statusMeta: 1, statusUpdatedAt: 1 }
     ).lean();
 
-    if (!repo) return null;
+    if (!repo) {return null;}
 
     return {
         status: repo.status,

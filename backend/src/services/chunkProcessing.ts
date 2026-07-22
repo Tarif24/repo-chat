@@ -56,7 +56,7 @@ export async function processAndStoreChunk(chunk: CodeChunkType, repoURL: string
 export async function processAndStoreChunks(
     chunks: CodeChunkType[],
     repoURL: string,
-    emit: (event: string, data: object) => void
+    emit: (event: string, data: object) => Promise<void>
 ) {
     let totalProcessedChunks = 0;
     logger.info(`REPO: ${repoURL} - Processing and storing ${chunks.length} chunks...`);
