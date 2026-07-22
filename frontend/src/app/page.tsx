@@ -90,7 +90,18 @@ export default function HomePage() {
                 onUpdate: status => {
                     const meta = status.data.statusMeta ?? {};
 
-                    console.log(status.data.statusStage);
+                    status.data.statusHistory.map(
+                        (history: {
+                            statusStage: string;
+                            statusMessage: string;
+                        }) => {
+                            snapshotStage(
+                                setStageHistory,
+                                history.statusStage,
+                                history.statusMessage
+                            );
+                        }
+                    );
 
                     switch (status.data.statusStage) {
                         case 'cloning':
@@ -104,17 +115,20 @@ export default function HomePage() {
                             break;
                         case 'scanning':
                             setJobStage('scanning');
-                            setStageDetails('Scanning files...');
-                            break;
-                        case 'scanResult':
-                            setStageDetails(
-                                `Found ${meta.fileCount ?? 0} parseable files (scanned ${meta.totalFileCount ?? 0})`
-                            );
-                            snapshotStage(
-                                setStageHistory,
-                                'scanning',
-                                `Found ${meta.fileCount ?? 0} parseable files (scanned ${meta.totalFileCount ?? 0})`
-                            );
+                            if (meta.totalFileCount && meta.fileCount) {
+                                setStageDetails(
+                                    `Found ${meta.fileCount ?? 0} parseable files (scanned ${meta.totalFileCount ?? 0})`
+                                );
+
+                                snapshotStage(
+                                    setStageHistory,
+                                    'scanning',
+                                    `Found ${meta.fileCount ?? 0} parseable files (scanned ${meta.totalFileCount ?? 0})`
+                                );
+                            } else {
+                                setStageDetails('Scanning files...');
+                            }
+
                             break;
                         case 'storageCheck':
                             setJobStage('storageCheck');

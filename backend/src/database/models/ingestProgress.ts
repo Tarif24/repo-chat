@@ -17,7 +17,6 @@ const ingestProgress = new mongoose.Schema(
             enum: [
                 'cloning',
                 'scanning',
-                'scanResult',
                 'storageCheck',
                 'chunking',
                 'embeddingAndProcessing',
@@ -34,6 +33,7 @@ const ingestProgress = new mongoose.Schema(
             type: Date,
             default: Date.now,
         },
+        statusHistory: { type: Array, default: [] },
     },
     {
         timestamps: true,

@@ -78,10 +78,16 @@ export async function ingestRepo(repoURL: string): Promise<void> {
             appConfig.repoStoragePath,
             repoURL
         );
-        await updateIngestProgressStatus(repoURL, 'processing', 'scanResult', 'Scanning files...', {
-            fileCount: validFiles?.length ?? 0,
-            totalFileCount: totalScanned ? totalScanned : 0,
-        });
+        await updateIngestProgressStatus(
+            repoURL,
+            'processing',
+            'scanning',
+            `Found ${validFiles?.length ?? 0} parseable files (scanned ${totalScanned ? totalScanned : 0})`,
+            {
+                fileCount: validFiles?.length ?? 0,
+                totalFileCount: totalScanned ? totalScanned : 0,
+            }
+        );
 
         // Estimate the storage requirements for the repository and check against limits
         const storageCheck = checkRepoBelowStorageLimit(validFilesSize, 25, false, true);
@@ -102,7 +108,7 @@ export async function ingestRepo(repoURL: string): Promise<void> {
             repoURL,
             'processing',
             'storageCheck',
-            'Checking storage limits...',
+            `Estimated size: ${storageCheck.bufferMB.toFixed(2) ?? 0} MB`,
             {
                 estimateMB: storageCheck.estimate.confirmedTotalMB.toFixed(2),
                 estimateWithBufferMB: storageCheck.bufferMB.toFixed(2),
@@ -177,9 +183,15 @@ export async function ingestRepo(repoURL: string): Promise<void> {
 
         const allCodeChunks = await parseFiles(validFiles || [], repoURL);
 
-        await updateIngestProgressStatus(repoURL, 'processing', 'chunking', 'Chunking files...', {
-            chunkCount: allCodeChunks.length,
-        });
+        await updateIngestProgressStatus(
+            repoURL,
+            'processing',
+            'chunking',
+            `${allCodeChunks.length ?? 0} chunks produced`,
+            {
+                chunkCount: allCodeChunks.length,
+            }
+        );
 
         // Clear the cloned repository from disk to save space
         await deleteEverythingInDir(appConfig.repoStoragePath);
@@ -202,7 +214,7 @@ export async function ingestRepo(repoURL: string): Promise<void> {
                 repoURL,
                 'processing',
                 'embeddingAndProcessing',
-                'Processing and storing chunks...',
+                data.message || 'Embedding and processing chunks',
                 {
                     current: data.current,
                     totalChunks: data.totalChunks,

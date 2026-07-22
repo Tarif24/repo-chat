@@ -66,6 +66,7 @@ export async function processAndStoreChunks(
             await processAndStoreChunk(chunk, repoURL);
             totalProcessedChunks++;
             await emit('embeddingAndProcessing', {
+                message: `${totalProcessedChunks ?? 0} / ${chunks.length ?? 0} chunks embedded`,
                 current: totalProcessedChunks,
                 totalChunks: chunks.length,
             });
