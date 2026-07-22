@@ -9,7 +9,7 @@ import {
 export async function ingest(repoURL: string) {
     await createRepoIngestStatus(repoURL);
 
-    ingestRepo(repoURL).catch(err => {
+    await ingestRepo(repoURL).catch(err => {
         logger.error(`REPO: ${repoURL} - Unhandled ingestion error: ${err.message}`);
     });
 }

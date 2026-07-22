@@ -80,7 +80,7 @@ export default function HomePage() {
 
         setIsLoading(true);
 
-        await startIngestion(validatedRepoURL);
+        startIngestion(validatedRepoURL);
 
         setJobStage('cloning');
 
@@ -201,7 +201,7 @@ export default function HomePage() {
                     }
                 },
             },
-            500
+            1000
         );
     };
 

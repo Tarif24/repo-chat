@@ -17,7 +17,7 @@ export async function getIngestionStatus(repoURL: string) {
         body: JSON.stringify({ repoURL }),
     });
     const json = await res.json();
-    return json; // { status, statusStage, statusMessage, statusMeta, statusUpdatedAt }
+    return json; // {message: string data: { status, statusStage, statusMessage, statusMeta, statusUpdatedAt, statusHistory } }
 }
 
 export function startPollingIngestionStatus(
