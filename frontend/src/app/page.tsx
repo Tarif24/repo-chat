@@ -83,6 +83,7 @@ export default function HomePage() {
         void startIngestion(validatedRepoURL);
 
         setJobStage('cloning');
+        setStageDetails('Cloning repository...');
 
         startPollingIngestionStatus(
             validatedRepoURL,
