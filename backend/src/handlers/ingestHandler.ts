@@ -1,49 +1,24 @@
 import type { Request, Response } from 'express';
-import { v4 as uuidv4 } from 'uuid';
-import { registerJob, removeJob } from '../lib/jobRegistry.js';
-import { ingest } from '../controllers/ingestController.js';
+import { ingest, getIngestStatus } from '../controllers/ingestController.js';
 
 export async function handleIngestRepo(req: Request, res: Response): Promise<void> {
-    const { repoUrl } = req.body;
-
-    const jobId = uuidv4();
+    const { repoURL } = req.body;
 
     // Fire off ingestion in background — do not await
-    ingest(jobId, repoUrl);
+    ingest(repoURL);
 
-    res.standardResponse(200, { jobId }, 'Ingestion started');
+    res.standardResponse(202, { repoURL }, 'Ingestion started');
 }
 
-export async function handleIngestProgress(req: Request, res: Response): Promise<void> {
-    const { jobId } = req.params;
+export async function handleGetIngestStatus(req: Request, res: Response) {
+    const { repoUrl } = req.query as { repoUrl: string };
 
-    if (!jobId || typeof jobId !== 'string') {
-        res.standardResponse(400, null, 'Missing jobId parameter');
+    const status = await getIngestStatus(repoUrl);
+
+    if (!status) {
+        res.standardResponse(404, null, 'No ingestion status found for this repository');
         return;
     }
 
-    // Set SSE headers to keep the connection open and stream events
-    res.setHeader('Content-Type', 'text/event-stream');
-    res.setHeader('Cache-Control', 'no-cache');
-    res.setHeader('Connection', 'keep-alive');
-    res.flushHeaders();
-
-    // senderFn is stored in the registry so ingestService can call it
-    const senderFn = (event: string, data: object) => {
-        res.write(`event: ${event}\ndata: ${JSON.stringify(data)}\n\n`);
-    };
-
-    registerJob(jobId, senderFn);
-
-    // Keep connection alive on AWS ALB — comment lines are ignored by EventSource
-    const heartbeat = setInterval(() => {
-        res.write(': heartbeat\n\n');
-    }, 30000);
-
-    // Clean up when client disconnects
-    req.on('close', () => {
-        clearInterval(heartbeat);
-        removeJob(jobId);
-        res.end();
-    });
+    res.standardResponse(200, status, 'Ingestion status retrieved');
 }
