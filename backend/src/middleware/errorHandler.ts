@@ -21,15 +21,15 @@ export default function errorHandler(err: Error, req: Request, res: Response, _n
     }
 
     if (req.originalUrl === '/api/ingest/repo') {
-        deleteRepo(req.body.repoUrl).catch(deleteErr => {
+        deleteRepo(req.body.repoURL).catch(deleteErr => {
             logger.error(
-                `Failed to delete repo after error during ingestion for ${req.body.repoUrl}: ${deleteErr.message}`,
+                `Failed to delete repo after error during ingestion for ${req.body.repoURL}: ${deleteErr.message}`,
                 deleteErr
             );
         });
 
         logger.info(
-            `REPO: ${req.body.repoUrl} - Deleted repository due to error during ingestion.`
+            `REPO: ${req.body.repoURL} - Deleted repository due to error during ingestion.`
         );
     }
 

@@ -160,10 +160,10 @@ export async function getAllRepositories() {
     return repoNames;
 }
 
-export async function getRepositoryByURL(repoUrl: string) {
-    const repo = await getRepoByURL(repoUrl);
+export async function getRepositoryByURL(repoURL: string) {
+    const repo = await getRepoByURL(repoURL);
     if (!repo) {
-        return `Repository with URL ${repoUrl} not found.`;
+        return `Repository with URL ${repoURL} not found.`;
     }
     return repo;
 }

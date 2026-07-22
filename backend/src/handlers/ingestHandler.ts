@@ -4,8 +4,8 @@ import { ingest, getIngestStatus } from '../controllers/ingestController.js';
 export async function handleIngestRepo(req: Request, res: Response): Promise<void> {
     const { repoURL } = req.body;
 
-    // Fire off ingestion in background — do not await
-    ingest(repoURL);
+    // Fire off ingestion in background — await is used only for initialization but not for the entire ingestion pipeline
+    await ingest(repoURL);
 
     res.standardResponse(202, { repoURL }, 'Ingestion started');
 }

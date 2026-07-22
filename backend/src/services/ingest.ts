@@ -16,10 +16,7 @@ import {
     updateRepoFileTree,
     updateRepoLastAccessed,
 } from '../services/repoProcessing.js';
-import {
-    createIngestProgress,
-    updateIngestProgressStatus,
-} from '../repositories/ingestProgressRepository.js';
+import { updateIngestProgressStatus } from '../repositories/ingestProgressRepository.js';
 import { checkRepoBelowStorageLimit, canIngestRepo } from '../services/storage.js';
 import { cacheInvalidate } from '../services/semanticCache.js';
 
@@ -28,7 +25,6 @@ export async function ingestRepo(repoURL: string): Promise<void> {
         logger.info(`REPO: ${repoURL} - Starting ingestion process.`);
 
         initializeDirectory();
-        await createIngestProgress(repoURL);
 
         const existingRepo = await getRepoByURL(repoURL);
         const latestSha = await getLatestSha(repoURL);
@@ -226,6 +222,8 @@ export async function ingestRepo(repoURL: string): Promise<void> {
                 success: true,
             }
         );
+
+        logger.info(`REPO: ${repoURL} - Repository ingested successfully.`);
     } catch (err: any) {
         logger.error(`REPO: ${repoURL} - Ingestion error: ${err.message}`);
         await updateIngestProgressStatus(

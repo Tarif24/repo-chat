@@ -3,14 +3,18 @@ import { IngestProgress } from '../database/models/index.js';
 export async function createIngestProgress(repoURL: string) {
     const existing = await IngestProgress.findOne({ repoURL });
     if (existing) {
-        throw new Error(`Ingest progress for repo ${repoURL} already exists.`);
+        return existing;
     }
 
     return await IngestProgress.create({ repoURL });
 }
 
+export async function deleteIngestProgress(repoURL: string) {
+    return await IngestProgress.deleteOne({ repoURL });
+}
+
 export async function updateIngestProgressStatus(
-    repoUrl: string,
+    repoURL: string,
     status: 'idle' | 'processing' | 'complete' | 'error',
     statusStage:
         | 'cloning'
@@ -25,7 +29,7 @@ export async function updateIngestProgressStatus(
     statusMeta: object = {}
 ) {
     return await IngestProgress.updateOne(
-        { repoUrl },
+        { repoURL },
         {
             $set: {
                 status,

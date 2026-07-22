@@ -6,11 +6,11 @@ import { deleteEverythingInDir } from './files.js';
 
 // Validate if a GitHub repo URL is valid and accessible
 export async function validateGithubRepo(
-    repoUrl: string
+    repoURL: string
 ): Promise<{ isValid: boolean; reason?: string }> {
     try {
         const git: SimpleGit = simpleGit();
-        await git.listRemote([repoUrl]);
+        await git.listRemote([repoURL]);
         return { isValid: true };
     } catch (err) {
         const message = err instanceof Error ? err.message : String(err);
@@ -29,16 +29,16 @@ export async function validateGithubRepo(
 }
 
 // Clone a repo and get its latest SHA
-export async function cloneAndGetSha(repoUrl: string, localPath: string): Promise<string> {
+export async function cloneAndGetSha(repoURL: string, localPath: string): Promise<string> {
     await deleteEverythingInDir(appConfig.repoStoragePath);
 
-    const validation = await validateGithubRepo(repoUrl);
+    const validation = await validateGithubRepo(repoURL);
     if (!validation.isValid) {
         throw new NotFoundError(`Invalid repository: ${validation.reason}`);
     }
 
     const git: SimpleGit = simpleGit();
-    await git.clone(repoUrl, localPath, ['--depth', '1']);
+    await git.clone(repoURL, localPath, ['--depth', '1']);
 
     const repoGit: SimpleGit = simpleGit(localPath);
     const log: LogResult = await repoGit.log({ maxCount: 1 });
@@ -51,16 +51,16 @@ export async function cloneAndGetSha(repoUrl: string, localPath: string): Promis
 
 // Get latest SHA without cloning
 export async function getLatestSha(
-    repoUrl: string,
+    repoURL: string,
     branch: string = 'main'
 ): Promise<string | undefined> {
-    const validation = await validateGithubRepo(repoUrl);
+    const validation = await validateGithubRepo(repoURL);
     if (!validation.isValid) {
         throw new NotFoundError(`Invalid repository: ${validation.reason}`);
     }
 
     const git: SimpleGit = simpleGit();
-    const remoteInfo: string = await git.listRemote(['--heads', repoUrl]);
+    const remoteInfo: string = await git.listRemote(['--heads', repoURL]);
 
     const line = remoteInfo
         .trim()

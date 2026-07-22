@@ -21,7 +21,7 @@ export async function getIngestionStatus(repoURL: string) {
 }
 
 export function startPollingIngestionStatus(
-    repoUrl: string,
+    repoURL: string,
     handlers: {
         onUpdate: (status: any) => void;
         onComplete: (status: any) => void;
@@ -35,16 +35,16 @@ export function startPollingIngestionStatus(
         if (cancelled) return;
 
         try {
-            const status = await getIngestionStatus(repoUrl);
+            const status = await getIngestionStatus(repoURL);
             if (cancelled || !status) return;
 
             handlers.onUpdate(status);
 
-            if (status.status === 'complete') {
+            if (status.data.status === 'complete') {
                 handlers.onComplete(status);
                 return;
             }
-            if (status.status === 'error') {
+            if (status.data.status === 'error') {
                 handlers.onError(status);
                 return;
             }

@@ -6,7 +6,7 @@ import {
 } from '../controllers/queryController.js';
 
 export async function handleUserQuery(req: Request, res: Response) {
-    const queryResponse = await userQuery(req.body.query, req.body.repoUrl, req.body.chatHistory);
+    const queryResponse = await userQuery(req.body.query, req.body.repoURL, req.body.chatHistory);
     res.standardResponse(200, { ...queryResponse }, 'Query processed successfully');
 }
 
@@ -16,6 +16,6 @@ export async function handleGetAllRepos(_req: Request, res: Response) {
 }
 
 export async function handleGetRepoByURL(req: Request, res: Response) {
-    const repo = await getRepositoryByURL(req.body.repoUrl);
+    const repo = await getRepositoryByURL(req.body.repoURL);
     res.standardResponse(200, { repo: repo }, 'Repository retrieved successfully');
 }

@@ -57,7 +57,7 @@ export default function ChatTypingBar({
             },
             body: JSON.stringify({
                 query: input,
-                repoUrl: selectedRepo,
+                repoURL: selectedRepo,
                 chatHistory: chatHistory,
             }),
         });
