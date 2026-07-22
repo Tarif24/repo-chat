@@ -1,4 +1,3 @@
-// repositories/cacheRepository.ts
 import { SemanticCache } from '../database/models/index.js';
 
 export async function searchSemanticCache(
