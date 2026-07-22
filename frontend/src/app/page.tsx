@@ -201,7 +201,7 @@ export default function HomePage() {
                     }
                 },
             },
-            1000
+            500
         );
     };
 
