@@ -80,7 +80,7 @@ export default function HomePage() {
 
         setIsLoading(true);
 
-        startIngestion(validatedRepoURL);
+        void startIngestion(validatedRepoURL);
 
         setJobStage('cloning');
 
