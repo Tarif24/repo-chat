@@ -17,7 +17,7 @@ const githubUrlSchema = z
     });
 
 export const ingestRepoSchema = z.object({
-    repoUrl: githubUrlSchema,
+    repoURL: githubUrlSchema,
 });
 
 export type IngestRepoType = z.infer<typeof ingestRepoSchema>;

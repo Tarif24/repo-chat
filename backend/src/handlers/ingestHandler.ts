@@ -11,9 +11,9 @@ export async function handleIngestRepo(req: Request, res: Response): Promise<voi
 }
 
 export async function handleGetIngestStatus(req: Request, res: Response) {
-    const { repoUrl } = req.query as { repoUrl: string };
+    const { repoURL } = req.body;
 
-    const status = await getIngestStatus(repoUrl);
+    const status = await getIngestStatus(repoURL);
 
     if (!status) {
         res.standardResponse(404, null, 'No ingestion status found for this repository');

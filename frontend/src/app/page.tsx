@@ -6,7 +6,7 @@ import { validateRepoPath } from '../lib/validateRepoPath';
 import { toast } from 'react-toastify';
 import RepoLoadingState from './repoLoadingState';
 import { useNavVisibility } from '../components/navVisibility';
-import { startIngestion, openIngestionStream } from '../lib/api';
+import { startIngestion, startPollingIngestionStatus } from '../lib/api';
 
 const EXAMPLE_REPOS = [
     'Tarif24/repo-chat',
@@ -79,66 +79,79 @@ export default function HomePage() {
         setCurrentIngestingRepo(validatedRepoURL);
 
         setIsLoading(true);
-        const { jobId } = await startIngestion(validatedRepoURL);
+
+        await startIngestion(validatedRepoURL);
 
         setJobStage('cloning');
 
-        openIngestionStream(jobId, {
-            onCloning: () => {
-                setJobStage('cloning');
-                setStageDetails('Cloning repository...');
-                snapshotStage(
-                    setStageHistory,
-                    'cloning',
-                    'Cloning repository...'
-                );
-            },
-            onScanning: () => {
-                setJobStage('scanning');
-                setStageDetails('Scanning files...');
-            },
-            onScanResult: d => {
-                setStageDetails(
-                    `Found ${d.fileCount} parseable files (scanned ${d.totalFileCount})`
-                );
-                snapshotStage(
-                    setStageHistory,
-                    'scanning',
-                    `Found ${d.fileCount} parseable files (scanned ${d.totalFileCount})`
-                );
-            },
-            onStorageCheck: d => {
-                setJobStage('storageCheck');
-                setStageDetails(`Estimated size: ${d.estimateWithBufferMB} MB`);
-                snapshotStage(
-                    setStageHistory,
-                    'storageCheck',
-                    `Estimated size: ${d.estimateWithBufferMB} MB`
-                );
-            },
-            onChunking: d => {
-                setJobStage('chunking');
-                setStageDetails(`${d.chunkCount} chunks produced`);
-                snapshotStage(
-                    setStageHistory,
-                    'chunking',
-                    `${d.chunkCount} chunks produced`
-                );
-            },
-            onEmbeddingAndProcessing: d => {
-                setJobStage('embeddingAndProcessing');
-                setStageDetails(
-                    `${d.current} / ${d.totalChunks} chunks embedded`
-                );
-            },
-            onStoring: () => {
-                snapshotStage(
-                    setStageHistory,
-                    'embeddingAndProcessing',
-                    stageDetails
-                );
-                setJobStage('storing');
-                setStageDetails('Writing to database...');
+        const stopPolling = startPollingIngestionStatus(validatedRepoURL, {
+            onUpdate: status => {
+                const meta = status.data.statusMeta ?? {};
+
+                switch (status.data.statusStage) {
+                    case 'cloning':
+                        setJobStage('cloning');
+                        setStageDetails('Cloning repository...');
+                        snapshotStage(
+                            setStageHistory,
+                            'cloning',
+                            'Cloning repository...'
+                        );
+                        break;
+                    case 'scanning':
+                        setJobStage('scanning');
+                        setStageDetails('Scanning files...');
+                        break;
+                    case 'scanResult':
+                        setStageDetails(
+                            `Found ${meta.fileCount ?? 0} parseable files (scanned ${meta.totalFileCount ?? 0})`
+                        );
+                        snapshotStage(
+                            setStageHistory,
+                            'scanning',
+                            `Found ${meta.fileCount ?? 0} parseable files (scanned ${meta.totalFileCount ?? 0})`
+                        );
+                        break;
+                    case 'storageCheck':
+                        setJobStage('storageCheck');
+                        setStageDetails(
+                            `Estimated size: ${meta.estimateWithBufferMB ?? 0} MB`
+                        );
+                        snapshotStage(
+                            setStageHistory,
+                            'storageCheck',
+                            `Estimated size: ${meta.estimateWithBufferMB ?? 0} MB`
+                        );
+                        break;
+                    case 'chunking':
+                        setJobStage('chunking');
+                        setStageDetails(
+                            `${meta.chunkCount ?? 0} chunks produced`
+                        );
+                        snapshotStage(
+                            setStageHistory,
+                            'chunking',
+                            `${meta.chunkCount ?? 0} chunks produced`
+                        );
+                        break;
+                    case 'embeddingAndProcessing':
+                        setJobStage('embeddingAndProcessing');
+                        setStageDetails(
+                            `${meta.current ?? 0} / ${meta.totalChunks ?? 0} chunks embedded`
+                        );
+                        break;
+                    case 'storing':
+                        snapshotStage(
+                            setStageHistory,
+                            'embeddingAndProcessing',
+                            stageDetails
+                        );
+                        setJobStage('storing');
+                        setStageDetails('Writing to database...');
+                        break;
+                    default:
+                        break;
+                }
             },
             onComplete: () => {
                 setJobStage('');
@@ -151,7 +164,7 @@ export default function HomePage() {
                     'Repo Successfully Ingested! You can now ask questions about it.'
                 );
             },
-            onError: d => {
+            onError: status => {
                 setJobStage('');
                 setStageDetails('');
                 setStageHistory({});
@@ -161,8 +174,12 @@ export default function HomePage() {
                 toast.error(
                     'Sorry the repo could not be ingested at this time please try again later'
                 );
-                if (d.message.toLowerCase().includes('openai api error')) {
-                    toast.success(d.data.message);
+                if (
+                    status.data.statusMessage
+                        .toLowerCase()
+                        .includes('openai api error')
+                ) {
+                    toast.success(status.message);
                 }
             },
         });

@@ -1,64 +1,64 @@
 const API_URL = process.env.NEXT_PUBLIC_API_URL || '';
 
-export async function startIngestion(
-    repoUrl: string
-): Promise<{ jobId: string }> {
+export async function startIngestion(repoURL: string) {
     const res = await fetch(`${API_URL}/api/ingest/repo`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ repoUrl }),
+        body: JSON.stringify({ repoURL }),
     });
     const json = await res.json();
-    return json.data; // matches your standardResponse shape: { success, message, data }
+    return json.data;
 }
 
-export function openIngestionStream(
-    jobId: string,
+export async function getIngestionStatus(repoURL: string) {
+    const res = await fetch(`${API_URL}/api/ingest/status`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ repoURL }),
+    });
+    const json = await res.json();
+    return json; // { status, statusStage, statusMessage, statusMeta, statusUpdatedAt }
+}
+
+export function startPollingIngestionStatus(
+    repoUrl: string,
     handlers: {
-        onCloning?: (data: any) => void;
-        onScanning?: (data: any) => void;
-        onScanResult?: (data: any) => void;
-        onStorageCheck?: (data: any) => void;
-        onChunking?: (data: any) => void;
-        onEmbeddingAndProcessing?: (data: any) => void;
-        onStoring?: (data: any) => void;
-        onComplete?: (data: any) => void;
-        onError?: (data: any) => void;
-    }
-): EventSource {
-    const source = new EventSource(`${API_URL}/api/ingest/progress/${jobId}`);
+        onUpdate: (status: any) => void;
+        onComplete: (status: any) => void;
+        onError: (status: any) => void;
+    },
+    intervalMs = 2000
+): () => void {
+    let cancelled = false;
 
-    source.addEventListener('cloning', e =>
-        handlers.onCloning?.(JSON.parse(e.data))
-    );
-    source.addEventListener('scanning', e =>
-        handlers.onScanning?.(JSON.parse(e.data))
-    );
-    source.addEventListener('scanResult', e => {
-        handlers.onScanResult?.(JSON.parse(e.data));
-    });
-    source.addEventListener('storageCheck', e =>
-        handlers.onStorageCheck?.(JSON.parse(e.data))
-    );
-    source.addEventListener('chunking', e =>
-        handlers.onChunking?.(JSON.parse(e.data))
-    );
-    source.addEventListener('embeddingAndProcessing', e =>
-        handlers.onEmbeddingAndProcessing?.(JSON.parse(e.data))
-    );
-    source.addEventListener('storing', e =>
-        handlers.onStoring?.(JSON.parse(e.data))
-    );
-    source.addEventListener('complete', e => {
-        handlers.onComplete?.(JSON.parse(e.data));
-        source.close();
-    });
-    source.addEventListener('error', (e: any) => {
-        handlers.onError?.(
-            e.data ? JSON.parse(e.data) : { message: 'Connection error' }
-        );
-        source.close();
-    });
+    const poll = async () => {
+        if (cancelled) return;
 
-    return source;
+        try {
+            const status = await getIngestionStatus(repoUrl);
+            if (cancelled || !status) return;
+
+            handlers.onUpdate(status);
+
+            if (status.status === 'complete') {
+                handlers.onComplete(status);
+                return;
+            }
+            if (status.status === 'error') {
+                handlers.onError(status);
+                return;
+            }
+
+            setTimeout(poll, intervalMs);
+        } catch (err) {
+            if (!cancelled) setTimeout(poll, intervalMs);
+        }
+    };
+
+    poll();
+
+    // Return a cancel function so callers can stop polling on unmount.
+    return () => {
+        cancelled = true;
+    };
 }
