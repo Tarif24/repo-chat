@@ -65,8 +65,7 @@ export async function processAndStoreChunks(
         try {
             await processAndStoreChunk(chunk, repoURL);
             totalProcessedChunks++;
-            emit('embeddingAndProcessing', {
-                message: 'Processing and storing chunks...',
+            await emit('embeddingAndProcessing', {
                 current: totalProcessedChunks,
                 totalChunks: chunks.length,
             });
@@ -74,10 +73,10 @@ export async function processAndStoreChunks(
             logger.error('Error processing chunk:', error);
 
             if (error instanceof OpenAIError) {
-                emit('error', { message: error.message || 'Chunk processing failed' });
+                await emit('error', { message: error.message || 'Chunk processing failed' });
                 throw error;
             } else {
-                emit('error', { message: error || 'Chunk processing failed' });
+                await emit('error', { message: error || 'Chunk processing failed' });
                 throw new AppError(
                     'Error processing chunk: ' +
                         (error instanceof Error ? error.message : String(error))

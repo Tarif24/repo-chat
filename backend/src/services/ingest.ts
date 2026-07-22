@@ -16,24 +16,19 @@ import {
     updateRepoFileTree,
     updateRepoLastAccessed,
 } from '../services/repoProcessing.js';
-
+import {
+    createIngestProgress,
+    updateIngestProgressStatus,
+} from '../repositories/ingestProgressRepository.js';
 import { checkRepoBelowStorageLimit, canIngestRepo } from '../services/storage.js';
 import { cacheInvalidate } from '../services/semanticCache.js';
 
-import { getJob } from '../lib/jobRegistry.js';
-
-export async function ingestRepo(jobId: string, repoURL: string): Promise<void> {
-    const emit = (event: string, data: object) => {
-        const sender = getJob(jobId);
-        if (sender) {
-            sender(event, data);
-        }
-    };
-
+export async function ingestRepo(repoURL: string): Promise<void> {
     try {
         logger.info(`REPO: ${repoURL} - Starting ingestion process.`);
 
         initializeDirectory();
+        await createIngestProgress(repoURL);
 
         const existingRepo = await getRepoByURL(repoURL);
         const latestSha = await getLatestSha(repoURL);
@@ -41,22 +36,35 @@ export async function ingestRepo(jobId: string, repoURL: string): Promise<void> 
         // If the repository already exists and the latest SHA matches, skip re-ingestion but update the last accessed time
         if (existingRepo && latestSha && existingRepo.latestSHA === latestSha) {
             await updateRepoLastAccessed(repoURL);
-            emit('complete', {
-                message: 'Repository is up to date. No need to re-ingest',
-                latestSha,
-                success: true,
-            });
+            await updateIngestProgressStatus(
+                repoURL,
+                'complete',
+                'complete',
+                'Repository is up to date. No need to re-ingest',
+                {
+                    latestSha,
+                    success: true,
+                }
+            );
+            logger.info(`REPO: ${repoURL} - Repository is up to date. No need to re-ingest.`);
             return;
         }
 
         // --- cloning stage ---
 
         // Clone the repository and get the latest SHA
-        emit('cloning', { message: 'Cloning repository...' });
+        await updateIngestProgressStatus(repoURL, 'processing', 'cloning', 'Cloning repository...');
         const repoSha = await cloneAndGetSha(repoURL, appConfig.repoStoragePath);
 
         if (!repoSha) {
-            emit('error', { message: 'Failed to clone repository', success: false });
+            await updateIngestProgressStatus(
+                repoURL,
+                'error',
+                'error',
+                'Failed to clone repository',
+                { success: false }
+            );
+            logger.error(`REPO: ${repoURL} - Failed to clone repository.`);
             return;
         }
 
@@ -67,15 +75,14 @@ export async function ingestRepo(jobId: string, repoURL: string): Promise<void> 
 
         // --- scanning stage ---
 
-        emit('scanning', { message: 'Scanning files...' });
+        await updateIngestProgressStatus(repoURL, 'processing', 'scanning', 'Scanning files...');
 
         // Scan the cloned repository for parseable files
         const { validFiles, validFilesSize, totalScanned } = collectParseableFiles(
             appConfig.repoStoragePath,
             repoURL
         );
-        emit('scanResult', {
-            message: 'Scanning files...',
+        await updateIngestProgressStatus(repoURL, 'processing', 'scanResult', 'Scanning files...', {
             fileCount: validFiles?.length ?? 0,
             totalFileCount: totalScanned ? totalScanned : 0,
         });
@@ -95,11 +102,16 @@ export async function ingestRepo(jobId: string, repoURL: string): Promise<void> 
             )} MB.`
         );
 
-        emit('storageCheck', {
-            message: 'Checking storage limits...',
-            estimateMB: storageCheck.estimate.confirmedTotalMB.toFixed(2),
-            estimateWithBufferMB: storageCheck.bufferMB.toFixed(2),
-        });
+        await updateIngestProgressStatus(
+            repoURL,
+            'processing',
+            'storageCheck',
+            'Checking storage limits...',
+            {
+                estimateMB: storageCheck.estimate.confirmedTotalMB.toFixed(2),
+                estimateWithBufferMB: storageCheck.bufferMB.toFixed(2),
+            }
+        );
 
         // If the repository exceeds the storage limit, abort ingestion and clean up the cloned files
         if (!storageCheck.allowed) {
@@ -109,10 +121,14 @@ export async function ingestRepo(jobId: string, repoURL: string): Promise<void> 
 
             // Clear the cloned repository from disk to save space
             await deleteEverythingInDir(appConfig.repoStoragePath);
-            emit('error', {
-                message: `Repository exceeds storage limit. ${storageCheck.reason}`,
-                success: false,
-            });
+
+            await updateIngestProgressStatus(
+                repoURL,
+                'error',
+                'error',
+                `Repository exceeds storage limit. ${storageCheck.reason}`,
+                { success: false }
+            );
             return;
         }
 
@@ -133,10 +149,14 @@ export async function ingestRepo(jobId: string, repoURL: string): Promise<void> 
 
             // Clear the cloned repository from disk to save space
             await deleteEverythingInDir(appConfig.repoStoragePath);
-            emit('error', {
-                success: false,
-                message: `Repository exceeds database storage limit. ${dbStorageCheck.reason}`,
-            });
+
+            await updateIngestProgressStatus(
+                repoURL,
+                'error',
+                'error',
+                `Repository exceeds database storage limit. ${dbStorageCheck.reason}`,
+                { success: false }
+            );
             return;
         }
 
@@ -157,8 +177,13 @@ export async function ingestRepo(jobId: string, repoURL: string): Promise<void> 
         // --- chunking stage ---
 
         // Parse the valid files using Tree-sitter
+        await updateIngestProgressStatus(repoURL, 'processing', 'chunking', 'Chunking files...');
+
         const allCodeChunks = await parseFiles(validFiles || [], repoURL);
-        emit('chunking', { message: 'Chunking files...', chunkCount: allCodeChunks.length });
+
+        await updateIngestProgressStatus(repoURL, 'processing', 'chunking', 'Chunking files...', {
+            chunkCount: allCodeChunks.length,
+        });
 
         // Clear the cloned repository from disk to save space
         await deleteEverythingInDir(appConfig.repoStoragePath);
@@ -166,17 +191,49 @@ export async function ingestRepo(jobId: string, repoURL: string): Promise<void> 
         // --- embedding + storing stage ---
 
         // Process and store the code chunks in the database
-        await processAndStoreChunks(allCodeChunks, repoURL, emit);
+        await processAndStoreChunks(allCodeChunks, repoURL, async (event, data: any) => {
+            if (event === 'error') {
+                await updateIngestProgressStatus(
+                    repoURL,
+                    'error',
+                    'error',
+                    data.message || 'Chunk processing failed'
+                );
+                return;
+            }
+            // event === 'embeddingAndProcessing'
+            await updateIngestProgressStatus(
+                repoURL,
+                'processing',
+                'embeddingAndProcessing',
+                'Processing and storing chunks...',
+                {
+                    current: data.current,
+                    totalChunks: data.totalChunks,
+                }
+            );
+        });
 
         // --- complete ---
-        emit('complete', {
-            message: 'Repository ingested successfully',
-            latestSha: repoSha,
-            chunkCount: allCodeChunks.length,
-            success: true,
-        });
+        await updateIngestProgressStatus(
+            repoURL,
+            'complete',
+            'complete',
+            'Repository ingested successfully',
+            {
+                latestSha: repoSha,
+                chunkCount: allCodeChunks.length,
+                success: true,
+            }
+        );
     } catch (err: any) {
         logger.error(`REPO: ${repoURL} - Ingestion error: ${err.message}`);
-        emit('error', { message: err.message || 'Ingestion failed' });
+        await updateIngestProgressStatus(
+            repoURL,
+            'error',
+            'error',
+            `Ingestion error: ${err.message}`,
+            { success: false }
+        );
     }
 }

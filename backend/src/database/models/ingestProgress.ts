@@ -14,7 +14,16 @@ const ingestProgress = new mongoose.Schema(
         },
         statusStage: {
             type: String,
-            enum: ['cloning', 'scanning', 'chunking', 'embedding', 'storing', 'complete', 'error'],
+            enum: [
+                'cloning',
+                'scanning',
+                'scanResult',
+                'storageCheck',
+                'chunking',
+                'embeddingAndProcessing',
+                'complete',
+                'error',
+            ],
             default: 'cloning',
         },
         statusMeta: {

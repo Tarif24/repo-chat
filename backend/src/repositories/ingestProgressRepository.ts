@@ -15,9 +15,10 @@ export async function updateIngestProgressStatus(
     statusStage:
         | 'cloning'
         | 'scanning'
+        | 'scanResult'
+        | 'storageCheck'
         | 'chunking'
-        | 'embedding'
-        | 'storing'
+        | 'embeddingAndProcessing'
         | 'complete'
         | 'error',
     statusMessage: string,
