@@ -2,7 +2,8 @@
 import type { Request, Response, NextFunction } from 'express';
 import { AppError, OpenAIError } from '../error/appError.js';
 import { ZodError } from 'zod';
-import { deleteRepo } from '../services/repoProcessing.js';
+import { deleteRepoAndChunks } from '../services/repoProcessing.js';
+import { deleteRepoIngestStatus } from '../services/ingestProgress.js';
 import logger from '../lib/logger.js';
 
 export default function errorHandler(err: Error, req: Request, res: Response, _next: NextFunction) {
@@ -21,9 +22,15 @@ export default function errorHandler(err: Error, req: Request, res: Response, _n
     }
 
     if (req.originalUrl === '/api/ingest/repo') {
-        deleteRepo(req.body.repoURL).catch(deleteErr => {
+        deleteRepoAndChunks(req.body.repoURL).catch(deleteErr => {
             logger.error(
                 `Failed to delete repo after error during ingestion for ${req.body.repoURL}: ${deleteErr.message}`,
+                deleteErr
+            );
+        });
+        deleteRepoIngestStatus(req.body.repoURL).catch(deleteErr => {
+            logger.error(
+                `Failed to delete repo ingest status after error during ingestion for ${req.body.repoURL}: ${deleteErr.message}`,
                 deleteErr
             );
         });

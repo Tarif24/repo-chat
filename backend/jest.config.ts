@@ -6,6 +6,9 @@ const config: Config = {
     globalSetup: './tests/globalSetup.ts',
     globalTeardown: './tests/globalTeardown.ts',
     setupFilesAfterEnv: ['./tests/setup.ts'],
+    moduleNameMapper: {
+        '^(\\.{1,2}/.*)\\.js$': '$1',
+    },
     // ** means any folder depth, * means any filename
     testMatch: ['**/tests/unit/**/*.test.ts', '**/tests/integration/**/*.test.ts'],
 

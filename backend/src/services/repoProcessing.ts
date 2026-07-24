@@ -55,7 +55,7 @@ export async function getAllRepos() {
     return await getAllRepositories();
 }
 
-export async function deleteRepo(repoURL: string) {
+export async function deleteRepoAndChunks(repoURL: string) {
     await deleteChunksByRepoURL(repoURL);
     await deleteRepoByURL(repoURL);
 }
