@@ -56,6 +56,41 @@ describe('reranker — rerankChunks', () => {
         ]);
     });
 
+    it('skips reranking and preserves original scores when the chunk list is smaller than or equal to default topK', async () => {
+        const chunks = [
+            {
+                _id: '1',
+                content: 'first chunk',
+                embedding: [],
+                metadata: { relativePath: 'file1.ts', startLine: 1, endLine: 1 },
+                score: 0.25,
+            },
+            {
+                _id: '2',
+                content: 'second chunk',
+                embedding: [],
+                metadata: { relativePath: 'file2.ts', startLine: 2, endLine: 2 },
+                score: 0.75,
+            },
+        ] as unknown as ScoredChunk[];
+
+        const result = await rerankChunks('any question', chunks);
+
+        expect(mockScoreChunks).not.toHaveBeenCalled();
+        expect(result).toEqual([
+            {
+                ...chunks[0],
+                rerankScore: 0.25,
+                vectorScore: 0.25,
+            },
+            {
+                ...chunks[1],
+                rerankScore: 0.75,
+                vectorScore: 0.75,
+            },
+        ]);
+    });
+
     it('calls scoreChunks with the original question and chunks when reranking is needed', async () => {
         const chunks = [
             {
@@ -187,7 +222,11 @@ describe('reranker — rerankChunks', () => {
             _id: String(index + 1),
             content: `chunk ${index + 1}`,
             embedding: [],
-            metadata: { relativePath: `file${index + 1}.ts`, startLine: index + 1, endLine: index + 1 },
+            metadata: {
+                relativePath: `file${index + 1}.ts`,
+                startLine: index + 1,
+                endLine: index + 1,
+            },
             score: 0.1 * (index + 1),
         })) as unknown as ScoredChunk[];
 
