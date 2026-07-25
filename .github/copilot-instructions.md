@@ -74,7 +74,7 @@ change the import to "fix" the squiggle.
 ## Rules for you (Copilot)
 
 - I am a beginner learning to write tests. Explain each test's purpose in a
-  one-line comment above it, in plain language.
+  one-line comment above it, in plain language and if anything goes beyond the basics explain that too.
 - NEVER assume a function's return shape, field names, or error-handling
   behavior. If you haven't seen the actual source file's content, or if
   something in the source is ambiguous, STOP and ask me a specific question
