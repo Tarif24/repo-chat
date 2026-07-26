@@ -13,7 +13,7 @@ import { interpretAndEmbedQuery } from '../../src/services/queryInterpreter.js';
 const mockInterpretQuery = interpretQuery as jest.Mock;
 const mockCreateEmbedding = createEmbedding as jest.Mock;
 
-describe('queryInterpreter — interpretAndEmbedQuery', () => {
+describe('queryInterpreter service', () => {
     beforeEach(() => {
         jest.clearAllMocks();
     });

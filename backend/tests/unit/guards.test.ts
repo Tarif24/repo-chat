@@ -12,7 +12,7 @@ import { isRelevant } from '../../src/services/guards.js';
 // Cast to jest.Mock so TypeScript lets us call mock methods on it
 const mockCheckQueryRelevance = checkQueryRelevance as jest.Mock;
 
-describe('guards — isRelevant', () => {
+describe('guards service', () => {
     beforeEach(() => {
         jest.clearAllMocks();
     });

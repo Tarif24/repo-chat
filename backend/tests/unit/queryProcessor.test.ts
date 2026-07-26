@@ -7,7 +7,7 @@ import { processUserQuery } from '../../src/services/queryProcessor.js';
 
 const mockGetOpenAIResponseWithChatHistory = getOpenAIResponseWithChatHistory as jest.Mock;
 
-describe('queryProcessor — processUserQuery', () => {
+describe('queryProcessor service', () => {
     beforeEach(() => {
         jest.clearAllMocks();
     });
@@ -51,6 +51,8 @@ describe('queryProcessor — processUserQuery', () => {
         const error = new Error('provider failed');
         mockGetOpenAIResponseWithChatHistory.mockRejectedValueOnce(error);
 
-        await expect(processUserQuery('You are helpful', 'Hello?')).rejects.toThrow('provider failed');
+        await expect(processUserQuery('You are helpful', 'Hello?')).rejects.toThrow(
+            'provider failed'
+        );
     });
 });

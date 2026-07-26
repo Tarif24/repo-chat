@@ -2,7 +2,7 @@ import { buildQuery } from '../../src/services/queryBuilder.js';
 import type { ScoredChunk } from '../../src/repositories/chunkRepository.js';
 import { makeChunk } from '../fixtures/chunks.js';
 
-describe('buildQuery', () => {
+describe('buildQuery service', () => {
     beforeEach(() => {
         jest.clearAllMocks();
     });

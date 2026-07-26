@@ -32,7 +32,7 @@ const mockCreateEmbedding = createEmbedding as jest.Mock;
 const mockLoggerInfo = logger.info as jest.Mock;
 const mockLoggerError = logger.error as jest.Mock;
 
-describe('chunkProcessing', () => {
+describe('chunkProcessing service', () => {
     beforeEach(() => {
         jest.clearAllMocks();
     });

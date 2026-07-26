@@ -8,7 +8,7 @@ import { makeRankedChunk } from '../fixtures/chunks.js';
 
 const mockCompressChunk = compressChunk as jest.Mock;
 
-describe('contextCompression — compressContext', () => {
+describe('contextCompression service', () => {
     beforeEach(() => {
         jest.clearAllMocks();
     });

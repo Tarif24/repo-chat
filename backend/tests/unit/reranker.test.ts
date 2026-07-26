@@ -9,7 +9,7 @@ import type { ScoredChunk } from '../../src/repositories/chunkRepository.js';
 
 const mockScoreChunks = scoreChunks as jest.Mock;
 
-describe('reranker — rerankChunks', () => {
+describe('reranker service', () => {
     beforeEach(() => {
         jest.resetAllMocks();
     });

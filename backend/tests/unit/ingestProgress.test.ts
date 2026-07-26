@@ -5,15 +5,23 @@ jest.mock('../../src/repositories/ingestProgressRepository.js', () => ({
     deleteIngestProgress: jest.fn(),
 }));
 
-import { createIngestProgress, getIngestProgressStatus, deleteIngestProgress } from '../../src/repositories/ingestProgressRepository.js';
+import {
+    createIngestProgress,
+    getIngestProgressStatus,
+    deleteIngestProgress,
+} from '../../src/repositories/ingestProgressRepository.js';
 
-import { createRepoIngestStatus, getRepoIngestStatus, deleteRepoIngestStatus } from '../../src/services/ingestProgress.js';
+import {
+    createRepoIngestStatus,
+    getRepoIngestStatus,
+    deleteRepoIngestStatus,
+} from '../../src/services/ingestProgress.js';
 
 const mockCreate = createIngestProgress as jest.Mock;
 const mockGet = getIngestProgressStatus as jest.Mock;
 const mockDelete = deleteIngestProgress as jest.Mock;
 
-describe('services/ingestProgress', () => {
+describe('ingestProgress service', () => {
     beforeEach(() => {
         jest.clearAllMocks();
     });

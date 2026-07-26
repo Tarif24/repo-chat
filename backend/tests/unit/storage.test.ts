@@ -50,7 +50,7 @@ const mockCacheInvalidate = cacheInvalidate as jest.Mock;
 const mockLoggerWarn = logger.warn as jest.Mock;
 const mockLoggerInfo = logger.info as jest.Mock;
 
-describe('services/storage', () => {
+describe('storage service', () => {
     beforeEach(() => {
         jest.clearAllMocks();
     });

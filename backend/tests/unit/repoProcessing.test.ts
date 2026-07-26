@@ -51,7 +51,7 @@ const mockGetAllRepositories = getAllRepositories as jest.Mock;
 const mockDeleteRepoByURL = deleteRepoByURL as jest.Mock;
 const mockLoggerInfo = logger.info as jest.Mock;
 
-describe('repoProcessing', () => {
+describe('repoProcessing service', () => {
     beforeEach(() => {
         jest.clearAllMocks();
     });
@@ -81,9 +81,7 @@ describe('repoProcessing', () => {
     it('updates an existing repository instead of creating a duplicate', async () => {
         const existingRepo = { repoURL: 'https://example.com/repo', latestSHA: 'old-sha' };
         const updatedRepo = { ...existingRepo, latestSHA: 'new-sha' };
-        mockFindRepoByURL
-            .mockResolvedValueOnce(existingRepo)
-            .mockResolvedValueOnce(updatedRepo);
+        mockFindRepoByURL.mockResolvedValueOnce(existingRepo).mockResolvedValueOnce(updatedRepo);
         mockUpdateLatestSHA.mockResolvedValueOnce(updatedRepo);
         mockUpdateLastAccessed.mockResolvedValueOnce(updatedRepo);
 
