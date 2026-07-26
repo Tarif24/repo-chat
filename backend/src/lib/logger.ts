@@ -1,4 +1,4 @@
-import winston from 'winston';
+import * as winston from 'winston';
 //import DailyRotateFile from 'winston-daily-rotate-file';
 //import path from 'path';
 
@@ -18,7 +18,8 @@ const consoleFormat = combine(
     colorize(),
     timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
     errors({ stack: true }),
-    printf(({ level, message, timestamp, stack }) => {
+    printf((info: any) => {
+        const { level, message, timestamp, stack } = info;
         return stack
             ? `[${timestamp}] ${level}: ${message}\n${stack}`
             : `[${timestamp}] ${level}: ${message}`;
