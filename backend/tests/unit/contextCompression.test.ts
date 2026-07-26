@@ -4,23 +4,9 @@ jest.mock('../../src/providers/completionProvider.js', () => ({
 
 import { compressChunk } from '../../src/providers/completionProvider.js';
 import { compressContext } from '../../src/services/contextCompression.js';
+import { makeRankedChunk } from '../fixtures/chunks.js';
 
 const mockCompressChunk = compressChunk as jest.Mock;
-
-function makeChunk(content: string) {
-    return {
-        content,
-        embedding: [0.1, 0.2, 0.3],
-        metadata: {
-            relativePath: 'src/example.ts',
-            startLine: 1,
-            endLine: 3,
-        },
-        score: 0.4,
-        rerankScore: 0.4,
-        vectorScore: 0.4,
-    };
-}
 
 describe('contextCompression — compressContext', () => {
     beforeEach(() => {
@@ -28,7 +14,10 @@ describe('contextCompression — compressContext', () => {
     });
 
     it('returns each chunk unchanged with compression disabled when the total content stays under the threshold', async () => {
-        const chunks = [makeChunk('short chunk one'), makeChunk('short chunk two')];
+        const chunks = [
+            makeRankedChunk({ content: 'short chunk one' }),
+            makeRankedChunk({ content: 'short chunk two' }),
+        ];
 
         const result = await compressContext('how does this work?', chunks, 1_000);
 
@@ -47,7 +36,10 @@ describe('contextCompression — compressContext', () => {
     });
 
     it('compresses every chunk when the total content exceeds the threshold', async () => {
-        const chunks = [makeChunk('a'.repeat(6_000)), makeChunk('b'.repeat(6_000))];
+        const chunks = [
+            makeRankedChunk({ content: 'a'.repeat(6_000) }),
+            makeRankedChunk({ content: 'b'.repeat(6_000) }),
+        ];
         const firstCompressed = {
             ...chunks[0],
             originalContent: chunks[0]?.content,
@@ -73,7 +65,7 @@ describe('contextCompression — compressContext', () => {
     });
 
     it('propagates an error from the compression provider instead of swallowing it', async () => {
-        const chunks = [makeChunk('x'.repeat(12_000))];
+        const chunks = [makeRankedChunk({ content: 'x'.repeat(12_000) })];
         mockCompressChunk.mockRejectedValueOnce(new Error('compression failed'));
 
         await expect(compressContext('how does this work?', chunks, 1_000)).rejects.toThrow(
