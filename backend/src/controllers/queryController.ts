@@ -44,7 +44,8 @@ export async function userQuery(
     }
 
     // Interpret and get the filters for the query, and also get the embedding for the hypothetical chunk
-    const { embedding, filters, hypotheticalChunk } = await interpretAndEmbedQuery(query);
+    const interpretedQuery = await interpretAndEmbedQuery(query);
+    const { embedding, filters, hypotheticalChunk } = interpretedQuery ?? {};
 
     // Temporary logging for debugging and analysis
     logger.info(
