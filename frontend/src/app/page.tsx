@@ -47,6 +47,7 @@ function snapshotStage(
 }
 
 export default function HomePage() {
+    const API_URL = process.env.NEXT_PUBLIC_API_URL ?? '';
     const [inputText, setInputText] = useState('');
     const [currentIngestingRepo, setCurrentIngestingRepo] = useState('');
     const [isLoading, setIsLoading] = useState(false);
@@ -56,6 +57,10 @@ export default function HomePage() {
     const [stageHistory, setStageHistory] = useState<Record<string, string>>(
         {}
     );
+
+    useEffect(() => {
+        fetch(`${API_URL}/api/query/getAllRepos`);
+    }, [API_URL]);
 
     useEffect(() => {
         setVisible(!isLoading);

@@ -29,6 +29,24 @@ export function makeRankedChunk({
     };
 }
 
+export function buildChunk(
+    relativePath: string,
+    score: number,
+    parentDir = 'src/services',
+    startLine = 1,
+    endLine = 20
+): ScoredChunk {
+    return {
+        score,
+        metadata: {
+            relativePath,
+            parentDir,
+            startLine,
+            endLine,
+        },
+    } as ScoredChunk;
+}
+
 export function makeChunk(overrides?: Partial<ScoredChunk>): ScoredChunk {
     return {
         content: 'export function auth() { return true; }',

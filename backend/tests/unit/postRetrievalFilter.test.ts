@@ -5,29 +5,11 @@ jest.mock('../../src/lib/logger.js', () => ({
     },
 }));
 
-import type { ScoredChunk } from '../../src/repositories/chunkRepository.js';
 import logger from '../../src/lib/logger.js';
 import { applyPostRetrievalFilters } from '../../src/services/postRetrievalFilter.js';
+import { buildChunk } from '../fixtures/chunks.js';
 
 const mockLoggerInfo = logger.info as jest.Mock;
-
-function buildChunk(
-    relativePath: string,
-    score: number,
-    parentDir = 'src/services',
-    startLine = 1,
-    endLine = 20
-): ScoredChunk {
-    return {
-        score,
-        metadata: {
-            relativePath,
-            parentDir,
-            startLine,
-            endLine,
-        },
-    } as ScoredChunk;
-}
 
 describe('applyPostRetrievalFilters', () => {
     beforeEach(() => {
