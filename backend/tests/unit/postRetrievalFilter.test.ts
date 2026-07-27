@@ -11,7 +11,7 @@ import { buildChunk } from '../fixtures/chunks.js';
 
 const mockLoggerInfo = logger.info as jest.Mock;
 
-describe('applyPostRetrievalFilters', () => {
+describe('postRetrievalFilters service', () => {
     beforeEach(() => {
         jest.clearAllMocks();
     });

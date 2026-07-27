@@ -59,7 +59,7 @@ export default function HomePage() {
     );
 
     useEffect(() => {
-        fetch(`${API_URL}/api/query/getAllRepos`);
+        void fetch(`${API_URL}/api/query/getAllRepos`);
     }, [API_URL]);
 
     useEffect(() => {
