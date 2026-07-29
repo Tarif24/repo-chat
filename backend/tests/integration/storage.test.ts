@@ -18,7 +18,7 @@ const mockInvalidateSemanticCache = invalidateSemanticCache as jest.Mock;
 
 describe('storage service integration', () => {
     beforeEach(() => {
-        jest.clearAllMocks();
+        jest.resetAllMocks();
     });
 
     // verifies canIngestRepo deletes the oldest real repo when storage is critically full
