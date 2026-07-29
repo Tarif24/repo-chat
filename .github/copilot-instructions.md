@@ -74,7 +74,7 @@ change the import to "fix" the squiggle.
 ## Rules for you (Copilot)
 
 - I am a beginner learning to write tests. Explain each test's purpose in a
-  one-line comment above it, in plain language and if anything goes beyond the basics explain that too.
+  one-line comment above it, in plain language.
 - NEVER assume a function's return shape, field names, or error-handling
   behavior. If you haven't seen the actual source file's content, or if
   something in the source is ambiguous, STOP and ask me a specific question
@@ -89,7 +89,32 @@ change the import to "fix" the squiggle.
   senior engineer: clear describe/it names, Arrange/Act/Assert structure,
   no redundant setup.
 
-## Polling-based ingestion status
+## Integration test rules (tests/integration/ only)
+
+- These use a REAL MongoDB via mongodb-memory-server (started in
+  tests/globalSetup.ts, connected in tests/setup.ts). Do NOT mock any
+  Mongoose model or repository under test — only mock the true external
+  boundary: completionProvider, embeddingProvider, and chunkRepository
+  (since $vectorSearch does not run in mongodb-memory-server).
+- Before writing an integration test, ask: "would a mocked version of this
+  dependency actually prove the same thing a real one would?" If the point
+  of the test is to prove a Mongoose query/update/delete behaves correctly
+  against real data, mocking that model defeats the entire purpose of the
+  test — flag this to me if you're tempted to mock something under test.
+- afterEach in tests/setup.ts already clears all collections between tests
+  — do not add your own manual cleanup unless a test needs something
+  beyond a full collection wipe (e.g. seeding specific ordered data).
+- Use the real model's `.create()` to seed data at the start of a test,
+  not mocked repository calls, so the test proves the actual repository
+  functions work against it.
+- For any test involving deletion loops or ordering (e.g. "oldest repo
+  deleted first"), seed multiple real documents with distinct, explicit
+  timestamp fields so the ordering assertion isn't accidental.
+- If a test's whole point could be equally well proven with everything
+  mocked, it might belong in tests/unit/ instead — say so and ask before
+  writing it as an integration test.
+
+## New feature: polling-based ingestion status
 
 - Status lives in a separate `IngestProgress` model, keyed by `repoURL`
   (NOT on the `Repo` model — this is intentional, keep it decoupled).
