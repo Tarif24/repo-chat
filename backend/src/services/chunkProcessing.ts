@@ -61,15 +61,21 @@ export async function processAndStoreChunks(
     let totalProcessedChunks = 0;
     logger.info(`REPO: ${repoURL} - Processing and storing ${chunks.length} chunks...`);
 
+    const batchSize = Math.max(1, Math.ceil(chunks.length / 30)); // ~30 updates total, regardless of repo size
+
     for (const chunk of chunks) {
         try {
             await processAndStoreChunk(chunk, repoURL);
             totalProcessedChunks++;
-            await emit('embeddingAndProcessing', {
-                message: `${totalProcessedChunks ?? 0} / ${chunks.length ?? 0} chunks embedded`,
-                current: totalProcessedChunks,
-                totalChunks: chunks.length,
-            });
+
+            const isLastChunk = totalProcessedChunks === chunks.length;
+            if (totalProcessedChunks % batchSize === 0 || isLastChunk) {
+                await emit('embeddingAndProcessing', {
+                    message: `${totalProcessedChunks ?? 0} / ${chunks.length ?? 0} chunks embedded`,
+                    current: totalProcessedChunks,
+                    totalChunks: chunks.length,
+                });
+            }
         } catch (error) {
             logger.error('Error processing chunk:', error);
 
