@@ -10,6 +10,7 @@ jest.mock('../../src/services/ingestProgress.js', () => ({
 }));
 
 jest.mock('../../src/lib/logger.js', () => ({
+    __esModule: true,
     default: {
         error: jest.fn(),
     },

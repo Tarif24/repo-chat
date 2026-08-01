@@ -269,8 +269,11 @@ export default function Message({ role, content, sources }: MessageProps) {
 
     if (role === 'user') {
         return (
-            <div className="flex justify-end">
-                <div className="max-w-[80%] rounded-lg bg-gray-100 px-3.5 py-2.5 text-sm text-slate-800 dark:bg-slate-800 dark:text-slate-100">
+            <div className="flex justify-end" data-testid="user-message">
+                <div
+                    className="max-w-[80%] rounded-lg bg-gray-100 px-3.5 py-2.5 text-sm text-slate-800 dark:bg-slate-800 dark:text-slate-100"
+                    data-testid="user-message-content"
+                >
                     {content}
                 </div>
             </div>
@@ -278,20 +281,26 @@ export default function Message({ role, content, sources }: MessageProps) {
     }
 
     return (
-        <div className="flex max-w-[90%] gap-2.5 py-1">
+        <div className="flex max-w-[90%] gap-2.5 py-1" data-testid="assistant-message">
             <div className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-blue-50 dark:bg-blue-950">
                 <SearchCode className="h-5 w-5 text-blue-600 dark:text-blue-400" />
             </div>
 
             <div className="flex min-w-0 flex-1 flex-col gap-3">
-                <MarkdownBlocks text={content} />
+                <div data-testid="assistant-message-content">
+                    <MarkdownBlocks text={content} />
+                </div>
 
                 {sources.length > 0 && (
-                    <div className="flex flex-col gap-1.5 pt-1">
+                    <div
+                        className="flex flex-col gap-1.5 pt-1"
+                        data-testid="assistant-message-sources"
+                    >
                         {sources.map(source => (
                             <div
                                 key={`${source.relativePath}-${source.startLine}-${source.endLine}`}
                                 className="flex items-center gap-2 rounded-md border border-gray-200 px-2.5 py-1.5 font-mono text-xs text-gray-600 dark:border-slate-700 dark:text-slate-300"
+                                data-testid="assistant-message-source"
                             >
                                 <FileCode className="h-3.5 w-3.5 shrink-0 text-blue-600 dark:text-blue-400" />
 

@@ -122,6 +122,7 @@ export default function ChatTypingBar({
                         value={input}
                         placeholder="Ask about this repo..."
                         rows={1}
+                        data-testid="chat-input"
                         className="text-md min-w-0 flex-1 resize-none border-none bg-transparent text-slate-800 outline-none placeholder:text-gray-400 focus-within:ring-0 dark:text-slate-100 dark:placeholder:text-slate-500"
                         onChange={e => handleOnTextChange(e)}
                         onKeyDown={e => {
@@ -139,6 +140,7 @@ export default function ChatTypingBar({
                 <button
                     type="submit"
                     aria-label="Send"
+                    data-testid="chat-send-button"
                     className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-slate-800 transition-colors hover:cursor-pointer hover:bg-slate-900 sm:h-8.5 sm:w-8.5 dark:bg-blue-600 dark:hover:bg-blue-700"
                 >
                     <ArrowRight className="h-4 w-4 text-white" />

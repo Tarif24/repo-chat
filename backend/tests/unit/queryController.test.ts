@@ -46,6 +46,7 @@ jest.mock('../../src/services/guards.js', () => ({
 }));
 
 jest.mock('../../src/lib/logger.js', () => ({
+    __esModule: true,
     default: {
         info: jest.fn(),
         warn: jest.fn(),
