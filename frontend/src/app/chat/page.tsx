@@ -10,6 +10,7 @@ import type { FileReferenceType } from './chatTypingBar';
 import Message from './message';
 import RepoSelector from './repoSelector';
 import RepoEmptyState from './repoEmptyState';
+import { getAllRepos, getRepo } from '../../lib/api';
 
 export default function ChatPage() {
     type MessageType = {
@@ -34,10 +35,7 @@ export default function ChatPage() {
     useEffect(() => {
         const fetchRepositories = async () => {
             try {
-                const response = await fetch(
-                    `${API_URL}/api/query/getAllRepos`
-                );
-                const data = await response.json();
+                const data = await getAllRepos();
                 if (data.message.toLowerCase().includes('openai api error')) {
                     alert(data.data.message);
                 }
@@ -80,12 +78,9 @@ export default function ChatPage() {
         setSelectedRepo(repo);
         setSidebarOpen(false);
 
-        const responseJSON = await fetch(`${API_URL}/api/query/getRepoByURL`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ repoUrl: repo }),
-        });
-        const response = await responseJSON.json();
+        const response = await getRepo(repo);
+        console.log('Fetched repo data:', response.data);
+
         setRepoData(response.data.repo);
         setChatHistory([]);
         setUsedFiles([]);

@@ -1,5 +1,22 @@
 const API_URL = process.env.NEXT_PUBLIC_API_URL || '';
 
+export async function getAllRepos() {
+    const response = await fetch(`${API_URL}/api/query/getAllRepos`);
+    const data = await response.json();
+    return data;
+}
+
+export async function getRepo(repo: string) {
+    const responseJSON = await fetch(`${API_URL}/api/query/getRepoByURL`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ repoURL: repo }),
+    });
+    const data = await responseJSON.json();
+
+    return data;
+}
+
 export async function startIngestion(repoURL: string) {
     const res = await fetch(`${API_URL}/api/ingest/repo`, {
         method: 'POST',
@@ -36,17 +53,20 @@ export function startPollingIngestionStatus(
 
         try {
             const status = await getIngestionStatus(repoURL);
+
             if (cancelled || !status) return;
 
-            handlers.onUpdate(status);
+            if (status.data) {
+                handlers.onUpdate(status);
 
-            if (status.data.status === 'complete') {
-                handlers.onComplete(status);
-                return;
-            }
-            if (status.data.status === 'error') {
-                handlers.onError(status);
-                return;
+                if (status.data.status === 'complete') {
+                    handlers.onComplete(status);
+                    return;
+                }
+                if (status.data.status === 'error') {
+                    handlers.onError(status);
+                    return;
+                }
             }
 
             if (!cancelled) {
