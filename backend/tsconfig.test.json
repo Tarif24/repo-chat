@@ -7,7 +7,9 @@
         "verbatimModuleSyntax": false,
         "isolatedModules": false,
         "noUnusedLocals": false,
-        "noUnusedParameters": false
+        "noUnusedParameters": false,
+        "esModuleInterop": true,
+        "allowSyntheticDefaultImports": true
     },
     "include": ["src/**/*", "tests/**/*"],
     "exclude": ["node_modules", "dist"]

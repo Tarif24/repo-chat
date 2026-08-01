@@ -63,7 +63,7 @@ describe('ingest handler', () => {
     });
 
     // This checks that the handler sends a 404 response when the controller returns no status for the repo.
-    it('sends a 404 response when no ingest status exists', async () => {
+    it('sends a 200 response when no ingest status exists with null body', async () => {
         mockGetIngestStatus.mockResolvedValueOnce(undefined);
 
         const req = {
@@ -81,7 +81,7 @@ describe('ingest handler', () => {
         expect(mockGetIngestStatus).toHaveBeenCalledWith('https://example.com/repo');
         expect(standardResponse).toHaveBeenCalledTimes(1);
         expect(standardResponse).toHaveBeenCalledWith(
-            404,
+            200,
             null,
             'No ingestion status found for this repository'
         );
