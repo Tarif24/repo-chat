@@ -1,6 +1,22 @@
 // playwright.config.ts
 import { defineConfig, devices } from "@playwright/test";
 
+const baseURL =
+    process.env.BASE_URL ||
+    process.env.PLAYWRIGHT_BASE_URL ||
+    "http://localhost:3000";
+
+function isLocalBaseURL(url) {
+    try {
+        const hostname = new URL(url).hostname;
+        return ["localhost", "127.0.0.1", "0.0.0.0"].includes(hostname);
+    } catch {
+        return false;
+    }
+}
+
+const shouldStartWebServer = !process.env.CI && isLocalBaseURL(baseURL);
+
 export default defineConfig({
     testDir: "./backend/tests/e2e",
     testMatch: "**/*.spec.ts",
@@ -15,7 +31,7 @@ export default defineConfig({
     reporter: [["list"], ["html", { outputFolder: "playwright-report" }]],
 
     use: {
-        baseURL: process.env.BASE_URL || "http://localhost:3000",
+        baseURL,
         trace: "on-first-retry",
         screenshot: "only-on-failure",
         video: "on-first-retry",
@@ -28,11 +44,11 @@ export default defineConfig({
         },
     ],
 
-    webServer: process.env.CI
-        ? undefined
-        : {
+    webServer: shouldStartWebServer
+        ? {
               command: "npm run dev",
-              url: "http://localhost:3000",
+              url: baseURL,
               reuseExistingServer: true,
-          },
+          }
+        : undefined,
 });

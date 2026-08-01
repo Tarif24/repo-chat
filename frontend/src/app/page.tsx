@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { Sparkles, ArrowRight, GitBranch, Quote, Zap } from 'lucide-react';
 import { validateRepoPath } from '../lib/validateRepoPath';
 import { toast } from 'react-toastify';
@@ -57,6 +58,7 @@ export default function HomePage() {
     const [stageHistory, setStageHistory] = useState<Record<string, string>>(
         {}
     );
+    const router = useRouter();
 
     useEffect(() => {
         void fetch(`${API_URL}/api/query/getAllRepos`);
@@ -184,6 +186,7 @@ export default function HomePage() {
                     setInputText('');
                     setCurrentIngestingRepo('');
                     setIsLoading(false);
+                    router.push('/chat');
                     toast.success(
                         'Repo Successfully Ingested! You can now ask questions about it.'
                     );

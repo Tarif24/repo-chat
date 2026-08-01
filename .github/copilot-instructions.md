@@ -22,8 +22,24 @@
   directly. In unit tests, mock the repository, not the model.
 - Controllers (`src/controllers/*.ts`) are thin — validate + call handler,
   no logic worth testing directly.
-- Handlers (`src/handlers/*.ts`) own HTTP and Express — test these with a fake
-  `res` object (write/end/setHeader as jest.fn()).
+- Handlers (`src/handlers/*.ts`) own HTTP/Express response behavior in
+  general, not just streaming/SSE — for streaming routes that means SSE
+  formatting and stream piping; for regular routes that means the actual
+  status code and response body sent back. Do not assume redirects,
+  specific status codes, or response shapes — confirm from the real
+  handler/controller source every time.
+- CONFIRMED: successful ingestion (`POST /api/ingest/repo`) does NOT
+  redirect anywhere — it returns 202 with
+  `res.standardResponse(202, { repoUrl }, 'Ingestion started')`. Any
+  "redirects to /chat" behavior is frontend-only (client-side navigation
+  after the ingestion completes, likely driven by polling status reaching
+  'complete') — do not assume the backend itself redirects, and do not
+  write backend tests asserting on a redirect.
+- CONFIRMED: `GET /api/ingest/status?repoUrl=` when no IngestProgress doc
+  exists yet does NOT return 404. It returns 200 with
+  `{ message: string, data: null }`. Do not write or accept tests
+  asserting a 404 status for this case — check this file for any test
+  prompt/description that still says 404 and treat it as wrong.
 
 ## Test levels
 
@@ -114,12 +130,42 @@ change the import to "fix" the squiggle.
   mocked, it might belong in tests/unit/ instead — say so and ask before
   writing it as an integration test.
 
+## E2E test rules (tests/e2e/ only)
+
+- Nothing is mocked. Real frontend, real backend, real MongoDB, and likely
+  real OpenAI + real GitHub calls — these tests are slow and may cost real
+  API usage. Don't add more E2E tests than necessary to prove
+  browser-level behavior that a unit/integration test structurally cannot
+  prove (network timing, actual polling intervals, real navigation,
+  real rendered UI state).
+- Both frontend and backend must already be running locally before these
+  run — playwright.config.ts points baseURL at localhost:3000. If a test
+  seems to need something like `page.waitForResponse` on a specific route,
+  check the actual route path against src/routes/ first — don't guess it.
+- Use `page.getByRole`, `page.getByPlaceholder`, or `page.getByTestId` —
+  confirm real `data-testid` attributes exist in the actual component
+  source before writing a selector. If a component doesn't have a
+  data-testid for something you need to select, tell me instead of
+  guessing a selector that might coincidentally work.
+- Only use `localhost` URLs — Playwright's Chromium in this environment
+  cannot reach the internet (see Known Issues Resolved in the handoff doc).
+- For timing-based assertions (e.g. "polls every 2 seconds"), use
+  `page.waitForResponse` matched multiple times with awaited gaps, or count
+  matched requests over a fixed window — don't use arbitrary `page.waitForTimeout`
+  sleeps as the primary assertion mechanism, only as a fallback if nothing
+  else works, and say so if you use one.
+- Show me the actual component source (e.g. IngestionProgress.tsx) before
+  writing selectors or assertions against its behavior — don't assume
+  prop names, testid values, or polling implementation details.
+
 ## New feature: polling-based ingestion status
 
 - Status lives in a separate `IngestProgress` model, keyed by `repoURL`
   (NOT on the `Repo` model — this is intentional, keep it decoupled).
-- Routes: `POST /api/ingest/repo` (kicks off ingestion, returns 202),
-  `GET /api/ingest/status?repoUrl=` (200 with status doc, or 404 if none exists).
+- Routes: `POST /api/ingest/repo` (kicks off ingestion, returns 202, no
+  redirect — that's frontend-only client navigation),
+  `GET /api/ingest/status?repoUrl=` (200 with status doc if it exists,
+  200 with `{ message: string, data: null }` if no doc exists yet — NOT 404).
 - Lifecycle service functions: createIngestProgress, updateIngestProgressStatus
   (pull-then-push per stage into statusHistory, then $set top-level fields),
   getIngestProgressStatus, deleteIngestProgress.
@@ -128,8 +174,11 @@ change the import to "fix" the squiggle.
   model, plus an E2E polling test that checks the frontend polls every ~2s
   and stops on 'complete' or 'error'.
 
-## Current task
+## Current task — Phase 4 (E2E)
 
-Write `tests/unit/[FILENAME].test.ts` for `src/services/[FILENAME].ts`.
-Show me the file's current content first in your response before writing
-tests, so I can confirm you're testing the real logic and not a guess.
+Phases 1–3 (unit, handler unit, integration) are complete. Now writing
+tests/e2e/\*.spec.ts files. Follow the "E2E test rules" section above.
+Show me the real frontend component source before writing any selector
+or assertion — do not guess data-testid values, routes, or UI behavior,
+including whether something redirects, what status codes come back, or
+how polling is wired up client-side.
