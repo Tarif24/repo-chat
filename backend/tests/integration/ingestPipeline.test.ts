@@ -57,8 +57,8 @@ function writeFixtureFiles(version: 'initial' | 'updated' = 'initial') {
             relativePath: 'src/index.ts',
             content:
                 version === 'updated'
-                    ? `export function greetUpdated(name: string) {\n  return \"hello \" + name;\n}`
-                    : `export function greet(name: string) {\n  return \"hello \" + name;\n}`,
+                    ? `export function greetUpdated(name: string) {\n  return "hello " + name;\n}`
+                    : `export function greet(name: string) {\n  return "hello " + name;\n}`,
         },
         {
             relativePath: 'src/utils.ts',
