@@ -16,7 +16,7 @@ export async function handleGetIngestStatus(req: Request, res: Response) {
     const status = await getIngestStatus(repoURL);
 
     if (!status) {
-        res.standardResponse(404, null, 'No ingestion status found for this repository');
+        res.standardResponse(200, null, 'No ingestion status found for this repository');
         return;
     }
 
