@@ -198,9 +198,17 @@ export default function HomePage() {
                     setInputText('');
                     setCurrentIngestingRepo('');
                     setIsLoading(false);
-                    toast.error(
-                        'Sorry the repo could not be ingested at this time please try again later'
-                    );
+                    if (status.data) {
+                        toast.error(
+                            status.data.statusMessage ??
+                                'An error occurred during ingestion.'
+                        );
+                    } else {
+                        toast.error(
+                            'Sorry the repo could not be ingested at this time please try again later'
+                        );
+                    }
+
                     if (
                         status.data.statusMessage
                             .toLowerCase()

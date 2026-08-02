@@ -18,7 +18,7 @@ export async function getIngestStatus(repoURL: string) {
     const status = await getRepoIngestStatus(repoURL);
 
     if (status?.status === 'complete' || status?.status === 'error') {
-        await deleteRepoIngestStatus(repoURL);
+        deleteRepoIngestStatus(repoURL);
     }
 
     return status;

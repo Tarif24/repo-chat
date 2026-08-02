@@ -24,10 +24,10 @@ export default defineConfig({
     expect: {
         timeout: 10000,
     },
-    fullyParallel: true,
+    fullyParallel: false,
     forbidOnly: !!process.env.CI,
     retries: process.env.CI ? 1 : 0,
-    workers: process.env.CI ? 1 : undefined,
+    workers: 1,
     reporter: [["list"], ["html", { outputFolder: "playwright-report" }]],
 
     use: {
@@ -48,7 +48,7 @@ export default defineConfig({
         ? {
               command: "npm run dev",
               url: baseURL,
-              reuseExistingServer: true,
+              reuseExistingServer: false,
           }
         : undefined,
 });

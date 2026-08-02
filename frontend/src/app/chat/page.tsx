@@ -79,7 +79,6 @@ export default function ChatPage() {
         setSidebarOpen(false);
 
         const response = await getRepo(repo);
-        console.log('Fetched repo data:', response.data);
 
         setRepoData(response.data.repo);
         setChatHistory([]);

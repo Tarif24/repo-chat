@@ -89,10 +89,10 @@ const startServer = async () => {
         app.use(express.json());
         // Request logging
         app.use(requestLogger);
-        // Rate limiting
-        app.use(globalLimiter);
         // Standard response formatting
         app.use(responseHandler);
+        // Rate limiting
+        app.use(globalLimiter);
 
         const PORT = appConfig.port || 8080;
 

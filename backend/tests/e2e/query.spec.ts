@@ -1,22 +1,36 @@
 import { test, expect, type Page } from '@playwright/test';
 
+test.describe.configure({ mode: 'serial', timeout: 240000 });
+
 async function openChatForRepo(page: Page) {
     await page.goto('/');
 
     const repoInput = page.getByPlaceholder('owner/repo');
     await expect(repoInput).toBeVisible();
-    const repoToIngest = 'Tarif24/Tarif24';
-    await repoInput.fill('https://github.com/' + repoToIngest);
-    await page.getByRole('button', { name: /analyze/i }).click();
 
-    // Wait for the ingestion to start and show indexing UI before
-    // asserting navigation — makes the test more robust against timing.
+    const repoToIngest = 'Tarif24/Tarif24';
+
+    await repoInput.fill('https://github.com/' + repoToIngest);
+
+    const analyzeButton = page.getByRole('button', { name: /analyze/i });
+
+    // Click analyze and wait for the backend to return 202 for ingestion start.
+    await Promise.all([
+        page.waitForResponse(
+            resp => resp.url().includes('/api/ingest/repo') && resp.status() === 202,
+            { timeout: 240000 }
+        ),
+        analyzeButton.click(),
+    ]);
+
+    // Wait for the ingestion UI to appear to ensure frontend progressed.
     await expect(page.getByText('Indexing', { exact: true })).toBeVisible({ timeout: 240000 });
     await expect(page.getByText(repoToIngest)).toBeVisible({ timeout: 240000 });
 
-    await expect(page).toHaveURL(/\/chat$/, { timeout: 240000 });
+    // Wait for client-side navigation to /chat (more robust than immediate expect)
+    await page.waitForURL(/\/chat$/, { timeout: 240000 });
 
-    await page.getByRole('button', { name: /repo-chat/i }).click();
+    await page.getByRole('button', { name: new RegExp(repoToIngest, 'i') }).click();
     await expect(page.getByTestId('chat-input')).toBeVisible();
 }
 
