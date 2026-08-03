@@ -20,7 +20,7 @@ export async function loadSecrets() {
             );
             const key = name.split('/').pop()!;
             process.env[key] = result.Parameter!.Value!;
-        } catch (err) {
+        } catch {
             logger.warn(`Failed to load SSM parameter ${name}:`);
         }
     }
