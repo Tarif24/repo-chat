@@ -24,3 +24,13 @@ README.md
 # Docker
 Dockerfile
 .dockerignore
+
+# Testing
+**/*.test.ts
+**/*.spec.ts
+**/__tests__
+**/__mocks__
+jest.config.*
+jest.setup.*
+vitest.config.*
+coverage
