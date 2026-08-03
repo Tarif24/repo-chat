@@ -20,8 +20,8 @@ export async function loadSecrets() {
             );
             const key = name.split('/').pop()!;
             process.env[key] = result.Parameter!.Value!;
-        } catch {
-            logger.warn(`Failed to load SSM parameter ${name}:`);
+        } catch (err) {
+            logger.warn(`Failed to load SSM parameter ${name}:` + err);
         }
     }
     logger.info('Secrets loading complete from AWS SSM');

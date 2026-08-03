@@ -33,8 +33,6 @@ test.describe('homepage ingestion flow', () => {
     test('shows an error for an invalid repo and does not navigate', async ({ page }) => {
         await page.goto('/');
 
-        console.log('current URL:', page.url());
-
         const input = page.getByPlaceholder('owner/repo');
         await input.fill('not-a-valid-repo');
         await page.getByRole('button', { name: /analyze/i }).click();
