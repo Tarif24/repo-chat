@@ -21,7 +21,7 @@ export async function loadSecrets() {
             const key = name.split('/').pop()!;
             process.env[key] = result.Parameter!.Value!;
         }
-        logger.info('Secrets loaded successfully from AWS SSM');
+        logger.info('Secrets loaded successfully from AWS SSM ');
     } catch {
         logger.warn('Could not load secrets from AWS SSM. Using local environment variables.');
     }

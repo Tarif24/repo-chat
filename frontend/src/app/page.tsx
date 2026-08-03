@@ -21,7 +21,7 @@ const FEATURES = [
         icon: GitBranch,
         title: 'CST-aware chunking',
         description:
-            'Code is split along real boundaries, not arbitrary line counts.',
+            'Code is split along real boundaries, not arbitrary line counts. ',
     },
     {
         icon: Quote,
