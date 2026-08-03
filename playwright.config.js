@@ -1,4 +1,4 @@
-// playwright.config.ts
+import "backend/src/config/config.js";
 import { defineConfig, devices } from "@playwright/test";
 
 const baseURL =

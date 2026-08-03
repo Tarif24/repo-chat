@@ -1,13 +1,14 @@
 import * as fs from 'fs';
 import * as path from 'path';
+import { appConfig, dbConfig, openAIConfig } from '../../src/config/config.js';
 
 jest.mock('../../src/config/config.js', () => ({
     appConfig: {
-        repoStoragePath: process.env.REPO_STORAGE_PATH || path.join(process.cwd(), 'repoCloning'),
+        repoStoragePath: appConfig.repoStoragePath || path.join(process.cwd(), 'repoCloning'),
     },
     dbConfig: {
         mongoUrl:
-            process.env.MONGO_URL || process.env.MONGO_TEST_URI || 'mongodb://127.0.0.1:27017/test',
+            dbConfig.mongoUrl || process.env.MONGO_TEST_URI || 'mongodb://127.0.0.1:27017/test',
     },
     openAIConfig: {
         apiKey: 'test-openai-key',
@@ -25,13 +26,13 @@ jest.mock('../../src/providers/embeddingProvider.js', () => ({
     createEmbedding: jest.fn(),
 }));
 
-process.env.OPENAI_API_KEY = process.env.OPENAI_API_KEY || 'test-openai-key';
-process.env.OPENAI_CHAT_MODEL = process.env.OPENAI_CHAT_MODEL || 'gpt-4o-mini';
-process.env.OPENAI_EMBEDDING_MODEL = process.env.OPENAI_EMBEDDING_MODEL || 'text-embedding-3-small';
+process.env.OPENAI_API_KEY = openAIConfig.apiKey || 'test-openai-key';
+process.env.OPENAI_CHAT_MODEL = openAIConfig.chatModel || 'gpt-4o-mini';
+process.env.OPENAI_EMBEDDING_MODEL = openAIConfig.embeddingModel || 'text-embedding-3-small';
 process.env.MONGO_URL =
-    process.env.MONGO_URL || process.env.MONGO_TEST_URI || 'mongodb://127.0.0.1:27017/test';
+    dbConfig.mongoUrl || process.env.MONGO_TEST_URI || 'mongodb://127.0.0.1:27017/test';
 process.env.REPO_STORAGE_PATH =
-    process.env.REPO_STORAGE_PATH || path.join(process.cwd(), 'repoCloning');
+    appConfig.repoStoragePath || path.join(process.cwd(), 'repoCloning');
 
 import { cloneAndGetSha, getLatestSha } from '../../src/services/gitHub.js';
 import { createEmbedding } from '../../src/providers/embeddingProvider.js';
@@ -46,7 +47,7 @@ let Chunk: typeof import('../../src/database/models/Chunk.js').default;
 let getIngestProgressStatus: typeof import('../../src/repositories/ingestProgressRepository.js').getIngestProgressStatus;
 
 const fixtureRepoURL = 'https://github.com/Tarif24/Tarif24';
-const fixtureStoragePath = process.env.REPO_STORAGE_PATH as string;
+const fixtureStoragePath = appConfig.repoStoragePath as string;
 
 function writeFixtureFiles(version: 'initial' | 'updated' = 'initial') {
     fs.rmSync(fixtureStoragePath, { recursive: true, force: true });
