@@ -4,6 +4,7 @@ import { SSMClient, GetParameterCommand } from '@aws-sdk/client-ssm';
 const ssm = new SSMClient({ region: 'ca-central-1' });
 
 export async function loadSecrets() {
+    console.log('Loading secrets from AWS SSM...');
     const names = [
         '/repo-chat/prod/PORT',
         '/repo-chat/prod/REPO_STORAGE_PATH',
