@@ -1,4 +1,5 @@
-name: E2E (live) — nightly if there was a commit today
+# Runs nightly if there was a commit in the last 24 hours
+name: E2E (live)
 
 on:
   schedule:
