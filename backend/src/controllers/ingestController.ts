@@ -1,5 +1,7 @@
 import logger from '../lib/logger.js';
 import { ingestRepo } from '../services/ingest.js';
+import { deleteRepoAndChunks } from '../services/repoProcessing.js';
+import { cacheInvalidate } from '../services/semanticCache.js';
 import {
     getRepoIngestStatus,
     deleteRepoIngestStatus,
@@ -22,4 +24,10 @@ export async function getIngestStatus(repoURL: string) {
     }
 
     return status;
+}
+
+export async function repoCleanup(repoURL: string) {
+    await cacheInvalidate(repoURL);
+    await deleteRepoIngestStatus(repoURL);
+    await deleteRepoAndChunks(repoURL);
 }

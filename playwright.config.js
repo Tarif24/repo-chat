@@ -17,6 +17,7 @@ function isLocalBaseURL(url) {
 const shouldStartWebServer = !process.env.CI && isLocalBaseURL(baseURL);
 
 export default defineConfig({
+    globalSetup: "./e2eGlobalSetup.ts",
     testDir: "./backend/tests/e2e",
     testMatch: "**/*.spec.ts",
     timeout: 60000,
