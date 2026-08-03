@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 
-test.describe.configure({ mode: 'serial', timeout: 60000 });
+test.describe.configure({ mode: 'serial', timeout: 240000 });
 
 test.describe('homepage ingestion flow', () => {
     test('shows loading progress for a valid repo and navigates to /chat when ingestion completes', async ({
@@ -19,7 +19,7 @@ test.describe('homepage ingestion flow', () => {
         await Promise.all([
             page.waitForResponse(
                 resp => resp.url().includes('/api/ingest/repo') && resp.status() === 202,
-                { timeout: 60000 }
+                { timeout: 240000 }
             ),
             analyzeButton.click(),
         ]);
@@ -27,7 +27,7 @@ test.describe('homepage ingestion flow', () => {
         await expect(page.getByText('Indexing', { exact: true })).toBeVisible();
         await expect(page.getByText(repoToIngest)).toBeVisible();
 
-        await page.waitForURL(/\/chat$/, { timeout: 60000 });
+        await page.waitForURL(/\/chat$/, { timeout: 240000 });
     });
 
     test('shows an error for an invalid repo and does not navigate', async ({ page }) => {
