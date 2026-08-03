@@ -1,9 +1,8 @@
 import type { RateLimitRequestHandler, Options } from 'express-rate-limit';
 import type { Request, Response } from 'express';
 import rateLimit from 'express-rate-limit';
-import { env } from '../config/env.js';
 
-const isLocalOrTest = env.NODE_ENV !== 'production';
+const isLocalOrTest = process.env.NODE_ENV !== 'production';
 
 const rateLimitHandler = (_req: Request, res: Response): void => {
     res.standardResponse(
