@@ -15,8 +15,6 @@ const app = express();
 const cors = require('cors');
 dotenv.config();
 
-console.log('Application starting');
-
 // Allowed origins for CORS
 const allowedOrigins: string[] = [
     'http://localhost:3000',

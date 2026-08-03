@@ -4,7 +4,6 @@ import { SSMClient, GetParameterCommand } from '@aws-sdk/client-ssm';
 const ssm = new SSMClient({ region: 'ca-central-1' });
 
 export async function loadSecrets() {
-    console.log('Loading secrets from AWS SSM...');
     const names = [
         '/repo-chat/prod/PORT',
         '/repo-chat/prod/REPO_STORAGE_PATH',
@@ -14,16 +13,16 @@ export async function loadSecrets() {
         '/repo-chat/prod/OPENAI_CHAT_MODEL',
         '/repo-chat/prod/OPENAI_EMBEDDING_MODEL',
     ];
-    try {
-        for (const name of names) {
+    for (const name of names) {
+        try {
             const result = await ssm.send(
                 new GetParameterCommand({ Name: name, WithDecryption: true })
             );
             const key = name.split('/').pop()!;
             process.env[key] = result.Parameter!.Value!;
+        } catch (err) {
+            logger.error(`Failed to load SSM parameter ${name}:`, err);
         }
-        logger.info('Secrets loaded successfully from AWS SSM ');
-    } catch {
-        logger.warn('Could not load secrets from AWS SSM. Using local environment variables.');
     }
+    logger.info('Secrets loading complete from AWS SSM');
 }
