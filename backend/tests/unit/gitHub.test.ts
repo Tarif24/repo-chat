@@ -122,7 +122,7 @@ describe('gitHub service', () => {
             .mockResolvedValueOnce('123 refs/heads/main');
 
         await expect(getLatestSha('https://github.com/example/repo.git', ['dev'])).rejects.toThrow(
-            'Branch "dev" not found'
+            'None of the branches [dev] were found'
         );
     });
 });
