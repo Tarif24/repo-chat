@@ -76,13 +76,15 @@ TypeScript, JavaScript, Python, Java, Go, Ruby, C++, C#, HTML, CSS, Markdown
 
 Full request/response shapes for all endpoints are in the [API Endpoints doc](docs/RepoChat-APIEndpoints.pdf).
 
-| Method | Path                      | Description                            |
-| ------ | ------------------------- | -------------------------------------- |
-| `POST` | `/api/ingest/repo`        | Ingest a public GitHub repository      |
-| `POST` | `/api/query/userQuery`    | Query an ingested repository           |
-| `GET`  | `/api/query/getAllRepos`  | List all ingested repository URLs      |
-| `POST` | `/api/query/getRepoByURL` | Get metadata for a specific repository |
-| `GET`  | `/api/health/check`       | Health check                           |
+| Method   | Path                      | Description                             |
+| -------- | ------------------------- | --------------------------------------- |
+| `POST`   | `/api/ingest/repo`        | Ingest a public GitHub repository       |
+| `POST`   | `/api/ingest/status`      | Polling route to get ingestion status   |
+| `DELETE` | `/api/ingest/delete/repo` | To delete all DB data related to a repo |
+| `POST`   | `/api/query/userQuery`    | Query an ingested repository            |
+| `GET`    | `/api/query/getAllRepos`  | List all ingested repository URLs       |
+| `POST`   | `/api/query/getRepoByURL` | Get metadata for a specific repository  |
+| `GET`    | `/api/health/check`       | Health check                            |
 
 ---
 
@@ -131,7 +133,7 @@ CI/CD runs on GitHub Actions: PRs trigger test + build, merges to main trigger f
 
 The test strategy covers unit tests (Jest + ts-jest) for each pipeline service in isolation, integration tests against a real MongoDB instance (mongodb-memory-server), and E2E tests (Playwright) for the full user flow. Because `$vectorSearch` does not run in MongoDB-memory-server, the vector search boundary is mocked in CI and tested separately against a seeded Atlas dev cluster.
 
-Full test matrix is in the [Plan doc](docs/RepoChat-Plan_v2.pdf).
+Full test matrix is in the [Plan doc](docs/RepoChat-Plan_V3.pdf).
 
 ---
 
@@ -139,7 +141,7 @@ Full test matrix is in the [Plan doc](docs/RepoChat-Plan_v2.pdf).
 
 | Document                                                                 | Contents                                                      |
 | ------------------------------------------------------------------------ | ------------------------------------------------------------- |
-| [Plan](docs/RepoChat-Plan_v2.pdf)                                        | Architecture decisions, tech stack, test matrix, known issues |
+| [Plan](docs/RepoChat-Plan_V3.pdf)                                        | Architecture decisions, tech stack, test matrix, known issues |
 | [RAG Pipeline](docs/RepoChat-RAGPipelineExplanation.pdf)                 | Full pipeline detail, parameter values, prompt templates      |
 | [Ingestion Pipeline Diagram](docs/RepoChat-IngestionPipelineDiagram.pdf) | Ingestion flow diagram                                        |
 | [Query Pipeline Diagram](docs/RepoChat-QueryPipelineDiagram.pdf)         | Query flow diagram                                            |
