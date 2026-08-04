@@ -3,6 +3,9 @@
 # Server configuration
 PORT=
 
+# Relative path for repo storage
+REPO_STORAGE_PATH=
+
 # MongoDB connection string
 MONGO_URL=
 
@@ -16,7 +19,7 @@ OPENAI_EMBEDDING_MODEL=
 
 #FRONTEND ----------------------
 
-REPO-CHAT_API_URL =
+NEXT_PUBLIC_API_URL =
 
 #DATABASE  ----------------------
 
