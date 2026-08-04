@@ -52,7 +52,7 @@ export async function cloneAndGetSha(repoURL: string, localPath: string): Promis
 // Get latest SHA without cloning
 export async function getLatestSha(
     repoURL: string,
-    branch: string = 'main'
+    branches: string[] = ['main', 'master']
 ): Promise<string | undefined> {
     const validation = await validateGithubRepo(repoURL);
     if (!validation.isValid) {
@@ -62,15 +62,14 @@ export async function getLatestSha(
     const git: SimpleGit = simpleGit();
     const remoteInfo: string = await git.listRemote(['--heads', repoURL]);
 
-    const line = remoteInfo
-        .trim()
-        .split('\n')
-        .find(l => l.includes(`refs/heads/${branch}`));
+    const lines = remoteInfo.trim().split('\n');
 
-    if (!line) {
-        throw new NotFoundError(`Branch "${branch}" not found`);
+    for (const branch of branches) {
+        const line = lines.find(l => l.includes(`refs/heads/${branch}`));
+        if (line) {
+            return line.split('\t')[0];
+        }
     }
 
-    const sha: string | undefined = line.split('\t')[0];
-    return sha;
+    throw new NotFoundError(`None of the branches [${branches.join(', ')}] were found`);
 }
