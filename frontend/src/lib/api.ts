@@ -7,11 +7,22 @@ export async function getAllRepos() {
 }
 
 export async function getRepo(repo: string) {
+    const responseJSON = await fetch(`${API_URL}/api/query/getRepoByURL`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ repoURL: repo }),
+    });
+    const data = await responseJSON.json();
+
+    return data;
+}
+
+export async function startIngestion(repoURL: string) {
     try {
-        const res = await fetch(`${API_URL}/api/query/getRepoByURL`, {
+        const res = await fetch(`${API_URL}/api/ingest/repo`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ repoURL: repo }),
+            body: JSON.stringify({ repoURL }),
         });
         if (!res.ok) {
             // Eat the 504 error from api gateway timeout (30sec) so it doesn't get shown to the client
@@ -26,16 +37,6 @@ export async function getRepo(repo: string) {
             err
         );
     }
-}
-
-export async function startIngestion(repoURL: string) {
-    const res = await fetch(`${API_URL}/api/ingest/repo`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ repoURL }),
-    });
-    const json = await res.json();
-    return json.data;
 }
 
 export async function getIngestionStatus(repoURL: string) {
