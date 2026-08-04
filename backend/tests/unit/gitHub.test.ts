@@ -42,7 +42,9 @@ describe('gitHub service', () => {
         const result = await validateGithubRepo('https://github.com/example/repo.git');
 
         expect(result).toEqual({ isValid: true });
-        expect(mockGitInstance.listRemote).toHaveBeenCalledWith(['https://github.com/example/repo.git']);
+        expect(mockGitInstance.listRemote).toHaveBeenCalledWith([
+            'https://github.com/example/repo.git',
+        ]);
     });
 
     it('returns a private-repository reason when the remote rejects with an authentication error', async () => {
@@ -76,7 +78,10 @@ describe('gitHub service', () => {
         mockGitInstance.listRemote.mockResolvedValueOnce('ok');
         mockGitInstance.log.mockResolvedValueOnce({ latest: { hash: 'abc123' } });
 
-        const result = await cloneAndGetSha('https://github.com/example/repo.git', '/tmp/local-repo');
+        const result = await cloneAndGetSha(
+            'https://github.com/example/repo.git',
+            '/tmp/local-repo'
+        );
 
         expect(mockDeleteEverythingInDir).toHaveBeenCalledWith(appConfig.repoStoragePath);
         expect(mockGitInstance.clone).toHaveBeenCalledWith(
@@ -91,9 +96,9 @@ describe('gitHub service', () => {
     it('throws a not-found error when the repository validation fails before cloning', async () => {
         mockGitInstance.listRemote.mockRejectedValueOnce(new Error('Repository not found'));
 
-        await expect(cloneAndGetSha('https://github.com/example/repo.git', '/tmp/local-repo')).rejects.toThrow(
-            'Invalid repository: Repository does not exist'
-        );
+        await expect(
+            cloneAndGetSha('https://github.com/example/repo.git', '/tmp/local-repo')
+        ).rejects.toThrow('Invalid repository: Repository does not exist');
         expect(mockGitInstance.clone).not.toHaveBeenCalled();
     });
 
@@ -102,10 +107,13 @@ describe('gitHub service', () => {
             .mockResolvedValueOnce('ok')
             .mockResolvedValueOnce('123 refs/heads/main\n456 refs/heads/dev');
 
-        const result = await getLatestSha('https://github.com/example/repo.git', 'dev');
+        const result = await getLatestSha('https://github.com/example/repo.git', ['dev']);
 
         expect(result).toBe('456 refs/heads/dev');
-        expect(mockGitInstance.listRemote).toHaveBeenCalledWith(['--heads', 'https://github.com/example/repo.git']);
+        expect(mockGitInstance.listRemote).toHaveBeenCalledWith([
+            '--heads',
+            'https://github.com/example/repo.git',
+        ]);
     });
 
     it('throws a not-found error when the requested branch is missing from the remote', async () => {
@@ -113,7 +121,7 @@ describe('gitHub service', () => {
             .mockResolvedValueOnce('ok')
             .mockResolvedValueOnce('123 refs/heads/main');
 
-        await expect(getLatestSha('https://github.com/example/repo.git', 'dev')).rejects.toThrow(
+        await expect(getLatestSha('https://github.com/example/repo.git', ['dev'])).rejects.toThrow(
             'Branch "dev" not found'
         );
     });
