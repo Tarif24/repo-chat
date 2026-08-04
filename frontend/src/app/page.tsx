@@ -179,7 +179,7 @@ export default function HomePage() {
                             break;
                     }
                 },
-                onComplete: () => {
+                onComplete: status => {
                     setJobStage('');
                     setStageDetails('');
                     setStageHistory({});
@@ -187,8 +187,10 @@ export default function HomePage() {
                     setCurrentIngestingRepo('');
                     setIsLoading(false);
                     router.push('/chat');
+
                     toast.success(
-                        'Repo Successfully Ingested! You can now ask questions about it.'
+                        status.data.statusMessage ??
+                            'Repo Successfully Ingested! You can now ask questions about it.'
                     );
                 },
                 onError: status => {

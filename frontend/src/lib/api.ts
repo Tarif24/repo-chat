@@ -27,8 +27,7 @@ export async function startIngestion(repoURL: string) {
         if (!res.ok) {
             // Eat the 504 error from api gateway timeout (30sec) so it doesn't get shown to the client
             console.warn(
-                'Ingest POST returned non-OK, but ingestion may still be running:',
-                res.status
+                'Ingest POST returned non-OK, but ingestion is still running server-side, relying on polling'
             );
         }
     } catch (err) {
