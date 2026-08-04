@@ -7,14 +7,25 @@ export async function getAllRepos() {
 }
 
 export async function getRepo(repo: string) {
-    const responseJSON = await fetch(`${API_URL}/api/query/getRepoByURL`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ repoURL: repo }),
-    });
-    const data = await responseJSON.json();
-
-    return data;
+    try {
+        const res = await fetch(`${API_URL}/api/query/getRepoByURL`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ repoURL: repo }),
+        });
+        if (!res.ok) {
+            // Eat the 504 error from api gateway timeout (30sec) so it doesn't get shown to the client
+            console.warn(
+                'Ingest POST returned non-OK, but ingestion may still be running:',
+                res.status
+            );
+        }
+    } catch (err) {
+        console.warn(
+            'Ingest POST failed/timed out client-side, relying on polling:',
+            err
+        );
+    }
 }
 
 export async function startIngestion(repoURL: string) {
