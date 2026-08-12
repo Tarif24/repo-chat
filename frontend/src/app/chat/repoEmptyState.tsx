@@ -26,7 +26,10 @@ export default function RepoEmptyState({
     onSelectRepo: (repo: string) => Promise<void>;
     isLoadingRepos?: boolean;
 }) {
-    const suggestions = repositories.slice(0, 4);
+    const suggestions = repositories.slice(
+        repositories.length - 4,
+        repositories.length
+    );
 
     return (
         <div className="relative flex min-h-0 flex-1 flex-col overflow-hidden">
@@ -107,6 +110,12 @@ export default function RepoEmptyState({
                                         .replace(/\/$/, '')}
                                 </button>
                             ))}
+                            {suggestions.length < repositories.length && (
+                                <span className="text-xs text-gray-400 dark:text-slate-500">
+                                    +{repositories.length - suggestions.length}{' '}
+                                    more
+                                </span>
+                            )}
                         </div>
                     ) : (
                         <div className="flex items-center gap-2 pt-1 text-xs text-gray-400 dark:text-slate-500">
