@@ -26,10 +26,7 @@ export default function RepoEmptyState({
     onSelectRepo: (repo: string) => Promise<void>;
     isLoadingRepos?: boolean;
 }) {
-    const suggestions = repositories.slice(
-        repositories.length - 4,
-        repositories.length
-    );
+    const suggestions = repositories.slice(0, 4);
 
     return (
         <div className="relative flex min-h-0 flex-1 flex-col overflow-hidden">

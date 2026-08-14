@@ -13,7 +13,8 @@ export async function deleteRepoByURL(repoURL: string) {
 }
 
 export async function getAllRepositories() {
-    return await Repo.find({});
+    // Return all repositories from the database in order of last accessed time (newest first)
+    return await Repo.find({}).sort({ lastAccessed: -1 }).lean();
 }
 
 export async function updateLastAccessed(repoURL: string) {

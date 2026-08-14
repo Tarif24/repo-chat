@@ -1,6 +1,6 @@
 // config.js
-import { loadSecrets } from './initializeEnv.js';
-await loadSecrets();
+// import { loadSecrets } from './initializeEnv.js';
+// await loadSecrets();
 const { env } = await import('./env.js');
 
 export const appConfig = {

@@ -124,6 +124,7 @@ export function collectParseableFiles(
 export type FileTreeNode = {
     name: string;
     type: 'directory' | 'file';
+    path?: string;
     children?: FileTreeNode[];
 };
 
@@ -147,6 +148,7 @@ export function createParseableFilesTree(
         const children: FileTreeNode[] = [];
         for (const entry of entries) {
             const fullPath = path.join(dir, entry.name);
+            const fullPathClean = fullPath.replace(/^.*?repoCloning[\\/]?/, '');
             if (entry.isDirectory()) {
                 if (!IGNORED_DIRS.has(entry.name)) {
                     const child = walk(fullPath);
@@ -154,6 +156,7 @@ export function createParseableFilesTree(
                         children.push({
                             name: entry.name,
                             type: 'directory',
+                            path: fullPathClean,
                             children: child.children,
                         });
                     }
@@ -165,6 +168,7 @@ export function createParseableFilesTree(
                     children.push({
                         name: entry.name,
                         type: 'file',
+                        path: fullPathClean,
                     });
                 }
             }
@@ -172,7 +176,12 @@ export function createParseableFilesTree(
         if (children.length === 0) {
             return null;
         }
-        return { name: path.basename(dir), type: 'directory', children };
+        return {
+            name: path.basename(dir),
+            path: dir.replace(/^.*?repoCloning[\\/]?/, ''),
+            type: 'directory',
+            children,
+        };
     }
 
     const tree = walk(resolvedRoot);

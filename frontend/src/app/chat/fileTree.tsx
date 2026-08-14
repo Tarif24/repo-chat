@@ -1,4 +1,5 @@
 import { Folder, File } from 'lucide-react';
+import type { FileReferenceType } from './chatTypingBar';
 
 export default function FileTree({
     tree,
@@ -6,11 +7,20 @@ export default function FileTree({
     depth = 0,
 }: {
     tree: any;
-    usedFiles: string[];
+    usedFiles: FileReferenceType[];
     depth?: number;
 }) {
     if (tree.type === 'file') {
-        const isUsed = usedFiles.includes(tree.name);
+        const isUsed = usedFiles.some((ref: FileReferenceType) => {
+            if (
+                ref.fileName === tree.name &&
+                (!tree.path || ref.relativePath === tree.path)
+            ) {
+                return true;
+            } else {
+                return false;
+            }
+        });
         return (
             <div
                 title={tree.name}

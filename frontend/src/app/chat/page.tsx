@@ -121,9 +121,7 @@ export default function ChatPage() {
                             <div className="min-h-0 font-mono text-[12.5px] text-gray-600 dark:text-slate-300">
                                 <FileTree
                                     tree={repoData.fileTree}
-                                    usedFiles={usedFiles.map(
-                                        (ref: FileReferenceType) => ref.fileName
-                                    )}
+                                    usedFiles={usedFiles}
                                 />
                             </div>
                         </aside>
@@ -191,10 +189,7 @@ export default function ChatPage() {
                                         <div className="min-h-0 overflow-x-auto font-mono text-[12.5px] text-gray-600 dark:text-slate-300">
                                             <FileTree
                                                 tree={repoData.fileTree}
-                                                usedFiles={usedFiles.map(
-                                                    (ref: FileReferenceType) =>
-                                                        ref.fileName
-                                                )}
+                                                usedFiles={usedFiles}
                                             />
                                         </div>
                                     </aside>
