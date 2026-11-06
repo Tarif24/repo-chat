@@ -24,7 +24,7 @@ const allowedOrigins: string[] = [
 
 // Graceful shutdown handling
 const gracefulShutdown = (signal: string) => {
-    logger.info(`${signal} received, shutting down gracefully`);
+    logger.info(`${signal} received, shutting down gracefully `);
 
     if (!app) {
         logger.error('Express app instance not found, forcing shutdown');
