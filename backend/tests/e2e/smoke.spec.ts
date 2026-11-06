@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 
-test('Playwright is working', async ({ page }) => {
+test('Playwright is working and the frontend is reachable', async ({ page }) => {
     // Use your actual running frontend instead of an external URL
     await page.goto('/');
 
