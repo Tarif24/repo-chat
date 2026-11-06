@@ -8,9 +8,9 @@ Quality assurance work for **RepoChat**, a full-stack app that ingests a GitHub 
 | --------------------- | --------------------------------------------------------- |
 | Automated tests       | 131 (104 unit, 21 integration, 6 end-to-end), all passing |
 | Manual test cases     | 25 (TC-132 to TC-156), targeting gaps in the automation   |
-| Manual cases executed | [X] of 25 (Pass: [X], Fail: [X], Blocked: [X])            |
-| Defects found         | [X] ([X] high, [X] medium, [X] low), all logged in Jira   |
-| Exploratory sessions  | [X] ([X] minutes)                                         |
+| Manual cases executed | 25 of 25 (Pass: 19, Fail: 5, Blocked: 1)                  |
+| Defects found         | 7 (3 high, 3 medium, 1 low), all logged in Jira           |
+| Exploratory sessions  | 1 (15 minutes)                                            |
 
 ## Approach
 
@@ -24,11 +24,9 @@ Quality assurance work for **RepoChat**, a full-stack app that ingests a GitHub 
 
 | File                                                 | What it is                                                                                                                |
 | ---------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
-| [`test-plan.md`](./test-plan.md)                     | Objective, scope, test levels, test areas with techniques, environment, entry and exit criteria, risks, and coverage gaps |
-| [`test-cases.csv`](./test-cases.csv)                 | All 156 test cases (131 automated, 25 manual) with priority, steps, expected and actual results, status, and bug links    |
-| [`bug-reports/`](./bug-reports)                      | Written defect reports (also tracked in Jira)                                                                             |
-| [`exploratory-session.md`](./exploratory-session.md) | Charter, notes, and findings from the exploratory session                                                                 |
-| [`screenshots/`](./screenshots)                      | Jira board, bug list, and dashboard                                                                                       |
+| [`test-plan.pdf`](./RepoChat-TestPlan.pdf)                     | Objective, scope, test levels, test areas with techniques, environment, entry and exit criteria, risks, and coverage gaps |
+| [`test-cases.pdf`](./RepoChat-TestCases.pdf)                 | All 156 test cases (131 automated, 25 manual) with priority, steps, expected and actual results, status, and bug links    |
+| [`jira/`](./jira)                      | Jira board, bug list, and dashboard                                                                            |
 
 ## Test design techniques used
 
