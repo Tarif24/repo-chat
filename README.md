@@ -139,14 +139,15 @@ Full test matrix is in the [Plan doc](docs/RepoChat-Plan_V3.pdf).
 
 ## Docs
 
-| Document                                                                 | Contents                                                      |
-| ------------------------------------------------------------------------ | ------------------------------------------------------------- |
-| [Plan](docs/RepoChat-Plan_V3.pdf)                                        | Architecture decisions, tech stack, test matrix, known issues |
-| [RAG Pipeline](docs/RepoChat-RAGPipelineExplanation.pdf)                 | Full pipeline detail, parameter values, prompt templates      |
-| [Ingestion Pipeline Diagram](docs/RepoChat-IngestionPipelineDiagram.pdf) | Ingestion flow diagram                                        |
-| [Query Pipeline Diagram](docs/RepoChat-QueryPipelineDiagram.pdf)         | Query flow diagram                                            |
-| [MongoDB Models](docs/RepoChat-DatabaseModels.pdf)                       | Collection schemas                                            |
-| [API Endpoints](docs/RepoChat-APIEndpoints.pdf)                          | Request and response shapes                                   |
-| [Hosting Strategy](docs/RepoChat-AWSHosting.pdf)                         | AWS architecture, cost breakdown, deployment decisions        |
-| [Setup Guide](docs/RepoChat-SetupGuide.md)                               | Setup guide for local development                             |
-| [CICD Setup](docs/RepoChat-CICD.pdf)                                     | CICD pipeline                                                 |
+| Document                                                                 | Contents                                                         |
+| ------------------------------------------------------------------------ | ---------------------------------------------------------------- |
+| [Plan](docs/RepoChat-Plan_V3.pdf)                                        | Architecture decisions, tech stack, test matrix, known issues    |
+| [RAG Pipeline](docs/RepoChat-RAGPipelineExplanation.pdf)                 | Full pipeline detail, parameter values, prompt templates         |
+| [Ingestion Pipeline Diagram](docs/RepoChat-IngestionPipelineDiagram.pdf) | Ingestion flow diagram                                           |
+| [Query Pipeline Diagram](docs/RepoChat-QueryPipelineDiagram.pdf)         | Query flow diagram                                               |
+| [MongoDB Models](docs/RepoChat-DatabaseModels.pdf)                       | Collection schemas                                               |
+| [API Endpoints](docs/RepoChat-APIEndpoints.pdf)                          | Request and response shapes                                      |
+| [Hosting Strategy](docs/RepoChat-AWSHosting.pdf)                         | AWS architecture, cost breakdown, deployment decisions           |
+| [Setup Guide](docs/RepoChat-SetupGuide.md)                               | Setup guide for local development                                |
+| [CICD Setup](docs/RepoChat-CICD.pdf)                                     | CICD pipeline                                                    |
+| [Test Plan](qa/RepoChat-TestPlan.pdf)                                    |     Test plan for Repo Chat (mainly geared towards manual tests) |
