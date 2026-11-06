@@ -22,11 +22,11 @@ Quality assurance work for **RepoChat**, a full-stack app that ingests a GitHub 
 
 ## Contents
 
-| File                                                 | What it is                                                                                                                |
-| ---------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
-| [`test-plan.pdf`](./RepoChat-TestPlan.pdf)                     | Objective, scope, test levels, test areas with techniques, environment, entry and exit criteria, risks, and coverage gaps |
-| [`test-cases.pdf`](./RepoChat-TestCases.pdf)                 | All 156 test cases (131 automated, 25 manual) with priority, steps, expected and actual results, status, and bug links    |
-| [`jira/`](./jira)                      | Jira board, bug list, and dashboard                                                                            |
+| File                                         | What it is                                                                                                                |
+| -------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
+| [`test-plan.pdf`](./RepoChat-TestPlan.pdf)   | Objective, scope, test levels, test areas with techniques, environment, entry and exit criteria, risks, and coverage gaps |
+| [`test-cases.pdf`](./RepoChat-TestCases.pdf) | All 156 test cases (131 automated, 25 manual) with priority, steps, expected and actual results, status, and bug links    |
+| [`jira/`](./jira)                            | Jira board, bug list, and dashboard                                                                                       |
 
 ## Test design techniques used
 
@@ -71,10 +71,10 @@ Work is tracked in a single Jira project. Defects use the **Bug** issue type, sy
 
 ```bash
 # Unit and integration tests
-npm test
+npm run test:unit:integration
 
 # End-to-end tests (frontend and backend running)
-npx playwright test
+npx run test:e2e
 ```
 
 _Update the commands above to match your project's scripts._
